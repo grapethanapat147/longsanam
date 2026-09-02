@@ -1,0 +1,258 @@
+import type {
+  BookingStatus,
+  ParticipantStatus,
+  PaymentStatus,
+  RefundStatus,
+  SessionStatus,
+  WaitlistStatus,
+} from '@/lib/domain/types';
+
+/**
+ * All user-facing copy. Adding `en.ts` with the same shape is what makes the
+ * app translatable later; nothing in a component should hardcode a string.
+ */
+
+export const sessionStatusLabel: Record<SessionStatus, string> = {
+  draft: 'ฉบับร่าง',
+  open: 'เปิดรับผู้เล่น',
+  ready_to_book: 'พร้อมจองสนาม',
+  holding_court: 'กำลังจองสนาม',
+  booked: 'ได้สนามแล้ว',
+  booking_failed: 'จองสนามไม่สำเร็จ',
+  cancelled: 'ยกเลิกแล้ว',
+  completed: 'จบก๊วนแล้ว',
+};
+
+export const sessionStatusHint: Record<SessionStatus, string> = {
+  draft: 'ยังไม่เผยแพร่ มีเพียงคุณที่เห็นก๊วนนี้',
+  open: 'กำลังรอผู้เล่นเข้าร่วมและชำระเงินให้ครบขั้นต่ำ',
+  ready_to_book: 'ผู้เล่นและยอดเงินครบแล้ว ระบบกำลังจะจองสนามให้',
+  holding_court: 'ระบบกำลังกันคอร์ตและรอสนามยืนยัน',
+  booked: 'ยืนยันสนามเรียบร้อย เจอกันในวันนัด',
+  booking_failed: 'ลองสนามที่อนุมัติไว้ครบแล้วแต่ยังไม่ได้คอร์ต',
+  cancelled: 'ก๊วนนี้ถูกยกเลิก และมีการคืนเงินตามเงื่อนไข',
+  completed: 'ก๊วนนี้จบแล้ว',
+};
+
+export const participantStatusLabel: Record<ParticipantStatus, string> = {
+  joined_pending_payment: 'รอชำระเงิน',
+  paid_confirmed: 'ยืนยันแล้ว',
+  cancelled: 'ยกเลิกแล้ว',
+  waitlisted: 'อยู่ในคิวสำรอง',
+  payment_expired: 'หมดเวลาชำระเงิน',
+  refunded: 'คืนเงินแล้ว',
+};
+
+export const bookingStatusLabel: Record<BookingStatus, string> = {
+  requested: 'รอสนามตอบรับ',
+  held: 'กันคอร์ตไว้',
+  confirmed: 'ยืนยันแล้ว',
+  rejected: 'สนามปฏิเสธ',
+  expired: 'หมดเวลา',
+  cancelled: 'ยกเลิกแล้ว',
+  failed: 'ไม่สำเร็จ',
+};
+
+export const paymentStatusLabel: Record<PaymentStatus, string> = {
+  pending: 'รอชำระ',
+  paid: 'ชำระแล้ว',
+  failed: 'ไม่สำเร็จ',
+  refunded: 'คืนเงินแล้ว',
+  expired: 'หมดเวลา',
+};
+
+export const refundStatusLabel: Record<RefundStatus, string> = {
+  pending: 'รอดำเนินการ',
+  processing: 'กำลังคืนเงิน',
+  completed: 'คืนเงินแล้ว',
+  failed: 'คืนเงินไม่สำเร็จ',
+};
+
+export const waitlistStatusLabel: Record<WaitlistStatus, string> = {
+  waiting: 'รออยู่ในคิว',
+  promoted: 'ได้สิทธิ์แล้ว รอชำระเงิน',
+  converted: 'เข้าร่วมแล้ว',
+  expired: 'หมดเวลารับสิทธิ์',
+  cancelled: 'ยกเลิกแล้ว',
+};
+
+/** Machine reasons returned by RPCs, turned into something a person can act on. */
+export const reasonLabel: Record<string, string> = {
+  not_authenticated: 'กรุณาเข้าสู่ระบบก่อน',
+  forbidden: 'คุณไม่มีสิทธิ์ทำรายการนี้',
+  session_not_found: 'ไม่พบก๊วนนี้',
+  session_not_open: 'ก๊วนนี้ไม่เปิดรับผู้เล่นแล้ว',
+  session_closed: 'ก๊วนนี้ปิดรับแล้ว',
+  session_started: 'ก๊วนนี้เริ่มไปแล้ว',
+  deadline_passed: 'เลยกำหนดชำระเงินแล้ว',
+  participant_not_found: 'ไม่พบรายชื่อผู้เล่น',
+  participant_not_awaiting_payment: 'รายการนี้ไม่ได้อยู่ในสถานะรอชำระเงิน',
+  payment_window_closed: 'หมดเวลาชำระเงินแล้ว',
+  payment_not_found: 'ไม่พบรายการชำระเงิน',
+  hold_not_found: 'ไม่พบการกันคอร์ต',
+  hold_expired: 'การกันคอร์ตหมดอายุแล้ว',
+  booking_not_found: 'ไม่พบรายการจอง',
+  court_not_found: 'ไม่พบคอร์ตนี้',
+  court_inactive: 'คอร์ตนี้ปิดให้บริการ',
+  venue_inactive: 'สนามนี้ปิดให้บริการ',
+  below_minimum_duration: 'ระยะเวลาน้อยกว่าที่สนามกำหนด',
+  inside_lead_time: 'ใกล้เวลาเล่นเกินกว่าที่สนามรับจองได้',
+  outside_opening_hours: 'อยู่นอกเวลาทำการของสนาม',
+  slot_taken: 'ช่วงเวลานี้ถูกจองไปแล้ว',
+  no_free_slot: 'ยังไม่มีที่ว่าง',
+  waitlist_empty: 'ไม่มีผู้เล่นในคิวสำรอง',
+  refund_not_found: 'ไม่พบรายการคืนเงิน',
+  slug_taken: 'ชื่อย่อนี้ถูกใช้แล้ว',
+  invalid_slug: 'ชื่อย่อใช้ได้เฉพาะ a-z, 0-9 และ -',
+  name_required: 'กรุณากรอกชื่อ',
+  session_not_ready: 'ก๊วนยังไม่พร้อมจองสนาม',
+  session_terminal: 'ก๊วนนี้ปิดไปแล้ว',
+  already_booked: 'ก๊วนนี้ได้สนามแล้ว',
+  no_approved_venue: 'ยังไม่ได้เลือกสนามที่อนุมัติให้จอง',
+  below_min_players: 'ผู้เล่นที่ชำระเงินยังไม่ถึงขั้นต่ำ',
+  below_required_total: 'ยอดเงินที่เก็บได้ยังไม่พอค่าสนาม',
+};
+
+export const t = {
+  brand: {
+    name: 'ลงสนาม',
+    tagline: 'รวมก๊วน จ่ายเงิน ได้สนาม จบในลิงก์เดียว',
+  },
+  nav: {
+    discover: 'หาก๊วน',
+    create: 'สร้างก๊วน',
+    mySessions: 'ก๊วนของฉัน',
+    payments: 'การชำระเงิน',
+    profile: 'โปรไฟล์',
+    venue: 'สำหรับเจ้าของสนาม',
+    admin: 'ผู้ดูแลระบบ',
+    signIn: 'เข้าสู่ระบบ',
+    signOut: 'ออกจากระบบ',
+    signUp: 'สมัครสมาชิก',
+  },
+  common: {
+    loading: 'กำลังโหลด...',
+    save: 'บันทึก',
+    cancel: 'ยกเลิก',
+    confirm: 'ยืนยัน',
+    back: 'ย้อนกลับ',
+    next: 'ถัดไป',
+    close: 'ปิด',
+    edit: 'แก้ไข',
+    delete: 'ลบ',
+    baht: 'บาท',
+    perPerson: 'ต่อคน',
+    players: 'คน',
+    empty: 'ยังไม่มีข้อมูล',
+    required: 'จำเป็นต้องกรอก',
+    unexpectedError: 'เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง',
+    copyLink: 'คัดลอกลิงก์',
+    copied: 'คัดลอกแล้ว',
+    shareToLine: 'แชร์ไปยัง LINE',
+  },
+  mock: {
+    badge: 'โหมดทดลอง',
+    paymentNotice:
+      'ระบบกำลังใช้ผู้ให้บริการชำระเงินจำลอง จะไม่มีการตัดเงินจริงและไม่ต้องกรอกข้อมูลบัตร',
+    short: 'ไม่มีการตัดเงินจริง',
+  },
+  auth: {
+    signInTitle: 'เข้าสู่ระบบ',
+    signUpTitle: 'สมัครสมาชิก',
+    email: 'อีเมล',
+    password: 'รหัสผ่าน',
+    displayName: 'ชื่อที่แสดง',
+    signInCta: 'เข้าสู่ระบบ',
+    signUpCta: 'สร้างบัญชี',
+    toSignUp: 'ยังไม่มีบัญชี? สมัครสมาชิก',
+    toSignIn: 'มีบัญชีอยู่แล้ว? เข้าสู่ระบบ',
+    lineSoon: 'เข้าสู่ระบบด้วย LINE',
+    lineNotConfigured:
+      'ยังไม่ได้ตั้งค่า LINE Login สำหรับสภาพแวดล้อมนี้ กรุณาใช้อีเมลระหว่างการพัฒนา',
+    invalidCredentials: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    passwordTooShort: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
+    demoAccounts: 'บัญชีสำหรับทดลองใช้',
+  },
+  session: {
+    slotsLeft: 'เหลืออีก',
+    paidCount: 'ชำระแล้ว',
+    minimum: 'ขั้นต่ำ',
+    target: 'เป้าหมาย',
+    budget: 'งบต่อคน',
+    deadline: 'ปิดรับชำระ',
+    venuePreferences: 'สนามที่เลือกไว้',
+    fallbackNote: 'ระบบจะไล่จองตามลำดับนี้ และจะไม่จองสนามที่ไม่ได้อนุมัติ',
+    policy: 'เงื่อนไขการยกเลิกและคืนเงิน',
+    join: 'เข้าร่วมก๊วน',
+    joinAndPay: 'เข้าร่วมและชำระเงิน',
+    joinWaitlist: 'เข้าคิวสำรอง',
+    full: 'ผู้เล่นเต็มแล้ว',
+    organizer: 'ผู้จัด',
+    participants: 'ผู้เล่น',
+    waitlist: 'คิวสำรอง',
+    timeline: 'ไทม์ไลน์',
+    noSessions: 'ยังไม่มีก๊วนที่ตรงกับเงื่อนไข',
+  },
+  payment: {
+    title: 'ชำระเงิน',
+    amountDue: 'ยอดที่ต้องชำระ',
+    payNow: 'ชำระเงิน',
+    paying: 'กำลังดำเนินการ...',
+    succeeded: 'ชำระเงินสำเร็จ ที่นั่งของคุณได้รับการยืนยันแล้ว',
+    failedTitle: 'ชำระเงินไม่สำเร็จ',
+    retry: 'ลองชำระอีกครั้ง',
+    expired: 'หมดเวลาชำระเงิน ที่นั่งถูกปล่อยให้ผู้เล่นคนถัดไปแล้ว',
+    history: 'ประวัติการชำระเงิน',
+    refunds: 'การคืนเงิน',
+  },
+  waitlistPage: {
+    title: 'คุณอยู่ในคิวสำรอง',
+    position: 'ลำดับที่',
+    explain:
+      'เมื่อมีผู้เล่นสละสิทธิ์ ระบบจะแจ้งเตือนคุณและเปิดเวลาให้ชำระเงินตามที่ผู้จัดกำหนด',
+    leave: 'ออกจากคิว',
+  },
+  organizer: {
+    createTitle: 'สร้างก๊วนใหม่',
+    dashboard: 'จัดการก๊วน',
+    stepSport: 'เลือกกีฬา',
+    stepWhen: 'วันเวลาและสถานที่',
+    stepNumbers: 'จำนวนคนและงบ',
+    stepVenues: 'เลือกสนาม',
+    stepPolicy: 'เงื่อนไขการยกเลิก',
+    publish: 'เผยแพร่ก๊วน',
+    published: 'เผยแพร่แล้ว แชร์ลิงก์นี้เข้ากลุ่ม LINE ได้เลย',
+    paymentSummary: 'สรุปการเงิน',
+    collected: 'เก็บได้แล้ว',
+    pending: 'รอชำระ',
+    refunded: 'คืนเงินแล้ว',
+    courtCost: 'ค่าสนามโดยประมาณ',
+    bookNow: 'สั่งจองสนามตอนนี้',
+    cancelSession: 'ยกเลิกก๊วน',
+  },
+  venue: {
+    portal: 'ระบบจัดการสนาม',
+    onboarding: 'ลงทะเบียนสนาม',
+    courts: 'คอร์ต',
+    availability: 'เวลาทำการ',
+    calendar: 'ปฏิทิน',
+    inbox: 'คำขอจอง',
+    history: 'ประวัติการจอง',
+    revenue: 'รายได้',
+    approve: 'อนุมัติ',
+    reject: 'ปฏิเสธ',
+    blockSlot: 'ปิดคอร์ตชั่วคราว',
+    autoConfirm: 'ยืนยันคำขอจองอัตโนมัติ',
+    noRequests: 'ยังไม่มีคำขอจองที่รอดำเนินการ',
+  },
+  admin: {
+    dashboard: 'ภาพรวมระบบ',
+    users: 'ผู้ใช้',
+    venues: 'สนาม',
+    monitoring: 'การจองและการชำระเงิน',
+    auditLog: 'บันทึกการเปลี่ยนสถานะ',
+    disputes: 'คืนเงินด้วยตนเอง',
+  },
+} as const;
+
+export type Dictionary = typeof t;

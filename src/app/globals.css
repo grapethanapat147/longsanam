@@ -1,26 +1,71 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Longsanam visual identity.
+ *
+ * Deep green reads as trustworthy and outdoors-sporty in Thai consumer apps
+ * without the "clinical fintech" feel of a blue. The lime accent is reserved
+ * for the single primary action on a screen, so it never competes with itself.
+ */
+@theme {
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-200: #a7f3d0;
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #12a06e;
+  --color-brand-600: #0e7c57;
+  --color-brand-700: #0b6144;
+  --color-brand-800: #0a4d37;
+  --color-brand-900: #073728;
+
+  --color-accent-400: #a3e635;
+  --color-accent-500: #84cc16;
+  --color-accent-600: #65a30d;
+
+  --color-ink-50: #f8fafc;
+  --color-ink-100: #f1f5f9;
+  --color-ink-200: #e2e8f0;
+  --color-ink-300: #cbd5e1;
+  --color-ink-400: #94a3b8;
+  --color-ink-500: #64748b;
+  --color-ink-600: #475569;
+  --color-ink-700: #334155;
+  --color-ink-800: #1e293b;
+  --color-ink-900: #0f172a;
+
+  --font-sans: var(--font-noto-thai), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --background: #f6f8f7;
+  --foreground: var(--color-ink-900);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b1412;
+    --foreground: #e7f0ec;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Thai script needs a little extra line height to keep tone marks legible. */
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thai text should never be letter-spaced; it breaks mark positioning. */
+:lang(th) {
+  letter-spacing: 0;
+}
+
+@layer utilities {
+  .focus-ring {
+    @apply outline-none ring-offset-2 ring-offset-[var(--background)] focus-visible:ring-2 focus-visible:ring-brand-500;
+  }
 }

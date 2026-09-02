@@ -1,36 +1,226 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ลงสนาม (Longsanam)
 
-## Getting Started
+A LINE-first group booking platform for amateur sports in Thailand. An organizer
+creates a session, players join and pay through a shared link, and once enough
+money is in the pot the platform secures a court automatically — walking a
+ranked list of organizer-approved venues, and refunding everyone if it cannot.
 
-First, run the development server:
+This is an MVP built for one geographic area and 5–10 partner venues. Venues are
+integrated through a **Partner Portal** rather than direct APIs; the architecture
+leaves seams for Calendar Sync and Court API adapters later.
+
+---
+
+## Stack
+
+| Layer | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router) + React 19 + TypeScript strict |
+| Styling | Tailwind CSS v4 (CSS-first theme in `src/app/globals.css`) |
+| Data | Supabase — Postgres, Auth, Row Level Security, Realtime, Storage |
+| Transactions | Postgres RPCs called from server actions |
+| Payments | Provider abstraction; `MockPaymentProvider` locally |
+| Tests | Vitest (pure domain logic) |
+
+---
+
+## Prerequisites
+
+- Node.js 20+ (developed on 24)
+- Docker Desktop running
+- [Supabase CLI](https://supabase.com/docs/guides/cli) 2.x
+
+---
+
+## Setup
+
+```bash
+npm install
+```
+
+Start the local Supabase stack. This applies every migration and loads the demo
+seed:
+
+```bash
+npm run db:start
+```
+
+The stack uses the **544xx** port range so it can coexist with other local
+Supabase projects:
+
+| Service | URL |
+| --- | --- |
+| API | http://127.0.0.1:54421 |
+| Postgres | postgresql://postgres:postgres@127.0.0.1:54422/postgres |
+| Studio | http://127.0.0.1:54423 |
+| Mailpit | http://127.0.0.1:54424 |
+
+Copy the env template and fill in the keys that `npm run db:start` prints:
+
+```bash
+cp .env.example .env.local
+```
+
+You need `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`. Run
+`supabase status` at any time to print them again.
+
+Then:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs at http://localhost:3210.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Demo accounts
 
-## Learn More
+Every account uses the password `password123`.
 
-To learn more about Next.js, take a look at the following resources:
+| Email | Role in the demo |
+| --- | --- |
+| `organizer@longsanam.test` | Organizes all seeded sessions |
+| `player1@longsanam.test` … `player7@longsanam.test` | Players, some paid, some waitlisted |
+| `venue@longsanam.test` | Owns the badminton centre and the pickleball club |
+| `venue2@longsanam.test` | Owns the football arena (manual booking approval) |
+| `admin@longsanam.test` | Platform admin |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### What the seed contains
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 3 Bangkok venues, 7 courts, badminton / football / pickleball / tennis
+- Opening hours for every court, one blackout window, peak and weekend pricing
+- Sessions in **Draft**, **Open**, **ReadyToBook**, **Booked** and **Cancelled**
+- Paid participants, a pending payment, a 3-person waitlist
+- A confirmed booking, a booking request waiting in the partner inbox
+- Completed refunds on the cancelled session, plus an audit trail
 
-## Deploy on Vercel
+### A five-minute tour
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Sign in as `organizer@longsanam.test`, open **จัดการก๊วน → พิคเคิลบอลมือใหม่**
+   (ReadyToBook) and press **สั่งจองสนามตอนนี้**. The session holds a court,
+   books it, and flips to **ได้สนามแล้ว**.
+2. Sign in as `player7@longsanam.test`, open `/s/OPEN001`, join and pay. The
+   mock payment confirms the slot immediately.
+3. Sign in as `player4@longsanam.test`, open `/s/READY01` and give up the slot.
+   The refund is calculated from the policy and the first waitlisted player is
+   promoted with a payment window.
+4. Sign in as `venue2@longsanam.test` and approve the request in
+   **คำขอจอง** — the organizer's session becomes Booked.
+5. Sign in as `admin@longsanam.test` for platform counters, the audit log, and
+   manual refund support.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Scripts
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Dev server on :3210 |
+| `npm run build` | Production build |
+| `npm test` | Vitest unit tests |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | ESLint |
+| `npm run verify` | lint + typecheck + test |
+| `npm run db:start` / `db:stop` | Local Supabase stack |
+| `npm run db:reset` | Re-run migrations and reseed (wipes local data) |
+| `npm run db:types` | Regenerate `src/types/database.ts` |
+
+---
+
+## Tests
+
+```bash
+npm test
+```
+
+77 unit tests covering the four areas where a mistake costs real money:
+
+- `tests/booking-eligibility.test.ts` — headcount **and** collected-total gating
+- `tests/fallback.test.ts` — priority order, and never booking an unapproved court
+- `tests/refund.test.ts` — policy tiers, boundaries, clamping
+- `tests/waitlist.test.ts` — promotion order, payment windows, expiry cascade
+- `tests/state-machines.test.ts` — legal transitions for all three aggregates
+
+The domain layer in `src/lib/domain/` imports nothing from Supabase, which is
+what keeps it testable without a database.
+
+---
+
+## Scheduled jobs
+
+Court holds, unpaid slots and unclaimed waitlist promotions all expire on their
+own. Point a scheduler at:
+
+```bash
+curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3210/api/cron/expire
+```
+
+Platform admins can also run the same sweep on demand from `/admin`.
+
+---
+
+## Payments
+
+`PAYMENT_PROVIDER=mock` is the default and moves no money. Every mock surface is
+labelled **โหมดทดลอง** — the banner is not dismissible, because a demo must never
+be mistakable for a live transaction.
+
+Set `MOCK_PAYMENT_FAILURE_RATE=0.3` to make roughly 30% of charges decline, which
+is how the failure and retry states are exercised. Failures are deterministic per
+idempotency key, so a retry of the same charge behaves consistently.
+
+Real gateways (Omise, 2C2P, PromptPay) are reserved in
+`src/lib/payments/index.ts` and deliberately throw rather than half-work. See
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+---
+
+## LINE
+
+The app is designed to be opened from a LINE chat but runs entirely on email auth
+during development. LINE Login, LIFF and Messaging are declared in
+`src/lib/line/` and report "not configured" when their environment variables are
+absent. The sign-in button for LINE renders **disabled with the reason shown**
+rather than as a control that silently does nothing.
+
+Sharing works today with no LINE channel at all — the share endpoint takes a
+plain URL.
+
+---
+
+## Project layout
+
+```
+src/
+  app/                     routes (public, /app, /organizer, /venue, /admin)
+  components/              UI primitives, status chips, feature panels
+  i18n/                    all user-facing Thai copy
+  lib/
+    actions/               server actions — the only write path from the UI
+    domain/                pure logic + state machines (unit tested)
+    orchestration/         automatic booking workflow
+    payments/              provider abstraction + mock
+    venues/                partner portal / calendar / court API adapter seam
+    line/                  LINE integration points
+    supabase/              browser, server, admin and middleware clients
+supabase/
+  migrations/              schema, RPCs, RLS
+  seed.sql                 demo data
+tests/                     Vitest unit tests
+docs/ARCHITECTURE.md       design notes
+.codex/                    ticket board (LSN-xxxx)
+```
+
+---
+
+## Conventions
+
+- User-facing copy lives in `src/i18n/th.ts`. Adding `en.ts` with the same shape
+  is the whole localization story.
+- Money is whole Thai baht as `integer`. Never floats.
+- Times are `timestamptz`; the UI renders in `Asia/Bangkok`.
+- Anything that must not race is a Postgres RPC, not a sequence of client calls.
+- RLS is the authorization boundary. Route guards are UX.
+- Every meaningful status transition writes to `audit_logs`, which is
+  append-only at the database level.

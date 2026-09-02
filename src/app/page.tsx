@@ -1,69 +1,145 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { t } from '@/i18n';
+import { getCurrentUser } from '@/lib/auth';
+import { loadDiscoverSessions } from '@/lib/queries';
+import { SiteFooter, SiteHeader, MockModeBanner } from '@/components/shell';
+import { SessionCardLink } from '@/components/session-card';
+import { ButtonLink, Card } from '@/components/ui/primitives';
 
-export default function Home() {
+const STEPS = [
+  {
+    emoji: '📝',
+    title: 'ตั้งก๊วน',
+    body: 'เลือกกีฬา วันเวลา งบต่อคน และจัดลำดับสนามที่ยอมให้จองได้',
+  },
+  {
+    emoji: '🔗',
+    title: 'แชร์เข้า LINE',
+    body: 'ได้ลิงก์เดียวส่งเข้ากลุ่ม เพื่อน ๆ กดเข้าร่วมและจ่ายเงินได้ทันที',
+  },
+  {
+    emoji: '🏸',
+    title: 'ระบบจองสนามให้',
+    body: 'พอครบคนและครบยอด ระบบจะกันคอร์ตและยืนยันให้เอง ถ้าสนามแรกเต็มก็ไล่สนามสำรองตามลำดับ',
+  },
+  {
+    emoji: '💸',
+    title: 'ยกเลิกและคืนเงินอัตโนมัติ',
+    body: 'มีคิวสำรองรับช่วงต่อ และคืนเงินตามเงื่อนไขที่ผู้จัดตั้งไว้',
+  },
+];
+
+export default async function LandingPage() {
+  const [user, { sessions, counts }] = await Promise.all([
+    getCurrentUser(),
+    loadDiscoverSessions(),
+  ]);
+
+  const featured = sessions.slice(0, 3);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="flex min-h-dvh flex-col">
+      <MockModeBanner />
+      <SiteHeader />
+
+      <main className="flex-1">
+        <section className="border-b border-ink-200/70 bg-gradient-to-b from-brand-600 to-brand-700 px-4 py-14 text-white dark:border-white/10">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-sm font-semibold uppercase tracking-wide text-brand-100">
+              {t.brand.name}
+            </p>
+            <h1 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">
+              รวมก๊วน จ่ายเงิน ได้สนาม
+              <br />
+              จบในลิงก์เดียว
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-brand-50">
+              ไม่ต้องไล่ทวงเงินในกลุ่ม LINE ไม่ต้องลุ้นว่าจะได้คอร์ตไหม
+              ระบบเก็บเงินให้ครบแล้วจองสนามให้อัตโนมัติ
+            </p>
+            <div className="mt-7 flex flex-wrap justify-center gap-3">
+              <ButtonLink
+                href={user ? '/organizer/new' : '/auth/sign-up'}
+                size="lg"
+                className="bg-white text-brand-700 hover:bg-brand-50"
+              >
+                สร้างก๊วนของคุณ
+              </ButtonLink>
+              <ButtonLink
+                href="/discover"
+                size="lg"
+                variant="secondary"
+                className="border-white/40 bg-white/10 text-white hover:bg-white/20"
+              >
+                {t.nav.discover}
+              </ButtonLink>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-5xl px-4 py-12">
+          <h2 className="text-center text-xl font-bold text-ink-900 dark:text-white">
+            ทำงานยังไง
+          </h2>
+          <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((step, index) => (
+              <li key={step.title}>
+                <Card className="h-full px-5 py-5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl" aria-hidden>
+                      {step.emoji}
+                    </span>
+                    <span className="grid h-6 w-6 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
+                      {index + 1}
+                    </span>
+                  </div>
+                  <h3 className="mt-3 font-semibold text-ink-900 dark:text-white">{step.title}</h3>
+                  <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">{step.body}</p>
+                </Card>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {featured.length > 0 ? (
+          <section className="mx-auto max-w-5xl px-4 pb-14">
+            <div className="mb-4 flex items-baseline justify-between">
+              <h2 className="text-xl font-bold text-ink-900 dark:text-white">ก๊วนที่กำลังเปิดรับ</h2>
+              <Link
+                href="/discover"
+                className="text-sm font-semibold text-brand-700 hover:underline dark:text-brand-300"
+              >
+                ดูทั้งหมด
+              </Link>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.map((session) => (
+                <SessionCardLink
+                  key={session.id}
+                  session={session}
+                  counts={counts.get(session.id)}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <section className="mx-auto max-w-5xl px-4 pb-14">
+          <Card className="flex flex-wrap items-center justify-between gap-4 px-6 py-6">
+            <div>
+              <h2 className="font-bold text-ink-900 dark:text-white">คุณเป็นเจ้าของสนาม?</h2>
+              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
+                ลงทะเบียนสนาม จัดการคอร์ตและเวลาทำการ แล้วรับคำขอจองจากก๊วนได้เลย
+              </p>
+            </div>
+            <ButtonLink href="/venue" variant="secondary">
+              {t.nav.venue}
+            </ButtonLink>
+          </Card>
+        </section>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

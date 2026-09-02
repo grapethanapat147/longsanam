@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "longsanam",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/grapetnp/Herd/longsanam && exec npm run dev -- --port 3210"
+      ],
+      "port": 3210
+    }
+  ]
+}
