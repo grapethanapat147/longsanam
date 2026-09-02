@@ -17,6 +17,10 @@
 | LSN-0013 | Organizer dashboard | 5 |
 | LSN-0014 | Platform admin | 6 |
 | LSN-0015 | README and architecture document | 6 |
+| LSN-0016 | Realtime session updates | 7 |
+| LSN-0017 | Image uploads (Supabase Storage) | 7 |
+| LSN-0018 | Session lifecycle completion | 7 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
-verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012 and LSN-0013.
+verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,
+LSN-0016, LSN-0017 and LSN-0018.

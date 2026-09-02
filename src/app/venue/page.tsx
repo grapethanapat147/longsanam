@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AppShell } from '@/components/shell';
 import { Alert, ButtonLink, Card, Chip, EmptyState, PageHeader } from '@/components/ui/primitives';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
 import { t } from '@/i18n';
@@ -19,7 +20,7 @@ export default async function VenueListPage({
 
   const { data } = await supabase
     .from('venue_members')
-    .select('role, venues (id, name, district, is_active, auto_confirm_bookings)')
+    .select('role, venues (id, name, district, is_active, auto_confirm_bookings, cover_image_url)')
     .eq('user_id', user.id);
 
   const memberships = (data ?? []) as unknown as {
@@ -30,6 +31,7 @@ export default async function VenueListPage({
       district: string;
       is_active: boolean;
       auto_confirm_bookings: boolean;
+      cover_image_url: string | null;
     } | null;
   }[];
 
@@ -61,8 +63,20 @@ export default async function VenueListPage({
               <Card key={membership.venues.id}>
                 <Link
                   href={`/venue/${membership.venues.id}`}
-                  className="block rounded-card px-5 py-4 focus-ring"
+                  className="block rounded-card focus-ring"
                 >
+                  {membership.venues.cover_image_url ? (
+                    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-card">
+                      <Image
+                        src={membership.venues.cover_image_url}
+                        alt={membership.venues.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, 384px"
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : null}
+                  <div className="px-5 py-4">
                   <div className="flex items-start justify-between gap-2">
                     <h2 className="font-semibold text-ink-900 dark:text-white">
                       {membership.venues.name}
@@ -81,6 +95,7 @@ export default async function VenueListPage({
                         ? 'ยืนยันอัตโนมัติ'
                         : 'ต้องอนุมัติเอง'}
                     </Chip>
+                  </div>
                   </div>
                 </Link>
               </Card>

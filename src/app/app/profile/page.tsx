@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/shell';
 import { ProfileForm } from '@/components/profile-form';
+import { AvatarUpload } from '@/components/image-upload';
 import { Card, Chip, PageHeader } from '@/components/ui/primitives';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
@@ -30,12 +31,15 @@ export default async function ProfilePage() {
       <PageHeader title={t.nav.profile} description="ข้อมูลที่แสดงให้เพื่อนร่วมก๊วนเห็น" />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="px-5 py-5">
-          <ProfileForm
-            displayName={user.displayName}
-            phone={contact?.phone ?? ''}
-            email={user.email ?? contact?.email ?? ''}
-          />
+        <Card className="space-y-6 px-5 py-5">
+          <AvatarUpload currentUrl={user.avatarUrl} displayName={user.displayName} />
+          <div className="border-t border-ink-200 pt-6 dark:border-white/10">
+            <ProfileForm
+              displayName={user.displayName}
+              phone={contact?.phone ?? ''}
+              email={user.email ?? contact?.email ?? ''}
+            />
+          </div>
         </Card>
 
         <div className="space-y-4">

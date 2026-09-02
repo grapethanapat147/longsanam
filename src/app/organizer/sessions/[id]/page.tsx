@@ -10,6 +10,7 @@ import {
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
 import { SessionTimeline } from '@/components/session-timeline';
+import { AvatarImage } from '@/components/image-upload';
 import { LiveSession } from '@/components/live-updates';
 import { Alert, Card, Chip, PageHeader, Stat } from '@/components/ui/primitives';
 import { createClient } from '@/lib/supabase/server';
@@ -82,7 +83,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
       loadSessionTimeline(session.id),
       admin
         .from('session_participants')
-        .select('id, status, amount_due_thb, payment_due_at, joined_at, user_id, profiles (display_name)')
+        .select('id, status, amount_due_thb, payment_due_at, joined_at, user_id, profiles (display_name, avatar_url)')
         .eq('session_id', session.id)
         .order('joined_at', { ascending: true }),
       admin
@@ -105,7 +106,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     payment_due_at: string;
     joined_at: string;
     user_id: string;
-    profiles: { display_name: string } | null;
+    profiles: { display_name: string; avatar_url: string | null } | null;
   }[];
 
   const waitlist = (waitlistRows ?? []) as unknown as {
@@ -256,7 +257,13 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
               <ul className="mt-3 divide-y divide-ink-200 dark:divide-white/10">
                 {participants.map((participant) => (
                   <li key={participant.id} className="flex items-center justify-between gap-3 py-2">
-                    <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <AvatarImage
+                        url={participant.profiles?.avatar_url ?? null}
+                        displayName={participant.profiles?.display_name ?? 'ผู้เล่น'}
+                        size={32}
+                      />
+                      <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-ink-900 dark:text-white">
                         {participant.profiles?.display_name ?? 'ผู้เล่น'}
                       </p>
@@ -266,6 +273,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
                           ? ` · ต้องชำระภายใน ${formatCountdown(participant.payment_due_at)}`
                           : ''}
                       </p>
+                      </div>
                     </div>
                     <ParticipantStatusChip status={participant.status} />
                   </li>

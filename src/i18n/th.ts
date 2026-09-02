@@ -150,6 +150,17 @@ export const t = {
     copied: 'คัดลอกแล้ว',
     shareToLine: 'แชร์ไปยัง LINE',
   },
+  upload: {
+    avatarTitle: 'รูปโปรไฟล์',
+    avatarHint: 'JPG, PNG หรือ WebP ขนาดไม่เกิน 2 MB',
+    venueCoverTitle: 'รูปหน้าปกสนาม',
+    venueHint: 'แนะนำอัตราส่วน 16:9 · JPG, PNG หรือ WebP ขนาดไม่เกิน 5 MB',
+    noVenueImage: 'ยังไม่มีรูปสนาม',
+    choose: 'เลือกรูป',
+    uploading: 'กำลังอัปโหลด...',
+    save: 'บันทึกรูป',
+    remove: 'ลบรูป',
+  },
   live: {
     label: 'อัปเดตสด',
     tooltip: 'หน้านี้จะอัปเดตเองเมื่อมีคนเข้าร่วม ชำระเงิน หรือสถานะการจองเปลี่ยน',

@@ -1,4 +1,5 @@
 import { AutoConfirmToggle } from '@/components/venue-forms';
+import { VenueCoverUpload } from '@/components/image-upload';
 import { BookingStatusChip } from '@/components/status';
 import { Card, Stat, ButtonLink } from '@/components/ui/primitives';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -18,7 +19,11 @@ export default async function VenueOverviewPage({
   const admin = createAdminClient();
 
   const [{ data: venue }, { data: courts }, { data: bookings }] = await Promise.all([
-    supabase.from('venues').select('auto_confirm_bookings').eq('id', venueId).maybeSingle(),
+    supabase
+      .from('venues')
+      .select('auto_confirm_bookings, cover_image_url, name')
+      .eq('id', venueId)
+      .maybeSingle(),
     supabase.from('courts').select('id, is_active').eq('venue_id', venueId),
     admin
       .from('bookings')
@@ -61,6 +66,14 @@ export default async function VenueOverviewPage({
       </div>
 
       <AutoConfirmToggle venueId={venueId} enabled={Boolean(venue?.auto_confirm_bookings)} />
+
+      <Card className="px-5 py-4">
+        <VenueCoverUpload
+          venueId={venueId}
+          currentUrl={venue?.cover_image_url ?? null}
+          venueName={venue?.name ?? 'สนาม'}
+        />
+      </Card>
 
       <Card className="px-5 py-4">
         <div className="flex items-center justify-between gap-3">

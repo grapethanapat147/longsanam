@@ -147,16 +147,47 @@ what keeps it testable without a database.
 
 ---
 
+## Live updates
+
+Session pages, the organizer dashboard and the venue booking inbox update
+themselves through Supabase Realtime. An **อัปเดตสด** badge appears only while
+the channel is genuinely connected.
+
+Realtime is used as a change signal, not a data source: an event triggers a
+server re-render, which re-fetches under RLS. Nothing from the event payload is
+displayed, so a subscriber can never see a row the page could not fetch.
+
+Anonymous visitors receive session and booking events only — `anon` holds no
+SELECT grant on the participation tables, and a binding that fails RLS would
+take the whole channel down rather than being skipped.
+
+## Images
+
+`avatars` and `venue-images` are public-read Supabase Storage buckets, created
+by migration with MIME and size limits (2 MB and 5 MB). Writes are scoped by
+storage policy: a user may only write to the folder named after their own id,
+and a venue folder only by that venue's members. Replacing an image deletes the
+one it replaced.
+
+Players upload an avatar from **โปรไฟล์**; venue admins upload a cover from the
+venue overview.
+
 ## Scheduled jobs
 
-Court holds, unpaid slots and unclaimed waitlist promotions all expire on their
-own. Point a scheduler at:
+Court holds, unpaid slots, unclaimed waitlist promotions, finished sessions and
+sessions that never secured a court are all handled by one sweep. Point a
+scheduler at:
 
 ```bash
 curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3210/api/cron/expire
 ```
 
-Platform admins can also run the same sweep on demand from `/admin`.
+The sweep also moves finished sessions to `completed`, and cancels any session
+that reached its start time without a court — refunding every paid player in
+full, because that failure is the platform's rather than theirs. Every routine
+is idempotent, so a short interval is safe.
+
+Platform admins can run the same sweep on demand from `/admin`.
 
 ---
 

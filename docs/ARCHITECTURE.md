@@ -1,8 +1,9 @@
 # Longsanam — Architecture
 
-How the pieces fit, and why they are shaped this way. Five topics: venue
-integration today, the two integrations planned next, the payment abstraction,
-the booking state machine, and how races are prevented.
+How the pieces fit, and why they are shaped this way: venue integration today,
+the two integrations planned next, the payment abstraction, the booking state
+machine, how races are prevented, and the realtime, image and authorization
+layers.
 
 ---
 
@@ -273,7 +274,45 @@ The hold window is the mitigation, not a cure.
 
 ---
 
-## 7. Authorization
+## 7. Realtime
+
+Realtime is a **change signal, not a data source**. A Postgres change triggers
+`router.refresh()`; the server re-renders the page under RLS and the event
+payload is discarded. That keeps one place — the policies — deciding who may
+see a row, and means a subscriber holding an old channel cannot outlive a
+policy change.
+
+Two behaviours the implementation has to respect, neither of which surfaces as
+an error:
+
+1. **The socket does not inherit the page's session.** Without an explicit
+   `realtime.setAuth(token)` the subscription is evaluated as `anon`, whatever
+   the cookies say.
+2. **A binding on a table the subscriber cannot read kills the whole channel.**
+   It is not skipped, and the channel still reports `SUBSCRIBED` — every other
+   binding simply goes silent. Bindings are therefore narrowed to what the
+   viewer may actually read, which is why anonymous visitors subscribe only to
+   `sessions` and `bookings`.
+
+Channel topics are unique per connection attempt, because `supabase.channel()`
+returns an existing channel when one is still registered and adding a binding
+to an already-subscribed channel throws.
+
+## 8. Images
+
+Two public-read buckets, `avatars` and `venue-images`. Public here means the
+rendered URL needs no signing, which is what a link shared into a LINE group
+requires. Writes are constrained by path: the first folder segment must be the
+owner's id, checked by `public.storage_owner_id()`, which returns NULL for a
+segment that is not a UUID so a malformed path is denied rather than raising.
+
+`next/image` needs the storage host in `remotePatterns`. It is derived from
+`NEXT_PUBLIC_SUPABASE_URL`, loaded through `@next/env` because `next.config` is
+evaluated before Next reads the env files. Next also refuses upstream images
+that resolve to a private IP — a sensible SSRF default — so that exception is
+enabled only when the configured Supabase host is this machine.
+
+## 9. Authorization
 
 RLS is the boundary; route guards are UX.
 

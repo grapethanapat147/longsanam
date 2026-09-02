@@ -4,6 +4,7 @@ import { cn } from '@/lib/cn';
 import { t } from '@/i18n';
 import { getPaymentProvider } from '@/lib/payments';
 import { getCurrentUser } from '@/lib/auth';
+import { AvatarImage } from '@/components/image-upload';
 import { Chip } from '@/components/ui/primitives';
 import { signOutAction } from '@/lib/actions/auth';
 
@@ -78,9 +79,10 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/app/profile"
-                className="hidden max-w-32 truncate text-sm font-medium text-ink-700 focus-ring rounded-lg px-2 py-1 sm:block dark:text-ink-200"
+                className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium text-ink-700 focus-ring dark:text-ink-200"
               >
-                {user.displayName}
+                <AvatarImage url={user.avatarUrl} displayName={user.displayName} size={28} />
+                <span className="hidden max-w-32 truncate sm:block">{user.displayName}</span>
               </Link>
               <form action={signOutAction}>
                 <button
