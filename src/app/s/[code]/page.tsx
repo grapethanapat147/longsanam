@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { AppShell } from '@/components/shell';
 import { SessionStatusChip } from '@/components/status';
 import { JoinPanel } from '@/components/join-panel';
+import { LiveSession } from '@/components/live-updates';
 import { ShareLink } from '@/components/share-link';
 import { Alert, Card, Chip, Progress } from '@/components/ui/primitives';
 import {
@@ -70,6 +71,7 @@ export default async function SessionDetailPage({ params }: Params) {
                 {session.sports?.emoji} {session.sports?.name_th}
               </Chip>
               <SessionStatusChip status={session.status} />
+              <LiveSession sessionId={session.id} />
             </div>
             <h1 className="mt-2 text-2xl font-bold text-ink-900 dark:text-white">{session.title}</h1>
             <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">

@@ -1120,6 +1120,7 @@ export type Database = {
         Args: { p_actor?: string; p_reason: string; p_session_id: string }
         Returns: Json
       }
+      complete_finished_sessions: { Args: never; Returns: Json }
       court_availability_report: {
         Args: { p_court_id: string; p_ends_at: string; p_starts_at: string }
         Returns: Json
@@ -1178,6 +1179,14 @@ export type Database = {
       join_session: {
         Args: { p_actor?: string; p_session_id: string }
         Returns: Json
+      }
+      list_stranded_sessions: {
+        Args: never
+        Returns: {
+          id: string
+          paid_participants: number
+          status: Database["public"]["Enums"]["session_status"]
+        }[]
       }
       mark_session_holding: {
         Args: { p_actor?: string; p_session_id: string }

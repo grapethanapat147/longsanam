@@ -10,6 +10,7 @@ import {
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
 import { SessionTimeline } from '@/components/session-timeline';
+import { LiveSession } from '@/components/live-updates';
 import { Alert, Card, Chip, PageHeader, Stat } from '@/components/ui/primitives';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -158,7 +159,12 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
         eyebrow={session.sports?.name_th}
         title={session.title}
         description={`${formatDateLong(session.starts_at)} · ${formatTimeRange(session.starts_at, session.ends_at)} · ${session.area_text}`}
-        action={<SessionStatusChip status={session.status} />}
+        action={
+          <div className="flex items-center gap-3">
+            <LiveSession sessionId={session.id} />
+            <SessionStatusChip status={session.status} />
+          </div>
+        }
       />
 
       {created ? (

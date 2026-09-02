@@ -150,6 +150,10 @@ export const t = {
     copied: 'คัดลอกแล้ว',
     shareToLine: 'แชร์ไปยัง LINE',
   },
+  live: {
+    label: 'อัปเดตสด',
+    tooltip: 'หน้านี้จะอัปเดตเองเมื่อมีคนเข้าร่วม ชำระเงิน หรือสถานะการจองเปลี่ยน',
+  },
   mock: {
     badge: 'โหมดทดลอง',
     paymentNotice:

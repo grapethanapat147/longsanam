@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { runLifecycleSweeps } from '@/lib/lifecycle';
 
 /**
  * Scheduled maintenance.
@@ -29,26 +29,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
 
-  const admin = createAdminClient();
-
-  const [holds, payments, promotions] = await Promise.all([
-    admin.rpc('expire_stale_holds'),
-    admin.rpc('expire_overdue_payments'),
-    admin.rpc('expire_waitlist_promotions'),
-  ]);
-
-  const error = holds.error ?? payments.error ?? promotions.error;
-  if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  try {
+    const result = await runLifecycleSweeps();
+    return NextResponse.json({ ok: true, ranAt: new Date().toISOString(), ...result });
+  } catch (error) {
+    console.error('[cron/expire] sweep failed', error);
+    return NextResponse.json(
+      { ok: false, error: error instanceof Error ? error.message : 'sweep failed' },
+      { status: 500 },
+    );
   }
-
-  return NextResponse.json({
-    ok: true,
-    ranAt: new Date().toISOString(),
-    holds: holds.data,
-    payments: payments.data,
-    waitlist: promotions.data,
-  });
 }
 
 export const GET = POST;

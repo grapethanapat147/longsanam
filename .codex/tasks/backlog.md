@@ -1,3 +1,3 @@
 # Backlog
 
-_(empty — all MVP tickets delivered)_
+_(empty)_

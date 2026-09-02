@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getCurrentUser } from '@/lib/auth';
 import { processRefund } from '@/lib/actions/participation';
+import { runLifecycleSweeps } from '@/lib/lifecycle';
 import { reasonLabel, t } from '@/i18n';
 import type { AppRole } from '@/lib/domain/types';
 
@@ -155,25 +156,19 @@ export async function runMaintenanceAction(): Promise<AdminActionState> {
   const admin = await requirePlatformAdmin();
   if (!admin) return { ok: false, error: reasonLabel.forbidden };
 
-  const client = createAdminClient();
-  const [holds, payments, promotions] = await Promise.all([
-    client.rpc('expire_stale_holds'),
-    client.rpc('expire_overdue_payments'),
-    client.rpc('expire_waitlist_promotions'),
-  ]);
-
-  const h = holds.data as { expiredHolds?: number; expiredBookings?: number } | null;
-  const p = payments.data as { expiredPayments?: number } | null;
-  const w = promotions.data as { expiredPromotions?: number } | null;
+  const result = await runLifecycleSweeps();
 
   revalidatePath('/admin', 'layout');
 
   return {
     ok: true,
     message:
-      `หมดอายุ: การกันคอร์ต ${h?.expiredHolds ?? 0} รายการ, ` +
-      `การจอง ${h?.expiredBookings ?? 0} รายการ, ` +
-      `การชำระเงิน ${p?.expiredPayments ?? 0} รายการ, ` +
-      `สิทธิ์คิวสำรอง ${w?.expiredPromotions ?? 0} รายการ`,
+      `หมดอายุ: การกันคอร์ต ${result.expiredHolds} · การจอง ${result.expiredBookings} · ` +
+      `การชำระเงิน ${result.expiredPayments} · สิทธิ์คิวสำรอง ${result.expiredPromotions} — ` +
+      `จบก๊วน ${result.completedSessions} รายการ` +
+      (result.strandedSessions > 0
+        ? ` · ยกเลิกก๊วนที่จองสนามไม่ทัน ${result.strandedSessions} รายการ ` +
+          `คืนเงินผู้เล่น ${result.refundedPlayers} คน รวม ${result.refundedThb} บาท`
+        : ''),
   };
 }

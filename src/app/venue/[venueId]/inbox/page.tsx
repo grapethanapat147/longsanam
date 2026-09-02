@@ -1,4 +1,5 @@
 import { BookingDecisionButtons } from '@/components/venue-forms';
+import { LiveVenueBookings } from '@/components/live-updates';
 import { BookingStatusChip } from '@/components/status';
 import { Alert, Card, EmptyState } from '@/components/ui/primitives';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -42,6 +43,9 @@ export default async function VenueInboxPage({
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <LiveVenueBookings venueId={venueId} />
+      </div>
       {venue?.auto_confirm_bookings ? (
         <Alert tone="info" title="สนามนี้เปิดยืนยันอัตโนมัติอยู่">
           คำขอส่วนใหญ่จะถูกยืนยันทันทีโดยไม่เข้ามาที่กล่องนี้

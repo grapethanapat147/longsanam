@@ -10,7 +10,7 @@ import { calculateRefund } from '@/lib/domain/refund';
 import { parseCancellationPolicy } from '@/lib/domain/types';
 import { assertSessionTransition } from '@/lib/domain/state-machines';
 import { runBookingOrchestration } from '@/lib/orchestration/book-session';
-import { processRefund } from '@/lib/actions/participation';
+import { refundAllPaidParticipants } from '@/lib/refunds';
 import { reasonLabel, t } from '@/i18n';
 
 /** Bangkok wall-clock input from the form, stored as an absolute instant. */
@@ -339,53 +339,13 @@ export async function cancelSessionAction(
     return { ok: false, error: reasonLabel[cancelled?.reason ?? ''] ?? t.common.unexpectedError };
   }
 
-  const { data: paidParticipants } = await admin
-    .from('session_participants')
-    .select('id, user_id, payments(id, amount_thb, status)')
-    .eq('session_id', sessionId)
-    .eq('status', 'paid_confirmed');
-
-  const policy = parseCancellationPolicy(session.cancellation_policy);
-  let refundedPlayers = 0;
-  let refundedThb = 0;
-
-  for (const participant of paidParticipants ?? []) {
-    const payments = (participant.payments ?? []) as { amount_thb: number; status: string }[];
-    const paid = payments.find((p) => p.status === 'paid');
-
-    const refund = calculateRefund({
-      policy,
-      paidAmountThb: paid?.amount_thb ?? 0,
-      sessionStartsAt: session.starts_at,
-      sessionStatus: session.status,
-      initiatedBy: user.role === 'platform_admin' ? 'platform' : 'organizer',
-    });
-
-    const { data } = await admin.rpc('cancel_participation', {
-      p_participant_id: participant.id,
-      p_refund_thb: refund.refundThb,
-      p_reason: reason,
-      p_policy_snapshot: { ...policy, appliedRule: refund.rule, percent: refund.percent },
-      p_idempotency_key: `session-cancel:${sessionId}:${participant.id}`,
-      p_actor: user.id,
-    });
-
-    const result = data as { ok?: boolean; refundId?: string; refundThb?: number } | null;
-    if (result?.refundId) {
-      await processRefund(result.refundId, user.id);
-      refundedPlayers += 1;
-      refundedThb += result.refundThb ?? 0;
-    }
-
-    await admin.rpc('notify_user', {
-      p_user_id: participant.user_id,
-      p_session_id: sessionId,
-      p_kind: 'session_cancelled',
-      p_title: 'ก๊วนถูกยกเลิก',
-      p_body: `ก๊วนนี้ถูกยกเลิก: ${reason}`,
-      p_action_url: '/app/payments',
-    });
-  }
+  const { refundedPlayers, refundedThb } = await refundAllPaidParticipants({
+    sessionId,
+    reason,
+    initiatedBy: user.role === 'platform_admin' ? 'platform' : 'organizer',
+    actorId: user.id,
+    session,
+  });
 
   revalidatePath('/organizer');
   revalidatePath('/app');
