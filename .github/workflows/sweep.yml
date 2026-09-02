@@ -1,0 +1,36 @@
+# Lifecycle sweep.
+#
+# Vercel's Hobby plan runs cron at most once a day, which is far too slow for
+# releasing unpaid slots — a player who misses their deadline would keep the
+# seat for up to 24 hours. This workflow runs the same endpoint every five
+# minutes and is free on any plan, so it is the recommended scheduler.
+#
+# Required repository secrets:
+#   SWEEP_URL     https://<your-app>.vercel.app/api/cron/expire
+#   CRON_SECRET   the same value set in the Vercel project
+name: Lifecycle sweep
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run expiry and completion sweep
+        run: |
+          if [ -z "${{ secrets.SWEEP_URL }}" ]; then
+            echo "SWEEP_URL secret is not set; nothing to call."
+            exit 1
+          fi
+          response=$(curl -sS -o /tmp/body -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SWEEP_URL }}")
+          echo "HTTP $response"
+          cat /tmp/body
+          echo
+          # A non-2xx means the sweep did not run; fail loudly rather than
+          # silently leaving slots and holds outstanding.
+          [ "$response" -ge 200 ] && [ "$response" -lt 300 ]
