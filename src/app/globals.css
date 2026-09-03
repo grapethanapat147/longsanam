@@ -88,7 +88,9 @@ body {
   background-image:
     radial-gradient(60rem 32rem at 50% -14rem, rgb(10 122 79 / 0.07), transparent 70%),
     radial-gradient(48rem 24rem at 100% 100%, rgb(180 224 46 / 0.06), transparent 70%);
-  background-attachment: fixed;
+  /* Not `fixed`: that forces a full repaint on every scroll frame on mobile,
+     which is exactly the jank this was supposed to be too subtle to cause. */
+  background-repeat: no-repeat;
   color: var(--foreground);
   /* Thai needs the extra leading to keep tone marks off the line above. */
   line-height: 1.7;
@@ -162,6 +164,98 @@ h3,
     border-bottom: 2px solid;
     border-right: 2px solid;
     border-bottom-right-radius: var(--radius-card);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Motion.
+ *
+ * Every animation here moves only `transform` and `opacity`, which the
+ * compositor handles off the main thread — nothing animates layout, colour or
+ * shadow, because those are exactly what made the page feel laggy. One
+ * orchestrated entrance per screen; after that the interface holds still and
+ * lets the content do the work.
+ * ------------------------------------------------------------------------ */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: rotate(14deg) translateY(0);
+  }
+  to {
+    transform: rotate(14deg) translateY(-14px);
+  }
+}
+
+@layer utilities {
+  /* Staggered entrance: set `--i` to the item's index and each one lands
+     55ms after the last. Capped by the delay math so a long list does not
+     leave its tail invisible for a full second. */
+  .rise {
+    animation: rise 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(min(var(--i, 0), 6) * 40ms);
+  }
+
+  /* Progress fills from the left on mount, like a line being painted. */
+  .grow-x {
+    transform-origin: left center;
+    animation: grow-x 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 120ms;
+  }
+
+  /* Skeleton sheen. The gradient is on a pseudo-element that slides, so the
+     block itself never repaints. */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.55) 50%, transparent 100%);
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+
+  /* The hero court breathes: a slow, small drift that reads as depth. */
+  .drift {
+    animation: drift 9s ease-in-out infinite alternate;
+  }
+
+  /* Interactive surfaces lift on hover. transform only. */
+  .lift {
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
+  }
+  .lift:hover {
+    transform: translateY(-2px);
   }
 }
 

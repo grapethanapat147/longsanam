@@ -55,7 +55,7 @@ export default async function LandingPage() {
         <section className="relative overflow-hidden">
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-28 -top-32 h-[42rem] w-[20rem] rotate-[14deg] text-brand-700/[0.13] sm:right-0 sm:w-[24rem] lg:right-20"
+            className="drift pointer-events-none absolute -right-28 -top-32 h-[42rem] w-[20rem] text-brand-700/[0.13] sm:right-0 sm:w-[24rem] lg:right-20"
           >
             <CourtMotif className="h-full w-full" />
           </div>
@@ -110,7 +110,11 @@ export default async function LandingPage() {
             <h2 className="text-2xl font-semibold text-ink-900">ทำงานยังไง</h2>
             <ol className="mt-8 grid gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-4">
               {STEPS.map((step, index) => (
-                <li key={step.title}>
+                <li
+                  key={step.title}
+                  className="rise"
+                  style={{ '--i': index } as React.CSSProperties}
+                >
                   {/* The numeral is a painted marking, with the rule running
                       out toward the next step. */}
                   <div className="flex items-center gap-3">
@@ -142,11 +146,12 @@ export default async function LandingPage() {
                 </Link>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {featured.map((session) => (
+                {featured.map((session, index) => (
                   <SessionCardLink
                     key={session.id}
                     session={session}
                     counts={counts.get(session.id)}
+                    index={index}
                   />
                 ))}
               </div>

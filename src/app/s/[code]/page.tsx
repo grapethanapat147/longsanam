@@ -51,17 +51,20 @@ export default async function SessionDetailPage({ params }: Params) {
     loadSessionProgress(session.id),
   ]);
 
-  const mine = user ? await loadMyParticipation(user.id, session.id) : null;
   const approved = preferences.filter((p) => p.approved);
   const isOrganizer = user?.id === session.organizer_id;
 
-  // The real price for this window, so the figure shown to players matches the
-  // one the booking workflow will require.
-  const { cheapest } = await loadApprovedCourtPrices(
-    approved.map((p) => p.court_id),
-    session.starts_at,
-    session.ends_at,
-  );
+  // Participation and the windowed court price are independent, so they share
+  // a round-trip. The price is the real one for this window — the same figure
+  // the booking workflow gates on — not the hourly base rate.
+  const [mine, { cheapest }] = await Promise.all([
+    user ? loadMyParticipation(user.id, session.id) : Promise.resolve(null),
+    loadApprovedCourtPrices(
+      approved.map((p) => p.court_id),
+      session.starts_at,
+      session.ends_at,
+    ),
+  ]);
   const cheapestCourt = cheapest > 0 ? cheapest : null;
 
   const now = requestNow();

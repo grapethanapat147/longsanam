@@ -9,9 +9,12 @@ import type { SessionCard as SessionCardData, SessionCounts } from '@/lib/querie
 export function SessionCardLink({
   session,
   counts,
+  index = 0,
 }: {
   session: SessionCardData;
   counts?: SessionCounts;
+  /** Position in its grid, for the staggered entrance. */
+  index?: number;
 }) {
   const paid = counts?.paid ?? 0;
   const pending = counts?.pending ?? 0;
@@ -19,7 +22,10 @@ export function SessionCardLink({
   const isFull = slotsLeft === 0;
 
   return (
-    <Card className="group transition-shadow duration-200 hover:shadow-lift">
+    <Card
+      className="rise lift group hover:shadow-lift"
+      style={{ '--i': index } as React.CSSProperties}
+    >
       <Link href={`/s/${session.public_code}`} className="focus-ring block rounded-card px-5 py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">

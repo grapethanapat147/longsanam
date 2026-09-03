@@ -20,11 +20,13 @@ export function Card({
   as: Tag = 'div',
   /** Marks the focal element of a screen with painted court corners. */
   focal = false,
+  style,
 }: {
   className?: string;
   children: ReactNode;
   as?: ElementType;
   focal?: boolean;
+  style?: React.CSSProperties;
 }) {
   return (
     <Tag
@@ -33,6 +35,7 @@ export function Card({
         focal && 'court-tick shadow-lift',
         className,
       )}
+      style={style}
     >
       {children}
     </Tag>
@@ -273,7 +276,7 @@ export function Progress({
       >
         <div
           className={cn(
-            'h-full rounded-sm transition-[width] duration-500 ease-out',
+            'grow-x h-full rounded-sm transition-[width] duration-500 ease-out',
             complete ? 'bg-accent-500' : tone === 'brand' ? 'bg-brand-500' : 'bg-accent-500',
           )}
           style={{ width: `${percent}%` }}
