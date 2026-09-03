@@ -1,9 +1,16 @@
-# Lifecycle sweep.
+# Lifecycle sweep — manual trigger only.
 #
-# Vercel's Hobby plan runs cron at most once a day, which is far too slow for
-# releasing unpaid slots — a player who misses their deadline would keep the
-# seat for up to 24 hours. This workflow runs the same endpoint every five
-# minutes and is free on any plan, so it is the recommended scheduler.
+# This ran on a `schedule:` every five minutes until 2026-09-04. GitHub queues
+# scheduled workflows best-effort, and in practice this one fired about four
+# hours apart rather than every five minutes, which defeats the point: an
+# unpaid slot would hold a seat until whenever the next run happened to land.
+#
+# The five-minute cadence now comes from an external scheduler (cron-job.org)
+# posting to the same endpoint with the same CRON_SECRET. vercel.json keeps a
+# once-daily cron as a last-resort backstop.
+#
+# What remains here is the manual button: force a sweep from the Actions tab
+# without waiting for a tick or reaching for curl.
 #
 # Required repository secrets:
 #   SWEEP_URL     https://<your-app>.vercel.app/api/cron/expire
@@ -11,8 +18,6 @@
 name: Lifecycle sweep
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:

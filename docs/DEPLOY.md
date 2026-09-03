@@ -132,6 +132,10 @@ terminal's history:
 openssl rand -hex 32 | npx vercel env add CRON_SECRET production
 ```
 
+Keep a copy in a password manager. If you mark the variable **Sensitive** in
+Vercel it becomes write-only, and GitHub secrets are write-only too — lose your
+copy and the only way forward is rotating it everywhere at once.
+
 Then deploy:
 
 ```bash
@@ -147,13 +151,21 @@ and refunds sessions that never secured a court. **It needs to run every few
 minutes**, not daily: an unpaid slot stays occupied until it runs.
 
 `vercel.json` ships with a daily schedule, because sub-daily cron requires a
-Vercel **Pro** plan.
+Vercel **Pro** plan. Pick one of these for the five-minute cadence:
 
-- **On Pro:** change the schedule in `vercel.json` to `*/5 * * * *` and redeploy.
-  Vercel sends `Authorization: Bearer $CRON_SECRET` automatically.
-- **On Hobby (free):** use `.github/workflows/sweep.yml` instead. Set the
-  repository secrets `SWEEP_URL` (`https://<your-app>.vercel.app/api/cron/expire`)
-  and `CRON_SECRET`, and it runs every five minutes for free.
+- **External scheduler — recommended, works on any plan.** Point cron-job.org
+  or equivalent at `https://<your-app>.vercel.app/api/cron/expire` with method
+  `POST` and the header `Authorization: Bearer <CRON_SECRET>`. The route also
+  accepts `?secret=`, but do not use it: a query string lands in every access
+  log between you and the function.
+- **Vercel Pro.** Change the schedule in `vercel.json` to `*/5 * * * *` and
+  redeploy. Vercel sends `Authorization: Bearer $CRON_SECRET` automatically.
+
+`.github/workflows/sweep.yml` used to carry a `*/5` schedule and no longer
+does. GitHub queues scheduled workflows best-effort, and measured on this repo
+they landed roughly four hours apart — fine as a backstop, useless as the
+primary. It is kept as a manual button, still needing the `SWEEP_URL` and
+`CRON_SECRET` repository secrets.
 
 Check it manually at any time:
 
