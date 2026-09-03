@@ -65,7 +65,11 @@ export class MockPaymentProvider implements PaymentProvider {
     const existing = charges.get(intent.idempotencyKey);
     if (existing) {
       return existing.status === 'succeeded'
-        ? { status: 'succeeded', providerRef: existing.providerRef, isMock: true }
+        ? {
+            status: 'succeeded',
+            providerRef: existing.providerRef,
+            isMock: true,
+          }
         : existing.status === 'failed'
           ? {
               status: 'failed',
@@ -74,7 +78,11 @@ export class MockPaymentProvider implements PaymentProvider {
               failureMessage: 'การชำระเงินจำลองถูกปฏิเสธ (โหมดทดลอง)',
               isMock: true,
             }
-          : { status: 'pending', providerRef: existing.providerRef, isMock: true };
+          : {
+              status: 'pending',
+              providerRef: existing.providerRef,
+              isMock: true,
+            };
     }
 
     if (intent.amountThb <= 0) {
@@ -162,7 +170,11 @@ export class MockPaymentProvider implements PaymentProvider {
       };
     } else {
       if (record) record.status = 'refunded';
-      result = { status: 'succeeded', providerRef: reference('mockrf', intent.idempotencyKey), isMock: true };
+      result = {
+        status: 'succeeded',
+        providerRef: reference('mockrf', intent.idempotencyKey),
+        isMock: true,
+      };
     }
 
     refunds.set(intent.idempotencyKey, result);

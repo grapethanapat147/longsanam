@@ -24,7 +24,6 @@ export function MockModeBanner({ compact = false }: { compact?: boolean }) {
       className={cn(
         'flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-amber-300 bg-amber-100 px-4 text-amber-950',
         compact ? 'py-1.5 text-xs' : 'py-2 text-sm',
-        'dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-100',
       )}
       role="status"
     >
@@ -40,7 +39,7 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link
       href={href}
-      className="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-ink-100 hover:text-ink-900 focus-ring dark:text-ink-200 dark:hover:bg-white/10 dark:hover:text-white"
+      className="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-ink-100 hover:text-ink-900 focus-ring"
     >
       {children}
     </Link>
@@ -51,13 +50,13 @@ export async function SiteHeader() {
   const user = await getCurrentUser();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-ink-200/70 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-[#0b1412]/85">
+    <header className="sticky top-0 z-30 border-b border-ink-200/70 bg-white/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-3">
         <Link href="/" className="flex items-center gap-2 focus-ring rounded-lg">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-black text-white">
             ลส
           </span>
-          <span className="text-base font-bold text-ink-900 dark:text-white">{t.brand.name}</span>
+          <span className="text-base font-bold text-ink-900">{t.brand.name}</span>
         </Link>
 
         <nav className="ml-auto hidden items-center gap-1 sm:flex">
@@ -79,7 +78,7 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/app/profile"
-                className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium text-ink-700 focus-ring dark:text-ink-200"
+                className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium text-ink-700 focus-ring"
               >
                 <AvatarImage url={user.avatarUrl} displayName={user.displayName} size={28} />
                 <span className="hidden max-w-32 truncate sm:block">{user.displayName}</span>
@@ -87,7 +86,7 @@ export async function SiteHeader() {
               <form action={signOutAction}>
                 <button
                   type="submit"
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 focus-ring dark:text-ink-300 dark:hover:bg-white/10"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 focus-ring"
                 >
                   {t.nav.signOut}
                 </button>
@@ -97,7 +96,7 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/auth/sign-in"
-                className="rounded-lg px-3 py-2 text-sm font-medium text-ink-700 hover:bg-ink-100 focus-ring dark:text-ink-200 dark:hover:bg-white/10"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-ink-700 hover:bg-ink-100 focus-ring"
               >
                 {t.nav.signIn}
               </Link>
@@ -114,7 +113,7 @@ export async function SiteHeader() {
 
       {/* Mobile nav: the primary destinations only. */}
       {user ? (
-        <nav className="flex gap-1 overflow-x-auto border-t border-ink-200/70 px-3 py-1.5 [&>a]:shrink-0 sm:hidden dark:border-white/10">
+        <nav className="flex gap-1 overflow-x-auto border-t border-ink-200/70 px-3 py-1.5 [&>a]:shrink-0 sm:hidden">
           <NavLink href="/discover">{t.nav.discover}</NavLink>
           <NavLink href="/app">{t.nav.mySessions}</NavLink>
           <NavLink href="/organizer">{t.organizer.dashboard}</NavLink>
@@ -141,7 +140,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-ink-200/70 px-4 py-6 text-center text-xs text-ink-500 dark:border-white/10 dark:text-ink-400">
+    <footer className="border-t border-ink-200/70 px-4 py-6 text-center text-xs text-ink-500">
       <p>
         {t.brand.name} — {t.brand.tagline}
       </p>

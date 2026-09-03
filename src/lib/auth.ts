@@ -52,7 +52,10 @@ export async function requireUser(returnTo?: string): Promise<CurrentUser> {
  * Route-level role gate. This is a user-experience guard that keeps people out
  * of pages they cannot use; RLS is what actually protects the data.
  */
-export async function requireRole(roles: readonly AppRole[], returnTo?: string): Promise<CurrentUser> {
+export async function requireRole(
+  roles: readonly AppRole[],
+  returnTo?: string,
+): Promise<CurrentUser> {
   const user = await requireUser(returnTo);
   if (!roles.includes(user.role)) {
     redirect('/app?error=forbidden');

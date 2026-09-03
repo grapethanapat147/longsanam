@@ -21,7 +21,11 @@ type RefundAllInput = {
   initiatedBy: 'organizer' | 'platform';
   /** Null when the sweep runs unattended. */
   actorId: string | null;
-  session: { status: SessionStatus; starts_at: string; cancellation_policy: unknown };
+  session: {
+    status: SessionStatus;
+    starts_at: string;
+    cancellation_policy: unknown;
+  };
 };
 
 export async function refundAllPaidParticipants(
@@ -40,7 +44,10 @@ export async function refundAllPaidParticipants(
   let refundedThb = 0;
 
   for (const participant of paidParticipants ?? []) {
-    const payments = (participant.payments ?? []) as { amount_thb: number; status: string }[];
+    const payments = (participant.payments ?? []) as {
+      amount_thb: number;
+      status: string;
+    }[];
     const paid = payments.find((p) => p.status === 'paid');
 
     const refund = calculateRefund({
@@ -56,12 +63,20 @@ export async function refundAllPaidParticipants(
       p_participant_id: participant.id,
       p_refund_thb: refund.refundThb,
       p_reason: input.reason,
-      p_policy_snapshot: { ...policy, appliedRule: refund.rule, percent: refund.percent },
+      p_policy_snapshot: {
+        ...policy,
+        appliedRule: refund.rule,
+        percent: refund.percent,
+      },
       p_idempotency_key: `session-cancel:${input.sessionId}:${participant.id}`,
       p_actor: input.actorId ?? undefined,
     });
 
-    const result = data as { ok?: boolean; refundId?: string; refundThb?: number } | null;
+    const result = data as {
+      ok?: boolean;
+      refundId?: string;
+      refundThb?: number;
+    } | null;
     if (result?.refundId) {
       const outcome = await processRefund(result.refundId, input.actorId ?? undefined);
       if (outcome === 'completed' || outcome === 'pending') {

@@ -67,11 +67,11 @@ export default async function OrganizerPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-ink-900 dark:text-white">
+                      <p className="truncate font-semibold text-ink-900">
                         <span aria-hidden>{session.sports?.emoji} </span>
                         {session.title}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                      <p className="mt-0.5 text-xs text-ink-500">
                         {formatDate(session.starts_at)} ·{' '}
                         {formatTimeRange(session.starts_at, session.ends_at)} · {session.area_text}
                       </p>

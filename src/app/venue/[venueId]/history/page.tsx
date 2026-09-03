@@ -40,7 +40,7 @@ export default async function VenueHistoryPage({
   return (
     <Card className="overflow-x-auto">
       <table className="w-full min-w-[40rem] text-sm">
-        <thead className="border-b border-ink-200 text-left text-xs text-ink-500 dark:border-white/10 dark:text-ink-400">
+        <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
           <tr>
             <th className="px-4 py-3 font-medium">วันที่</th>
             <th className="px-4 py-3 font-medium">ก๊วน</th>
@@ -49,16 +49,16 @@ export default async function VenueHistoryPage({
             <th className="px-4 py-3 font-medium">สถานะ</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-ink-200 dark:divide-white/10">
+        <tbody className="divide-y divide-ink-200">
           {bookings.map((booking) => (
             <tr key={booking.id}>
-              <td className="px-4 py-3 text-ink-700 dark:text-ink-200">
+              <td className="px-4 py-3 text-ink-700">
                 {formatDate(booking.starts_at)}
                 <span className="block text-xs text-ink-500">
                   {formatTimeRange(booking.starts_at, booking.ends_at)}
                 </span>
               </td>
-              <td className="max-w-48 truncate px-4 py-3 text-ink-900 dark:text-white">
+              <td className="max-w-48 truncate px-4 py-3 text-ink-900">
                 {booking.sessions?.title ?? '—'}
                 {booking.decision_reason ? (
                   <span className="block truncate text-xs text-ink-500">
@@ -66,10 +66,8 @@ export default async function VenueHistoryPage({
                   </span>
                 ) : null}
               </td>
-              <td className="px-4 py-3 text-ink-700 dark:text-ink-200">
-                {booking.courts?.name ?? '—'}
-              </td>
-              <td className="px-4 py-3 text-right tabular-nums text-ink-900 dark:text-white">
+              <td className="px-4 py-3 text-ink-700">{booking.courts?.name ?? '—'}</td>
+              <td className="px-4 py-3 text-right tabular-nums text-ink-900">
                 {formatThb(booking.price_thb)}
               </td>
               <td className="px-4 py-3">

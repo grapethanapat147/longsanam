@@ -61,7 +61,7 @@ export function RoleSelect({
 
   if (isSelf) {
     return (
-      <span className="text-xs text-ink-500 dark:text-ink-400" title="ป้องกันการล็อกตัวเองออกจากระบบ">
+      <span className="text-xs text-ink-500" title="ป้องกันการล็อกตัวเองออกจากระบบ">
         {ROLES.find((r) => r.value === role)?.label} (บัญชีคุณเอง)
       </span>
     );
@@ -147,11 +147,7 @@ export function ManualRefundForm({
   const selected = payments.find((p) => p.id === paymentId);
 
   if (payments.length === 0) {
-    return (
-      <p className="text-sm text-ink-500 dark:text-ink-400">
-        ยังไม่มีรายการชำระเงินที่คืนเงินได้
-      </p>
-    );
+    return <p className="text-sm text-ink-500">ยังไม่มีรายการชำระเงินที่คืนเงินได้</p>;
   }
 
   return (

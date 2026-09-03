@@ -33,7 +33,7 @@ export default async function ProfilePage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="space-y-6 px-5 py-5">
           <AvatarUpload currentUrl={user.avatarUrl} displayName={user.displayName} />
-          <div className="border-t border-ink-200 pt-6 dark:border-white/10">
+          <div className="border-t border-ink-200 pt-6">
             <ProfileForm
               displayName={user.displayName}
               phone={contact?.phone ?? ''}
@@ -44,20 +44,21 @@ export default async function ProfilePage() {
 
         <div className="space-y-4">
           <Card className="px-5 py-5">
-            <h2 className="font-semibold text-ink-900 dark:text-white">สิทธิ์การใช้งาน</h2>
-            <p className="mt-2 flex items-center gap-2 text-sm text-ink-600 dark:text-ink-300">
+            <h2 className="font-semibold text-ink-900">สิทธิ์การใช้งาน</h2>
+            <p className="mt-2 flex items-center gap-2 text-sm text-ink-600">
               <Chip tone="brand">{ROLE_LABEL[user.role] ?? user.role}</Chip>
             </p>
-            <p className="mt-3 text-sm text-ink-600 dark:text-ink-300">
-              ทุกบัญชีสามารถเป็นผู้จัดก๊วนได้เอง สิทธิ์เจ้าของสนามจะได้รับอัตโนมัติเมื่อคุณลงทะเบียนสนาม
+            <p className="mt-3 text-sm text-ink-600">
+              ทุกบัญชีสามารถเป็นผู้จัดก๊วนได้เอง
+              สิทธิ์เจ้าของสนามจะได้รับอัตโนมัติเมื่อคุณลงทะเบียนสนาม
             </p>
           </Card>
 
           <Card className="px-5 py-5">
-            <h2 className="font-semibold text-ink-900 dark:text-white">การเชื่อมต่อ LINE</h2>
+            <h2 className="font-semibold text-ink-900">การเชื่อมต่อ LINE</h2>
             <dl className="mt-3 space-y-2 text-sm">
               <div className="flex items-center justify-between gap-3">
-                <dt className="text-ink-600 dark:text-ink-300">LINE Login</dt>
+                <dt className="text-ink-600">LINE Login</dt>
                 <dd>
                   {isLineLoginConfigured() ? (
                     <Chip tone="success">พร้อมใช้งาน</Chip>
@@ -67,7 +68,7 @@ export default async function ProfilePage() {
                 </dd>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <dt className="text-ink-600 dark:text-ink-300">LIFF</dt>
+                <dt className="text-ink-600">LIFF</dt>
                 <dd>
                   {isLiffConfigured() ? (
                     <Chip tone="success">พร้อมใช้งาน</Chip>
@@ -77,13 +78,11 @@ export default async function ProfilePage() {
                 </dd>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <dt className="text-ink-600 dark:text-ink-300">LINE user ID</dt>
-                <dd className="font-mono text-xs text-ink-500 dark:text-ink-400">
-                  {contact?.line_user_id ?? '—'}
-                </dd>
+                <dt className="text-ink-600">LINE user ID</dt>
+                <dd className="font-mono text-xs text-ink-500">{contact?.line_user_id ?? '—'}</dd>
               </div>
             </dl>
-            <p className="mt-3 text-xs text-ink-500 dark:text-ink-400">
+            <p className="mt-3 text-xs text-ink-500">
               ระหว่างการพัฒนาใช้อีเมลเข้าสู่ระบบได้ตามปกติ เมื่อตั้งค่า LINE channel
               แล้วปุ่มเข้าสู่ระบบด้วย LINE จะเปิดใช้งานเอง
             </p>

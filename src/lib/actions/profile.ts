@@ -6,7 +6,11 @@ import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth';
 import { reasonLabel, t } from '@/i18n';
 
-export type ProfileActionState = { ok: boolean; error?: string; message?: string };
+export type ProfileActionState = {
+  ok: boolean;
+  error?: string;
+  message?: string;
+};
 
 const profileSchema = z.object({
   displayName: z.string().trim().min(1, t.common.required).max(60),

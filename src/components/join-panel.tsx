@@ -46,7 +46,10 @@ type Props = {
   participantPaymentOverdue: boolean;
 };
 
-type Feedback = { tone: 'success' | 'danger' | 'info' | 'warning'; text: string } | null;
+type Feedback = {
+  tone: 'success' | 'danger' | 'info' | 'warning';
+  text: string;
+} | null;
 
 const JOINABLE: SessionStatus[] = ['open', 'ready_to_book', 'holding_court'];
 
@@ -79,9 +82,15 @@ export function JoinPanel(props: Props) {
       const result = await joinSessionAction(props.sessionId);
       if (!result.ok) return { tone: 'danger', text: result.error };
       if (result.outcome === 'waitlisted') {
-        return { tone: 'info', text: `เข้าคิวสำรองแล้ว ลำดับที่ ${result.position}` };
+        return {
+          tone: 'info',
+          text: `เข้าคิวสำรองแล้ว ลำดับที่ ${result.position}`,
+        };
       }
-      return { tone: 'success', text: 'เข้าร่วมแล้ว กรุณาชำระเงินเพื่อยืนยันที่นั่ง' };
+      return {
+        tone: 'success',
+        text: 'เข้าร่วมแล้ว กรุณาชำระเงินเพื่อยืนยันที่นั่ง',
+      };
     });
 
   const handlePay = (participantId: string) =>
@@ -89,10 +98,16 @@ export function JoinPanel(props: Props) {
       const result = await payForSlotAction(participantId);
       if (!result.ok) return { tone: 'danger', text: result.error };
       if (result.booked) {
-        return { tone: 'success', text: 'ชำระเงินสำเร็จ และระบบจองสนามให้เรียบร้อยแล้ว' };
+        return {
+          tone: 'success',
+          text: 'ชำระเงินสำเร็จ และระบบจองสนามให้เรียบร้อยแล้ว',
+        };
       }
       if (result.bookingOutcome === 'awaiting_venue') {
-        return { tone: 'success', text: 'ชำระเงินสำเร็จ ระบบส่งคำขอจองแล้ว กำลังรอสนามยืนยัน' };
+        return {
+          tone: 'success',
+          text: 'ชำระเงินสำเร็จ ระบบส่งคำขอจองแล้ว กำลังรอสนามยืนยัน',
+        };
       }
       if (result.bookingOutcome === 'failed') {
         return {
@@ -128,22 +143,29 @@ export function JoinPanel(props: Props) {
             text: `ยกเลิกที่นั่งแล้ว แต่การคืนเงิน ${formatThb(result.refundThb)} ยังไม่สำเร็จ ระบบบันทึกรายการไว้แล้วและทีมงานจะดำเนินการต่อ`,
           };
         default:
-          return { tone: 'success', text: 'ยกเลิกแล้ว ตามเงื่อนไขของก๊วนนี้ไม่มีการคืนเงิน' };
+          return {
+            tone: 'success',
+            text: 'ยกเลิกแล้ว ตามเงื่อนไขของก๊วนนี้ไม่มีการคืนเงิน',
+          };
       }
     });
 
   const handleLeaveWaitlist = (entryId: string) =>
     run(async () => {
       const result = await leaveWaitlistAction(entryId);
-      if (!result.ok) return { tone: 'danger', text: result.error ?? t.common.unexpectedError };
+      if (!result.ok)
+        return {
+          tone: 'danger',
+          text: result.error ?? t.common.unexpectedError,
+        };
       return { tone: 'info', text: 'ออกจากคิวสำรองแล้ว' };
     });
 
   return (
     <Card className="px-5 py-5">
-      <p className="text-xs font-medium text-ink-500 dark:text-ink-400">{t.payment.amountDue}</p>
-      <p className="text-2xl font-bold text-ink-900 dark:text-white">{formatThb(props.amountThb)}</p>
-      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+      <p className="text-xs font-medium text-ink-500">{t.payment.amountDue}</p>
+      <p className="text-2xl font-bold text-ink-900">{formatThb(props.amountThb)}</p>
+      <p className="mt-0.5 text-xs text-ink-500">
         {t.session.deadline} · {formatCountdown(props.paymentDeadline)}
       </p>
 
@@ -189,11 +211,11 @@ export function JoinPanel(props: Props) {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <ParticipantStatusChip status={participant.status} />
-            <span className="text-sm text-ink-600 dark:text-ink-300">ที่นั่งของคุณยืนยันแล้ว</span>
+            <span className="text-sm text-ink-600">ที่นั่งของคุณยืนยันแล้ว</span>
           </div>
           {confirmingCancel ? (
-            <div className="space-y-2 rounded-xl border border-red-300 bg-red-50 p-3 dark:border-red-500/30 dark:bg-red-500/10">
-              <p className="text-sm text-red-900 dark:text-red-100">
+            <div className="space-y-2 rounded-xl border border-red-300 bg-red-50 p-3">
+              <p className="text-sm text-red-900">
                 ยืนยันการสละสิทธิ์? จำนวนเงินคืนจะคำนวณตามเงื่อนไขของก๊วนนี้
                 และที่นั่งจะถูกส่งต่อให้คิวสำรอง
               </p>
@@ -237,9 +259,11 @@ export function JoinPanel(props: Props) {
             disabled={pending}
             onClick={() => handlePay(participant.id)}
           >
-            {pending ? t.payment.paying : `${t.payment.payNow} ${formatThb(participant.amount_due_thb)}`}
+            {pending
+              ? t.payment.paying
+              : `${t.payment.payNow} ${formatThb(participant.amount_due_thb)}`}
           </Button>
-          <p className="text-xs text-ink-500 dark:text-ink-400">
+          <p className="text-xs text-ink-500">
             ต้องชำระภายใน {formatCountdown(participant.payment_due_at)} · {t.mock.short}
           </p>
         </div>
@@ -259,7 +283,10 @@ export function JoinPanel(props: Props) {
 
     const waitlistEntry = props.waitlistEntry;
 
-    if (waitlistEntry && (waitlistEntry.status === 'waiting' || waitlistEntry.status === 'promoted')) {
+    if (
+      waitlistEntry &&
+      (waitlistEntry.status === 'waiting' || waitlistEntry.status === 'promoted')
+    ) {
       return (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
@@ -274,7 +301,7 @@ export function JoinPanel(props: Props) {
               {formatCountdown(waitlistEntry.promotion_expires_at)}
             </Alert>
           ) : (
-            <p className="text-sm text-ink-600 dark:text-ink-300">{t.waitlistPage.explain}</p>
+            <p className="text-sm text-ink-600">{t.waitlistPage.explain}</p>
           )}
           <Button
             variant="secondary"
@@ -299,10 +326,16 @@ export function JoinPanel(props: Props) {
     if (props.slotsLeft <= 0) {
       return (
         <div className="space-y-2">
-          <Button size="lg" variant="secondary" className="w-full" disabled={pending} onClick={handleJoin}>
+          <Button
+            size="lg"
+            variant="secondary"
+            className="w-full"
+            disabled={pending}
+            onClick={handleJoin}
+          >
             {pending ? t.common.loading : t.session.joinWaitlist}
           </Button>
-          <p className="text-xs text-ink-500 dark:text-ink-400">
+          <p className="text-xs text-ink-500">
             {t.session.full} — เข้าคิวไว้ ระบบจะแจ้งเมื่อมีคนสละสิทธิ์
           </p>
         </div>
@@ -314,7 +347,7 @@ export function JoinPanel(props: Props) {
         <Button size="lg" className="w-full" disabled={pending} onClick={handleJoin}>
           {pending ? t.common.loading : t.session.join}
         </Button>
-        <p className="text-xs text-ink-500 dark:text-ink-400">
+        <p className="text-xs text-ink-500">
           เหลือ {props.slotsLeft} ที่ · จองที่นั่งแล้วชำระเงินในขั้นตอนถัดไป
         </p>
       </div>

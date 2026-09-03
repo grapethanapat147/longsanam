@@ -53,8 +53,8 @@ export default async function VenueCourtsPage({
   return (
     <div className="space-y-5">
       <Card className="px-5 py-5">
-        <h2 className="font-semibold text-ink-900 dark:text-white">เพิ่มคอร์ตใหม่</h2>
-        <p className="mt-1 mb-4 text-sm text-ink-600 dark:text-ink-300">
+        <h2 className="font-semibold text-ink-900">เพิ่มคอร์ตใหม่</h2>
+        <p className="mt-1 mb-4 text-sm text-ink-600">
           คอร์ตใหม่จะถูกตั้งเวลาทำการเริ่มต้น 06:00–23:00 ทุกวัน ปรับได้ทีหลัง
         </p>
         <CourtForm venueId={venueId} sports={sports} />
@@ -62,13 +62,13 @@ export default async function VenueCourtsPage({
 
       {courts.length === 0 ? null : (
         <div className="space-y-4">
-          <h2 className="font-semibold text-ink-900 dark:text-white">
+          <h2 className="font-semibold text-ink-900">
             {t.venue.courts} ({courts.length})
           </h2>
           {courts.map((court) => (
             <Card key={court.id} className="px-5 py-5">
               <div className="mb-4 flex flex-wrap items-center gap-2">
-                <h3 className="font-semibold text-ink-900 dark:text-white">{court.name}</h3>
+                <h3 className="font-semibold text-ink-900">{court.name}</h3>
                 <Chip tone={court.is_active ? 'success' : 'neutral'}>
                   {court.is_active ? 'เปิดให้จอง' : 'ปิด'}
                 </Chip>
@@ -78,13 +78,11 @@ export default async function VenueCourtsPage({
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <div>
-                  <h4 className="mb-2 text-sm font-semibold text-ink-700 dark:text-ink-200">
-                    รายละเอียดคอร์ต
-                  </h4>
+                  <h4 className="mb-2 text-sm font-semibold text-ink-700">รายละเอียดคอร์ต</h4>
                   <CourtForm venueId={venueId} sports={sports} court={court} />
                 </div>
-                <div className="border-t border-ink-200 pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0 dark:border-white/10">
-                  <h4 className="mb-2 text-sm font-semibold text-ink-700 dark:text-ink-200">
+                <div className="border-t border-ink-200 pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+                  <h4 className="mb-2 text-sm font-semibold text-ink-700">
                     {t.venue.availability}
                   </h4>
                   <OpeningHoursForm

@@ -36,7 +36,10 @@ type Props = {
   paidTotalThb: number;
 };
 
-type Feedback = { tone: 'success' | 'danger' | 'info' | 'warning'; text: string } | null;
+type Feedback = {
+  tone: 'success' | 'danger' | 'info' | 'warning';
+  text: string;
+} | null;
 
 export function OrganizerControls(props: Props) {
   const router = useRouter();
@@ -99,7 +102,7 @@ export function OrganizerControls(props: Props) {
 
   return (
     <Card className="space-y-4 px-5 py-5">
-      <h2 className="font-semibold text-ink-900 dark:text-white">การจัดการก๊วน</h2>
+      <h2 className="font-semibold text-ink-900">การจัดการก๊วน</h2>
 
       {feedback ? <Alert tone={feedback.tone}>{feedback.text}</Alert> : null}
 
@@ -109,7 +112,7 @@ export function OrganizerControls(props: Props) {
           <Button size="lg" disabled={pending || approvedCount === 0} onClick={publish}>
             {pending ? t.common.loading : t.organizer.publish}
           </Button>
-          <p className="text-xs text-ink-500 dark:text-ink-400">
+          <p className="text-xs text-ink-500">
             {approvedCount === 0
               ? 'ต้องอนุมัติสนามอย่างน้อย 1 แห่งก่อนเผยแพร่'
               : 'เผยแพร่แล้วผู้เล่นจะเข้าร่วมและชำระเงินได้ทันที'}
@@ -119,11 +122,9 @@ export function OrganizerControls(props: Props) {
 
       {/* Book now */}
       {!terminal && props.status !== 'draft' ? (
-        <div className="border-t border-ink-200 pt-4 dark:border-white/10">
-          <h3 className="text-sm font-semibold text-ink-800 dark:text-ink-100">
-            {t.organizer.bookNow}
-          </h3>
-          <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+        <div className="border-t border-ink-200 pt-4">
+          <h3 className="text-sm font-semibold text-ink-800">{t.organizer.bookNow}</h3>
+          <p className="mt-1 text-xs text-ink-500">
             ปกติระบบจะจองให้อัตโนมัติเมื่อครบเงื่อนไข ปุ่มนี้ใช้สั่งจองซ้ำหรือลองสนามสำรองถัดไป
           </p>
           <div className="mt-2">
@@ -153,25 +154,23 @@ export function OrganizerControls(props: Props) {
       ) : null}
 
       {/* Fallback ordering */}
-      <div className="border-t border-ink-200 pt-4 dark:border-white/10">
-        <h3 className="text-sm font-semibold text-ink-800 dark:text-ink-100">
-          {t.session.venuePreferences}
-        </h3>
-        <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{t.session.fallbackNote}</p>
+      <div className="border-t border-ink-200 pt-4">
+        <h3 className="text-sm font-semibold text-ink-800">{t.session.venuePreferences}</h3>
+        <p className="mt-1 text-xs text-ink-500">{t.session.fallbackNote}</p>
         <ul className="mt-3 space-y-2">
           {props.preferences.map((preference) => (
             <li
               key={preference.id}
-              className="flex items-center gap-3 rounded-xl border border-ink-200 px-3 py-2 dark:border-white/10"
+              className="flex items-center gap-3 rounded-xl border border-ink-200 px-3 py-2"
             >
-              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink-100 text-xs font-bold text-ink-700 dark:bg-white/10 dark:text-ink-200">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink-100 text-xs font-bold text-ink-700">
                 {preference.priority}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-ink-900 dark:text-white">
+                <p className="truncate text-sm font-medium text-ink-900">
                   {preference.venueName} · {preference.courtName}
                 </p>
-                <p className="truncate text-xs text-ink-500 dark:text-ink-400">
+                <p className="truncate text-xs text-ink-500">
                   {preference.district} · {formatThb(preference.priceThb)} สำหรับช่วงเวลานี้
                 </p>
               </div>
@@ -199,19 +198,17 @@ export function OrganizerControls(props: Props) {
 
       {/* Cancellation */}
       {!terminal ? (
-        <div className="border-t border-ink-200 pt-4 dark:border-white/10">
-          <h3 className="text-sm font-semibold text-ink-800 dark:text-ink-100">
-            {t.organizer.cancelSession}
-          </h3>
-          <ul className="mt-1 space-y-0.5 text-xs text-ink-500 dark:text-ink-400">
+        <div className="border-t border-ink-200 pt-4">
+          <h3 className="text-sm font-semibold text-ink-800">{t.organizer.cancelSession}</h3>
+          <ul className="mt-1 space-y-0.5 text-xs text-ink-500">
             {describePolicy(props.policy).map((line) => (
               <li key={line}>• {line}</li>
             ))}
           </ul>
 
           {showCancel ? (
-            <div className="mt-3 space-y-2 rounded-xl border border-red-300 bg-red-50 p-3 dark:border-red-500/30 dark:bg-red-500/10">
-              <p className="text-sm text-red-900 dark:text-red-100">
+            <div className="mt-3 space-y-2 rounded-xl border border-red-300 bg-red-50 p-3">
+              <p className="text-sm text-red-900">
                 ผู้เล่นที่ชำระเงินแล้ว {props.paidParticipants} คน (รวม{' '}
                 {formatThb(props.paidTotalThb)}) จะได้รับเงินคืนตามเงื่อนไขข้างต้น
                 และคอร์ตที่จองไว้จะถูกยกเลิก
@@ -236,9 +233,7 @@ export function OrganizerControls(props: Props) {
                 </Button>
               </div>
               {cancelReason.trim().length < 3 ? (
-                <p className="text-xs text-red-700 dark:text-red-300">
-                  กรุณาระบุเหตุผลอย่างน้อย 3 ตัวอักษร
-                </p>
+                <p className="text-xs text-red-700">กรุณาระบุเหตุผลอย่างน้อย 3 ตัวอักษร</p>
               ) : null}
             </div>
           ) : (

@@ -75,12 +75,8 @@ export default async function MySessionsPage({
   const queue = (waitlists ?? []) as unknown as WaitlistRow[];
 
   const now = requestNow();
-  const upcoming = rows.filter(
-    (r) => r.sessions && new Date(r.sessions.starts_at).getTime() > now,
-  );
-  const past = rows.filter(
-    (r) => r.sessions && new Date(r.sessions.starts_at).getTime() <= now,
-  );
+  const upcoming = rows.filter((r) => r.sessions && new Date(r.sessions.starts_at).getTime() > now);
+  const past = rows.filter((r) => r.sessions && new Date(r.sessions.starts_at).getTime() <= now);
   const needsPayment = upcoming.filter((r) => r.status === 'joined_pending_payment');
 
   return (
@@ -107,7 +103,7 @@ export default async function MySessionsPage({
 
       {queue.length > 0 ? (
         <section className="mb-6">
-          <h2 className="mb-2 font-semibold text-ink-900 dark:text-white">{t.session.waitlist}</h2>
+          <h2 className="mb-2 font-semibold text-ink-900">{t.session.waitlist}</h2>
           <div className="space-y-2">
             {queue.map((entry) =>
               entry.sessions ? (
@@ -117,10 +113,8 @@ export default async function MySessionsPage({
                     className="flex items-center justify-between gap-3 focus-ring rounded-lg"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-ink-900 dark:text-white">
-                        {entry.sessions.title}
-                      </p>
-                      <p className="text-xs text-ink-500 dark:text-ink-400">
+                      <p className="truncate font-medium text-ink-900">{entry.sessions.title}</p>
+                      <p className="text-xs text-ink-500">
                         {formatDate(entry.sessions.starts_at)} · {t.waitlistPage.position}{' '}
                         {entry.position}
                         {entry.status === 'promoted' && entry.promotion_expires_at
@@ -138,7 +132,7 @@ export default async function MySessionsPage({
       ) : null}
 
       <section>
-        <h2 className="mb-2 font-semibold text-ink-900 dark:text-white">ก๊วนที่กำลังจะถึง</h2>
+        <h2 className="mb-2 font-semibold text-ink-900">ก๊วนที่กำลังจะถึง</h2>
         {upcoming.length === 0 ? (
           <EmptyState
             icon="🏸"
@@ -157,7 +151,7 @@ export default async function MySessionsPage({
 
       {past.length > 0 ? (
         <section className="mt-6">
-          <h2 className="mb-2 font-semibold text-ink-900 dark:text-white">ก๊วนที่ผ่านมา</h2>
+          <h2 className="mb-2 font-semibold text-ink-900">ก๊วนที่ผ่านมา</h2>
           <div className="space-y-2">
             {past.map((row) => (
               <ParticipationRow key={row.id} row={row} muted />
@@ -183,11 +177,11 @@ function ParticipationRow({ row, muted }: { row: ParticipantRow; muted?: boolean
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate font-medium text-ink-900 dark:text-white">
+            <p className="truncate font-medium text-ink-900">
               <span aria-hidden>{session.sports?.emoji} </span>
               {session.title}
             </p>
-            <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+            <p className="mt-0.5 text-xs text-ink-500">
               {formatDate(session.starts_at)} ·{' '}
               {formatTimeRange(session.starts_at, session.ends_at)} · {session.area_text}
             </p>

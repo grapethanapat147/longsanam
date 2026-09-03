@@ -77,25 +77,21 @@ export default async function VenueListPage({
                     </div>
                   ) : null}
                   <div className="px-5 py-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="font-semibold text-ink-900 dark:text-white">
-                      {membership.venues.name}
-                    </h2>
-                    <Chip tone={membership.venues.is_active ? 'success' : 'neutral'}>
-                      {membership.venues.is_active ? 'เปิดให้บริการ' : 'ปิดชั่วคราว'}
-                    </Chip>
-                  </div>
-                  <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
-                    {membership.venues.district}
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                    <Chip tone="neutral">{membership.role}</Chip>
-                    <Chip tone={membership.venues.auto_confirm_bookings ? 'info' : 'warning'}>
-                      {membership.venues.auto_confirm_bookings
-                        ? 'ยืนยันอัตโนมัติ'
-                        : 'ต้องอนุมัติเอง'}
-                    </Chip>
-                  </div>
+                    <div className="flex items-start justify-between gap-2">
+                      <h2 className="font-semibold text-ink-900">{membership.venues.name}</h2>
+                      <Chip tone={membership.venues.is_active ? 'success' : 'neutral'}>
+                        {membership.venues.is_active ? 'เปิดให้บริการ' : 'ปิดชั่วคราว'}
+                      </Chip>
+                    </div>
+                    <p className="mt-1 text-sm text-ink-500">{membership.venues.district}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                      <Chip tone="neutral">{membership.role}</Chip>
+                      <Chip tone={membership.venues.auto_confirm_bookings ? 'info' : 'warning'}>
+                        {membership.venues.auto_confirm_bookings
+                          ? 'ยืนยันอัตโนมัติ'
+                          : 'ต้องอนุมัติเอง'}
+                      </Chip>
+                    </div>
                   </div>
                 </Link>
               </Card>

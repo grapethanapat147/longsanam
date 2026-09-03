@@ -14,7 +14,12 @@ import { reasonLabel, t } from '@/i18n';
  * input off the network.
  */
 
-export type UploadState = { ok: boolean; error?: string; message?: string; url?: string };
+export type UploadState = {
+  ok: boolean;
+  error?: string;
+  message?: string;
+  url?: string;
+};
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const EXTENSION: Record<string, string> = {
@@ -74,7 +79,10 @@ export async function uploadAvatarAction(
 
   const { error: uploadError } = await supabase.storage
     .from('avatars')
-    .upload(path, validated.file, { contentType: validated.file.type, upsert: false });
+    .upload(path, validated.file, {
+      contentType: validated.file.type,
+      upsert: false,
+    });
 
   if (uploadError) {
     console.error('[uploadAvatarAction] upload failed', uploadError);
@@ -157,13 +165,19 @@ export async function uploadVenueCoverAction(
 
   const { error: uploadError } = await supabase.storage
     .from('venue-images')
-    .upload(path, validated.file, { contentType: validated.file.type, upsert: false });
+    .upload(path, validated.file, {
+      contentType: validated.file.type,
+      upsert: false,
+    });
 
   if (uploadError) {
     console.error('[uploadVenueCoverAction] upload failed', uploadError);
     // A storage policy rejection is the likely cause, and it means exactly one
     // thing to the operator: this is not their venue.
-    return { ok: false, error: 'อัปโหลดรูปไม่สำเร็จ — คุณอาจไม่มีสิทธิ์จัดการสนามนี้' };
+    return {
+      ok: false,
+      error: 'อัปโหลดรูปไม่สำเร็จ — คุณอาจไม่มีสิทธิ์จัดการสนามนี้',
+    };
   }
 
   const {

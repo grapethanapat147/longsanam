@@ -50,10 +50,22 @@ export function parseCancellationPolicy(value: unknown): CancellationPolicy {
     return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
   };
   return {
-    fullRefundHoursBefore: num('fullRefundHoursBefore', DEFAULT_CANCELLATION_POLICY.fullRefundHoursBefore),
-    partialRefundHoursBefore: num('partialRefundHoursBefore', DEFAULT_CANCELLATION_POLICY.partialRefundHoursBefore),
-    partialRefundPercent: Math.min(100, Math.max(0, num('partialRefundPercent', DEFAULT_CANCELLATION_POLICY.partialRefundPercent))),
-    noRefundWithinHours: num('noRefundWithinHours', DEFAULT_CANCELLATION_POLICY.noRefundWithinHours),
+    fullRefundHoursBefore: num(
+      'fullRefundHoursBefore',
+      DEFAULT_CANCELLATION_POLICY.fullRefundHoursBefore,
+    ),
+    partialRefundHoursBefore: num(
+      'partialRefundHoursBefore',
+      DEFAULT_CANCELLATION_POLICY.partialRefundHoursBefore,
+    ),
+    partialRefundPercent: Math.min(
+      100,
+      Math.max(0, num('partialRefundPercent', DEFAULT_CANCELLATION_POLICY.partialRefundPercent)),
+    ),
+    noRefundWithinHours: num(
+      'noRefundWithinHours',
+      DEFAULT_CANCELLATION_POLICY.noRefundWithinHours,
+    ),
     organizerCancelAlwaysFullRefund:
       typeof raw.organizerCancelAlwaysFullRefund === 'boolean'
         ? raw.organizerCancelAlwaysFullRefund

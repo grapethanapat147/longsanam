@@ -18,7 +18,13 @@ import { formatThb } from '@/lib/format';
 import { costPerPersonThb } from '@/lib/domain/booking-eligibility';
 import { t } from '@/i18n';
 
-type Sport = { id: string; slug: string; name_th: string; emoji: string; default_players: number };
+type Sport = {
+  id: string;
+  slug: string;
+  name_th: string;
+  emoji: string;
+  default_players: number;
+};
 
 type Court = {
   id: string;
@@ -125,7 +131,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
                 'rounded-full px-3 py-1.5 text-xs font-semibold transition focus-ring',
                 step === index
                   ? 'bg-brand-600 text-white'
-                  : 'border border-ink-300 bg-white text-ink-600 hover:bg-ink-50 dark:border-white/15 dark:bg-white/5 dark:text-ink-300',
+                  : 'border border-ink-300 bg-white text-ink-600 hover:bg-ink-50',
               )}
             >
               {index + 1}. {label}
@@ -138,7 +144,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
 
       {/* Step 1 — sport */}
       <Card className={cn('px-5 py-5', step !== 0 && 'hidden')}>
-        <h2 className="font-semibold text-ink-900 dark:text-white">{t.organizer.stepSport}</h2>
+        <h2 className="font-semibold text-ink-900">{t.organizer.stepSport}</h2>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {sports.map((sport) => (
             <label
@@ -146,8 +152,8 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
               className={cn(
                 'flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition',
                 sportId === sport.id
-                  ? 'border-brand-500 bg-brand-50 font-semibold text-brand-800 dark:bg-brand-500/10 dark:text-brand-200'
-                  : 'border-ink-300 hover:bg-ink-50 dark:border-white/15 dark:hover:bg-white/5',
+                  ? 'border-brand-500 bg-brand-50 font-semibold text-brand-800'
+                  : 'border-ink-300 hover:bg-ink-50',
               )}
             >
               <input
@@ -176,10 +182,16 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
 
       {/* Step 2 — when and where */}
       <Card className={cn('space-y-4 px-5 py-5', step !== 1 && 'hidden')}>
-        <h2 className="font-semibold text-ink-900 dark:text-white">{t.organizer.stepWhen}</h2>
+        <h2 className="font-semibold text-ink-900">{t.organizer.stepWhen}</h2>
 
         <Field label="ชื่อก๊วน" htmlFor="title" required error={fieldError('title')}>
-          <Input id="title" name="title" required maxLength={120} placeholder="เช่น ก๊วนแบดเย็นวันพุธ" />
+          <Input
+            id="title"
+            name="title"
+            required
+            maxLength={120}
+            placeholder="เช่น ก๊วนแบดเย็นวันพุธ"
+          />
         </Field>
 
         <Field label="รายละเอียด" htmlFor="description" hint="บอกระดับฝีมือ หรือสิ่งที่ต้องเตรียม">
@@ -212,7 +224,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
 
       {/* Step 3 — numbers */}
       <Card className={cn('space-y-4 px-5 py-5', step !== 2 && 'hidden')}>
-        <h2 className="font-semibold text-ink-900 dark:text-white">{t.organizer.stepNumbers}</h2>
+        <h2 className="font-semibold text-ink-900">{t.organizer.stepNumbers}</h2>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="จำนวนเป้าหมาย" htmlFor="targetPlayers" required>
@@ -259,7 +271,12 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="วันปิดรับชำระ" htmlFor="paymentDeadlineDate" required error={fieldError('paymentDeadlineDate')}>
+          <Field
+            label="วันปิดรับชำระ"
+            htmlFor="paymentDeadlineDate"
+            required
+            error={fieldError('paymentDeadlineDate')}
+          >
             <Input
               id="paymentDeadlineDate"
               name="paymentDeadlineDate"
@@ -292,13 +309,12 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
 
       {/* Step 4 — venues */}
       <Card className={cn('space-y-4 px-5 py-5', step !== 3 && 'hidden')}>
-        <h2 className="font-semibold text-ink-900 dark:text-white">{t.organizer.stepVenues}</h2>
-        <p className="text-sm text-ink-600 dark:text-ink-300">{t.session.fallbackNote}</p>
+        <h2 className="font-semibold text-ink-900">{t.organizer.stepVenues}</h2>
+        <p className="text-sm text-ink-600">{t.session.fallbackNote}</p>
 
         {eligibleCourts.length === 0 ? (
           <Alert tone="warning">
-            ยังไม่มีคอร์ตที่รองรับกีฬานี้ในระบบ กรุณาเลือกกีฬาอื่น
-            หรือชวนเจ้าของสนามมาลงทะเบียน
+            ยังไม่มีคอร์ตที่รองรับกีฬานี้ในระบบ กรุณาเลือกกีฬาอื่น หรือชวนเจ้าของสนามมาลงทะเบียน
           </Alert>
         ) : (
           <div className="space-y-2">
@@ -310,9 +326,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
                   key={court.id}
                   className={cn(
                     'flex items-center gap-3 rounded-xl border px-3 py-2.5 transition',
-                    selected
-                      ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10'
-                      : 'border-ink-300 dark:border-white/15',
+                    selected ? 'border-brand-500 bg-brand-50' : 'border-ink-300',
                   )}
                 >
                   <input
@@ -323,11 +337,12 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
                     className="h-4 w-4 accent-brand-600"
                   />
                   <label htmlFor={`court-${court.id}`} className="min-w-0 flex-1 cursor-pointer">
-                    <p className="truncate text-sm font-medium text-ink-900 dark:text-white">
+                    <p className="truncate text-sm font-medium text-ink-900">
                       {court.venueName} · {court.name}
                     </p>
-                    <p className="text-xs text-ink-500 dark:text-ink-400">
-                      {court.district} · {formatThb(court.basePriceThb)}/ชม. · รองรับ {court.capacity} คน
+                    <p className="text-xs text-ink-500">
+                      {court.district} · {formatThb(court.basePriceThb)}/ชม. · รองรับ{' '}
+                      {court.capacity} คน
                     </p>
                   </label>
                   {selected ? (
@@ -338,7 +353,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
                         onClick={() => move(court.id, -1)}
                         disabled={index === 0}
                         aria-label="เลื่อนขึ้น"
-                        className="rounded px-1.5 py-0.5 text-xs disabled:opacity-30 hover:bg-ink-100 dark:hover:bg-white/10"
+                        className="rounded px-1.5 py-0.5 text-xs disabled:opacity-30 hover:bg-ink-100"
                       >
                         ▲
                       </button>
@@ -347,7 +362,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
                         onClick={() => move(court.id, 1)}
                         disabled={index === selectedCourtIds.length - 1}
                         aria-label="เลื่อนลง"
-                        className="rounded px-1.5 py-0.5 text-xs disabled:opacity-30 hover:bg-ink-100 dark:hover:bg-white/10"
+                        className="rounded px-1.5 py-0.5 text-xs disabled:opacity-30 hover:bg-ink-100"
                       >
                         ▼
                       </button>
@@ -372,7 +387,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
 
       {/* Step 5 — policy */}
       <Card className={cn('space-y-4 px-5 py-5', step !== 4 && 'hidden')}>
-        <h2 className="font-semibold text-ink-900 dark:text-white">{t.organizer.stepPolicy}</h2>
+        <h2 className="font-semibold text-ink-900">{t.organizer.stepPolicy}</h2>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="คืนเต็มถ้ายกเลิกก่อน (ชม.)" htmlFor="fullRefundHoursBefore" required>
@@ -413,7 +428,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
           </Field>
         </div>
 
-        <label className="flex items-start gap-2 text-sm text-ink-700 dark:text-ink-200">
+        <label className="flex items-start gap-2 text-sm text-ink-700">
           <input
             type="checkbox"
             name="organizerCancelAlwaysFullRefund"
@@ -422,23 +437,23 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
           />
           <span>
             ถ้าผู้จัดยกเลิกก๊วน หรือระบบจองสนามไม่สำเร็จ คืนเงินผู้เล่นเต็มจำนวนทุกกรณี
-            <span className="block text-xs text-ink-500 dark:text-ink-400">
+            <span className="block text-xs text-ink-500">
               แนะนำให้เปิดไว้ เพราะผู้เล่นไม่ได้เป็นฝ่ายผิดในกรณีนี้
             </span>
           </span>
         </label>
 
-        <div className="flex flex-wrap items-center gap-3 border-t border-ink-200 pt-4 dark:border-white/10">
+        <div className="flex flex-wrap items-center gap-3 border-t border-ink-200 pt-4">
           <Button type="button" variant="ghost" onClick={() => setStep(3)}>
             {t.common.back}
           </Button>
           <SubmitButton disabled={selectedCourtIds.length === 0} />
           {selectedCourtIds.length === 0 ? (
-            <p className="text-xs text-ink-500 dark:text-ink-400">
+            <p className="text-xs text-ink-500">
               ต้องเลือกสนามอย่างน้อย 1 แห่งในขั้นตอนที่ 4 ก่อนจึงจะสร้างก๊วนได้
             </p>
           ) : (
-            <p className="text-xs text-ink-500 dark:text-ink-400">
+            <p className="text-xs text-ink-500">
               ก๊วนจะถูกสร้างเป็นฉบับร่าง คุณจะกดเผยแพร่เองในหน้าถัดไป
             </p>
           )}
@@ -450,7 +465,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
 
 function StepNav({ onBack, onNext }: { onBack?: () => void; onNext?: () => void }) {
   return (
-    <div className="mt-5 flex justify-between gap-2 border-t border-ink-200 pt-4 dark:border-white/10">
+    <div className="mt-5 flex justify-between gap-2 border-t border-ink-200 pt-4">
       {onBack ? (
         <Button type="button" variant="ghost" onClick={onBack}>
           {t.common.back}

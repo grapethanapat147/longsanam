@@ -29,10 +29,7 @@ export default async function AdminDashboardPage() {
       .from('bookings')
       .select('id', { count: 'exact', head: true })
       .in('status', ['requested', 'held']),
-    admin
-      .from('court_holds')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'active'),
+    admin.from('court_holds').select('id', { count: 'exact', head: true }).eq('status', 'active'),
   ]);
 
   const statusCounts = new Map<SessionStatus, number>();
@@ -65,23 +62,19 @@ export default async function AdminDashboardPage() {
         />
         <Stat label="การกันคอร์ตที่ยังทำงาน" value={`${activeHolds ?? 0}`} />
         <Stat label="ก๊วนทั้งหมด" value={`${sessions?.length ?? 0}`} />
-        <Stat
-          label="รายได้สุทธิ"
-          value={formatThb(paidTotal - refundedTotal)}
-          tone="positive"
-        />
+        <Stat label="รายได้สุทธิ" value={formatThb(paidTotal - refundedTotal)} tone="positive" />
       </div>
 
       <Card className="px-5 py-4">
-        <h2 className="font-semibold text-ink-900 dark:text-white">ก๊วนแยกตามสถานะ</h2>
+        <h2 className="font-semibold text-ink-900">ก๊วนแยกตามสถานะ</h2>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {(Object.keys(sessionStatusLabel) as SessionStatus[]).map((status) => (
             <li
               key={status}
-              className="flex items-center justify-between rounded-xl border border-ink-200 px-3 py-2 dark:border-white/10"
+              className="flex items-center justify-between rounded-xl border border-ink-200 px-3 py-2"
             >
               <SessionStatusChip status={status} />
-              <span className="font-bold tabular-nums text-ink-900 dark:text-white">
+              <span className="font-bold tabular-nums text-ink-900">
                 {statusCounts.get(status) ?? 0}
               </span>
             </li>
@@ -90,10 +83,10 @@ export default async function AdminDashboardPage() {
       </Card>
 
       <Card className="px-5 py-4">
-        <h2 className="font-semibold text-ink-900 dark:text-white">งานบำรุงรักษา</h2>
-        <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
-          ปล่อยคอร์ตที่กันไว้เกินเวลา ปิดรายการชำระเงินที่หมดอายุ
-          และคืนสิทธิ์คิวสำรองที่ไม่ได้ใช้ ปกติงานเหล่านี้รันตามกำหนดเวลาผ่าน{' '}
+        <h2 className="font-semibold text-ink-900">งานบำรุงรักษา</h2>
+        <p className="mt-1 text-sm text-ink-600">
+          ปล่อยคอร์ตที่กันไว้เกินเวลา ปิดรายการชำระเงินที่หมดอายุ และคืนสิทธิ์คิวสำรองที่ไม่ได้ใช้
+          ปกติงานเหล่านี้รันตามกำหนดเวลาผ่าน{' '}
           <code className="font-mono text-xs">/api/cron/expire</code>
         </p>
         <div className="mt-3">

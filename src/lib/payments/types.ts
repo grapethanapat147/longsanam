@@ -67,7 +67,12 @@ export type RefundIntent = {
 export type RefundResult =
   | { status: 'succeeded'; providerRef: string; isMock: boolean }
   | { status: 'pending'; providerRef: string; isMock: boolean }
-  | { status: 'failed'; failureCode: string; failureMessage: string; isMock: boolean };
+  | {
+      status: 'failed';
+      failureCode: string;
+      failureMessage: string;
+      isMock: boolean;
+    };
 
 export type PaymentStatusResult = {
   status: 'pending' | 'succeeded' | 'failed' | 'refunded' | 'expired';

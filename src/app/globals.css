@@ -1,71 +1,177 @@
 @import 'tailwindcss';
 
-/*
- * Longsanam visual identity.
+/* ===========================================================================
+ * ลงสนาม — "เส้นสนาม" (Court Lines)
  *
- * Deep green reads as trustworthy and outdoors-sporty in Thai consumer apps
- * without the "clinical fintech" feel of a blue. The lime accent is reserved
- * for the single primary action on a screen, so it never competes with itself.
- */
+ * The product exists to secure a court, so the interface borrows one: a warm
+ * playing-surface ground, crisp painted lines, and scoreboard numerals.
+ *
+ * Three rules hold the system together:
+ *
+ *   1. Light only. One theme executed properly beats two executed adequately,
+ *      and the app is opened from a LINE chat in daylight far more often than
+ *      it is browsed at night.
+ *   2. Pitch green carries every action. The lime is line paint — it fills
+ *      progress and marks "live", and is never used for text, where it would
+ *      fail contrast against any surface we use.
+ *   3. Numbers are the content. Money and headcount get tabular figures and
+ *      tighter tracking so a glance is enough.
+ * ======================================================================== */
+
 @theme {
-  --color-brand-50: #ecfdf5;
-  --color-brand-100: #d1fae5;
-  --color-brand-200: #a7f3d0;
-  --color-brand-300: #6ee7b7;
-  --color-brand-400: #34d399;
-  --color-brand-500: #12a06e;
-  --color-brand-600: #0e7c57;
-  --color-brand-700: #0b6144;
-  --color-brand-800: #0a4d37;
-  --color-brand-900: #073728;
+  /* Pitch green. Deepened from the old palette so 600 clears AA on white for
+     button labels and link text at body size. */
+  --color-brand-50: #eefaf3;
+  --color-brand-100: #d3f2e0;
+  --color-brand-200: #a7e5c3;
+  --color-brand-300: #6fd0a0;
+  --color-brand-400: #38b57e;
+  --color-brand-500: #159463;
+  --color-brand-600: #0a7a4f;
+  --color-brand-700: #076140;
+  --color-brand-800: #084d34;
+  --color-brand-900: #073a28;
 
-  --color-accent-400: #a3e635;
-  --color-accent-500: #84cc16;
-  --color-accent-600: #65a30d;
+  /* Line paint. Surfaces and fills only — never text. */
+  --color-accent-300: #e2fa8f;
+  --color-accent-400: #cdf25c;
+  --color-accent-500: #b4e02e;
+  --color-accent-600: #8fb81f;
 
-  --color-ink-50: #f8fafc;
-  --color-ink-100: #f1f5f9;
-  --color-ink-200: #e2e8f0;
-  --color-ink-300: #cbd5e1;
-  --color-ink-400: #94a3b8;
-  --color-ink-500: #64748b;
-  --color-ink-600: #475569;
-  --color-ink-700: #334155;
-  --color-ink-800: #1e293b;
-  --color-ink-900: #0f172a;
+  /* Clay, for the warning register. Warmer and less shrill than amber. */
+  --color-clay-50: #fdf4ee;
+  --color-clay-100: #fae3d3;
+  --color-clay-200: #f2c3a4;
+  --color-clay-500: #c2643b;
+  --color-clay-700: #8f4526;
+  --color-clay-900: #5c2c18;
 
-  --font-sans: var(--font-noto-thai), ui-sans-serif, system-ui, sans-serif;
+  /* Ink carries a green undertone so text never looks cold against the
+     warm ground. */
+  --color-ink-50: #f7f7f4;
+  --color-ink-100: #eeeeea;
+  --color-ink-200: #e0e0d9;
+  --color-ink-300: #c8c9c0;
+  /* Darkened from #9a9c92, which measured 2.78:1 on white — below the 3:1
+     that non-text UI needs, and this tier carries the card icons. */
+  --color-ink-400: #8b8d83;
+  --color-ink-500: #6f7268;
+  --color-ink-600: #53564d;
+  --color-ink-700: #3c3f38;
+  --color-ink-800: #262a25;
+  --color-ink-900: #12211c;
 
-  --radius-card: 1rem;
+  --font-sans: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jamjuree), var(--font-anuphan), ui-sans-serif, sans-serif;
+
+  --radius-card: 0.875rem;
+
+  /* One shadow language: tight, low, and tinted with the ink hue rather than
+     pure black, so cards sit on the surface instead of floating over it. */
+  --shadow-line: 0 1px 2px 0 rgb(18 33 28 / 0.05);
+  --shadow-lift: 0 1px 2px 0 rgb(18 33 28 / 0.06), 0 8px 24px -12px rgb(18 33 28 / 0.18);
 }
 
 :root {
-  --background: #f6f8f7;
+  color-scheme: light;
+  --surface: #f4f3ee;
+  --surface-raised: #ffffff;
   --foreground: var(--color-ink-900);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b1412;
-    --foreground: #e7f0ec;
-  }
+  --hairline: rgb(18 33 28 / 0.09);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--surface);
+  /* Daylight falling on a court: one soft warm highlight from the top, and a
+     faint green wash at the base. Cheap to paint, and it stops the page
+     reading as a flat sheet of grey. */
+  background-image:
+    radial-gradient(60rem 32rem at 50% -14rem, rgb(10 122 79 / 0.07), transparent 70%),
+    radial-gradient(48rem 24rem at 100% 100%, rgb(180 224 46 / 0.06), transparent 70%);
+  background-attachment: fixed;
   color: var(--foreground);
-  /* Thai script needs a little extra line height to keep tone marks legible. */
+  /* Thai needs the extra leading to keep tone marks off the line above. */
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Thai text should never be letter-spaced; it breaks mark positioning. */
+/* Headings take the condensed display face; body text stays in the grotesque.
+   Both are Cadson Demak designs, so the Thai and Latin actually share a
+   skeleton instead of colliding the way a Thai webfont plus a system Latin
+   fallback does. */
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+/* Letter-spacing breaks Thai mark positioning. Latin headings above opt in;
+   Thai text opts back out. */
 :lang(th) {
   letter-spacing: 0;
 }
 
+/* Money and counts read as a scoreboard: fixed-width figures so a number
+   changing in place does not shift the layout around it. */
+.tabular-nums,
+.numeric {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
 @layer utilities {
   .focus-ring {
-    @apply outline-none ring-offset-2 ring-offset-[var(--background)] focus-visible:ring-2 focus-visible:ring-brand-500;
+    @apply outline-none ring-offset-2 ring-offset-[var(--surface)] focus-visible:ring-2 focus-visible:ring-brand-500;
+  }
+
+  /* A hairline that matches the ink hue instead of a generic grey. */
+  .hairline {
+    border-color: var(--hairline);
+  }
+
+  /* Court corner tick — two short painted lines meeting at a corner. Used on
+     the one element that should feel like the focal point of a screen. */
+  .court-tick {
+    position: relative;
+  }
+  .court-tick::before,
+  .court-tick::after {
+    content: '';
+    position: absolute;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-color: var(--color-brand-400);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .court-tick::before {
+    top: -1px;
+    left: -1px;
+    border-top: 2px solid;
+    border-left: 2px solid;
+    border-top-left-radius: var(--radius-card);
+  }
+  .court-tick::after {
+    right: -1px;
+    bottom: -1px;
+    border-bottom: 2px solid;
+    border-right: 2px solid;
+    border-bottom-right-radius: var(--radius-card);
+  }
+}
+
+/* Respect the setting rather than animating regardless. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

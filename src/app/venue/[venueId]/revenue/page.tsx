@@ -73,18 +73,18 @@ export default async function VenueRevenuePage({
       </div>
 
       <Card className="px-5 py-4">
-        <h2 className="font-semibold text-ink-900 dark:text-white">แยกตามเดือน</h2>
+        <h2 className="font-semibold text-ink-900">แยกตามเดือน</h2>
         {byMonth.size === 0 ? (
           <p className="mt-2 text-sm text-ink-500">ยังไม่มีการจองที่ยืนยันแล้ว</p>
         ) : (
-          <ul className="mt-3 divide-y divide-ink-200 dark:divide-white/10">
+          <ul className="mt-3 divide-y divide-ink-200">
             {[...byMonth.entries()].map(([month, entry]) => (
               <li key={month} className="flex items-center justify-between py-2 text-sm">
-                <span className="text-ink-700 dark:text-ink-200">
+                <span className="text-ink-700">
                   {month}
                   <span className="ml-2 text-xs text-ink-500">{entry.count} การจอง</span>
                 </span>
-                <span className="font-semibold tabular-nums text-ink-900 dark:text-white">
+                <span className="font-semibold tabular-nums text-ink-900">
                   {formatThb(entry.total)}
                 </span>
               </li>
@@ -94,20 +94,20 @@ export default async function VenueRevenuePage({
       </Card>
 
       <Card className="px-5 py-4">
-        <h2 className="font-semibold text-ink-900 dark:text-white">แยกตามคอร์ต</h2>
+        <h2 className="font-semibold text-ink-900">แยกตามคอร์ต</h2>
         {byCourt.size === 0 ? (
           <p className="mt-2 text-sm text-ink-500">ยังไม่มีข้อมูล</p>
         ) : (
-          <ul className="mt-3 divide-y divide-ink-200 dark:divide-white/10">
+          <ul className="mt-3 divide-y divide-ink-200">
             {[...byCourt.entries()]
               .sort((a, b) => b[1].total - a[1].total)
               .map(([court, entry]) => (
                 <li key={court} className="flex items-center justify-between py-2 text-sm">
-                  <span className="text-ink-700 dark:text-ink-200">
+                  <span className="text-ink-700">
                     {court}
                     <span className="ml-2 text-xs text-ink-500">{entry.count} การจอง</span>
                   </span>
-                  <span className="font-semibold tabular-nums text-ink-900 dark:text-white">
+                  <span className="font-semibold tabular-nums text-ink-900">
                     {formatThb(entry.total)}
                   </span>
                 </li>

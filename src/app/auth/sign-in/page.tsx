@@ -18,20 +18,23 @@ export default async function SignInPage({
     <div className="flex min-h-dvh flex-col">
       <MockModeBanner compact />
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10">
-        <Link href="/" className="mb-6 flex items-center justify-center gap-2 focus-ring rounded-lg">
+        <Link
+          href="/"
+          className="mb-6 flex items-center justify-center gap-2 focus-ring rounded-lg"
+        >
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-600 text-sm font-black text-white">
             ลส
           </span>
-          <span className="text-lg font-bold text-ink-900 dark:text-white">{t.brand.name}</span>
+          <span className="text-lg font-bold text-ink-900">{t.brand.name}</span>
         </Link>
 
         <Card className="px-6 py-6">
-          <h1 className="text-xl font-bold text-ink-900 dark:text-white">{t.auth.signInTitle}</h1>
+          <h1 className="text-xl font-bold text-ink-900">{t.auth.signInTitle}</h1>
           <SignInForm next={next} />
         </Card>
 
-        <p className="mt-4 text-center text-sm text-ink-600 dark:text-ink-300">
-          <Link href="/auth/sign-up" className="font-semibold text-brand-700 hover:underline dark:text-brand-300">
+        <p className="mt-4 text-center text-sm text-ink-600">
+          <Link href="/auth/sign-up" className="font-semibold text-brand-700 hover:underline">
             {t.auth.toSignUp}
           </Link>
         </p>

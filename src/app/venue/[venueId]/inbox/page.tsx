@@ -8,11 +8,7 @@ import { formatCountdown, formatDateLong, formatThb, formatTimeRange } from '@/l
 import { t } from '@/i18n';
 import type { BookingStatus } from '@/lib/domain/types';
 
-export default async function VenueInboxPage({
-  params,
-}: {
-  params: Promise<{ venueId: string }>;
-}) {
+export default async function VenueInboxPage({ params }: { params: Promise<{ venueId: string }> }) {
   const { venueId } = await params;
   const supabase = await createClient();
   const admin = createAdminClient();
@@ -38,7 +34,11 @@ export default async function VenueInboxPage({
     expires_at: string | null;
     attempt_no: number;
     courts: { name: string } | null;
-    sessions: { title: string; public_code: string; target_players: number } | null;
+    sessions: {
+      title: string;
+      public_code: string;
+      target_players: number;
+    } | null;
   }[];
 
   return (
@@ -61,12 +61,12 @@ export default async function VenueInboxPage({
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="font-semibold text-ink-900 dark:text-white">
+                  <h2 className="font-semibold text-ink-900">
                     {request.sessions?.title ?? 'ก๊วน'}
                   </h2>
                   <BookingStatusChip status={request.status} />
                 </div>
-                <dl className="mt-2 space-y-1 text-sm text-ink-600 dark:text-ink-300">
+                <dl className="mt-2 space-y-1 text-sm text-ink-600">
                   <div>
                     📅 {formatDateLong(request.starts_at)} ·{' '}
                     {formatTimeRange(request.starts_at, request.ends_at)}
@@ -77,7 +77,7 @@ export default async function VenueInboxPage({
                     {request.sessions?.target_players ?? '—'} คน
                   </div>
                   {request.expires_at ? (
-                    <div className="text-amber-700 dark:text-amber-300">
+                    <div className="text-amber-700">
                       ⏳ คำขอหมดอายุ {formatCountdown(request.expires_at)}
                     </div>
                   ) : null}

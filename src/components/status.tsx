@@ -75,25 +75,37 @@ const waitlistTone: Record<WaitlistStatus, ChipTone> = {
 };
 
 export const SessionStatusChip = ({ status }: { status: SessionStatus }) => (
-  <Chip tone={sessionTone[status]}>{sessionStatusLabel[status]}</Chip>
+  <Chip dot tone={sessionTone[status]}>
+    {sessionStatusLabel[status]}
+  </Chip>
 );
 
 export const ParticipantStatusChip = ({ status }: { status: ParticipantStatus }) => (
-  <Chip tone={participantTone[status]}>{participantStatusLabel[status]}</Chip>
+  <Chip dot tone={participantTone[status]}>
+    {participantStatusLabel[status]}
+  </Chip>
 );
 
 export const BookingStatusChip = ({ status }: { status: BookingStatus }) => (
-  <Chip tone={bookingTone[status]}>{bookingStatusLabel[status]}</Chip>
+  <Chip dot tone={bookingTone[status]}>
+    {bookingStatusLabel[status]}
+  </Chip>
 );
 
 export const PaymentStatusChip = ({ status }: { status: PaymentStatus }) => (
-  <Chip tone={paymentTone[status]}>{paymentStatusLabel[status]}</Chip>
+  <Chip dot tone={paymentTone[status]}>
+    {paymentStatusLabel[status]}
+  </Chip>
 );
 
 export const RefundStatusChip = ({ status }: { status: RefundStatus }) => (
-  <Chip tone={refundTone[status]}>{refundStatusLabel[status]}</Chip>
+  <Chip dot tone={refundTone[status]}>
+    {refundStatusLabel[status]}
+  </Chip>
 );
 
 export const WaitlistStatusChip = ({ status }: { status: WaitlistStatus }) => (
-  <Chip tone={waitlistTone[status]}>{waitlistStatusLabel[status]}</Chip>
+  <Chip dot tone={waitlistTone[status]}>
+    {waitlistStatusLabel[status]}
+  </Chip>
 );

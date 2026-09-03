@@ -24,12 +24,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         description="ภาพรวมและเครื่องมือสำหรับผู้ดูแลแพลตฟอร์ม"
       />
 
-      <nav className="mb-5 flex gap-1 overflow-x-auto border-b border-ink-200 pb-px dark:border-white/10">
+      <nav className="mb-5 flex gap-1 overflow-x-auto border-b border-ink-200 pb-px">
         {TABS.map((tab) => (
           <Link
             key={tab.href}
             href={`/admin${tab.href}`}
-            className="whitespace-nowrap rounded-t-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 focus-ring dark:text-ink-300 dark:hover:bg-white/10"
+            className="whitespace-nowrap rounded-t-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 focus-ring"
           >
             {tab.label}
           </Link>

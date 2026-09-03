@@ -20,13 +20,20 @@ export default async function AdminUsersPage() {
   ]);
 
   const contactByUser = new Map(
-    ((contacts ?? []) as { user_id: string; email: string | null; phone: string | null }[]).map(
-      (c) => [c.user_id, c],
-    ),
+    (
+      (contacts ?? []) as {
+        user_id: string;
+        email: string | null;
+        phone: string | null;
+      }[]
+    ).map((c) => [c.user_id, c]),
   );
 
   const sessionsByUser = new Map<string, number>();
-  for (const row of (participantRows ?? []) as { user_id: string; status: string }[]) {
+  for (const row of (participantRows ?? []) as {
+    user_id: string;
+    status: string;
+  }[]) {
     if (row.status === 'paid_confirmed') {
       sessionsByUser.set(row.user_id, (sessionsByUser.get(row.user_id) ?? 0) + 1);
     }
@@ -42,7 +49,7 @@ export default async function AdminUsersPage() {
   return (
     <Card className="overflow-x-auto">
       <table className="w-full min-w-[46rem] text-sm">
-        <thead className="border-b border-ink-200 text-left text-xs text-ink-500 dark:border-white/10 dark:text-ink-400">
+        <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
           <tr>
             <th className="px-4 py-3 font-medium">ผู้ใช้</th>
             <th className="px-4 py-3 font-medium">อีเมล</th>
@@ -51,10 +58,10 @@ export default async function AdminUsersPage() {
             <th className="px-4 py-3 text-right font-medium">สิทธิ์</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-ink-200 dark:divide-white/10">
+        <tbody className="divide-y divide-ink-200">
           {users.map((user) => (
             <tr key={user.id}>
-              <td className="px-4 py-3 font-medium text-ink-900 dark:text-white">
+              <td className="px-4 py-3 font-medium text-ink-900">
                 {user.display_name}
                 {user.id === me?.id ? (
                   <Chip tone="brand" className="ml-2">
@@ -62,13 +69,9 @@ export default async function AdminUsersPage() {
                   </Chip>
                 ) : null}
               </td>
-              <td className="px-4 py-3 text-ink-600 dark:text-ink-300">
-                {contactByUser.get(user.id)?.email ?? '—'}
-              </td>
-              <td className="px-4 py-3 text-ink-600 dark:text-ink-300">
-                {formatDate(user.created_at)}
-              </td>
-              <td className="px-4 py-3 text-right tabular-nums text-ink-700 dark:text-ink-200">
+              <td className="px-4 py-3 text-ink-600">{contactByUser.get(user.id)?.email ?? '—'}</td>
+              <td className="px-4 py-3 text-ink-600">{formatDate(user.created_at)}</td>
+              <td className="px-4 py-3 text-right tabular-nums text-ink-700">
                 {sessionsByUser.get(user.id) ?? 0}
               </td>
               <td className="px-4 py-3">

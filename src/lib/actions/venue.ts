@@ -16,7 +16,11 @@ import { reasonLabel, t } from '@/i18n';
  * transaction that flips the booking.
  */
 
-export type VenueActionState = { ok: boolean; error?: string; fieldErrors?: Record<string, string> };
+export type VenueActionState = {
+  ok: boolean;
+  error?: string;
+  fieldErrors?: Record<string, string>;
+};
 
 const createVenueSchema = z.object({
   name: z.string().trim().min(2, 'กรุณากรอกชื่อสนาม').max(120),
@@ -71,7 +75,11 @@ export async function createVenueAction(
 
   if (error) return { ok: false, error: t.common.unexpectedError };
 
-  const result = data as { ok?: boolean; reason?: string; venueId?: string } | null;
+  const result = data as {
+    ok?: boolean;
+    reason?: string;
+    venueId?: string;
+  } | null;
   if (!result?.ok || !result.venueId) {
     const reason = result?.reason ?? '';
     return {
@@ -323,9 +331,16 @@ export async function decideBookingAction(
 
   if (error) return { ok: false, error: t.common.unexpectedError };
 
-  const result = data as { ok?: boolean; reason?: string; status?: string } | null;
+  const result = data as {
+    ok?: boolean;
+    reason?: string;
+    status?: string;
+  } | null;
   if (!result?.ok) {
-    return { ok: false, error: reasonLabel[result?.reason ?? ''] ?? t.common.unexpectedError };
+    return {
+      ok: false,
+      error: reasonLabel[result?.reason ?? ''] ?? t.common.unexpectedError,
+    };
   }
 
   const admin = createAdminClient();
@@ -335,9 +350,11 @@ export async function decideBookingAction(
     .eq('id', bookingId)
     .maybeSingle();
 
-  const session = booking?.sessions as
-    | { organizer_id: string; title: string; public_code: string }
-    | null;
+  const session = booking?.sessions as {
+    organizer_id: string;
+    title: string;
+    public_code: string;
+  } | null;
 
   if (session) {
     await admin.rpc('notify_user', {

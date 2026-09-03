@@ -20,7 +20,9 @@ export const SESSION_TRANSITIONS: Readonly<Record<SessionStatus, readonly Sessio
   completed: [],
 };
 
-export const PARTICIPANT_TRANSITIONS: Readonly<Record<ParticipantStatus, readonly ParticipantStatus[]>> = {
+export const PARTICIPANT_TRANSITIONS: Readonly<
+  Record<ParticipantStatus, readonly ParticipantStatus[]>
+> = {
   joined_pending_payment: ['paid_confirmed', 'cancelled', 'payment_expired'],
   paid_confirmed: ['cancelled', 'refunded'],
   waitlisted: ['joined_pending_payment', 'cancelled'],

@@ -31,7 +31,11 @@ export type SessionCard = {
   payment_deadline: string;
   status: SessionStatus;
   sports: { slug: string; name_th: string; emoji: string } | null;
-  organizer: { id: string; display_name: string; avatar_url: string | null } | null;
+  organizer: {
+    id: string;
+    display_name: string;
+    avatar_url: string | null;
+  } | null;
 };
 
 export type SessionCounts = {
@@ -42,19 +46,14 @@ export type SessionCounts = {
 };
 
 /** Roster counts for a batch of sessions, in one round trip rather than N. */
-export async function loadSessionCounts(
-  sessionIds: string[],
-): Promise<Map<string, SessionCounts>> {
+export async function loadSessionCounts(sessionIds: string[]): Promise<Map<string, SessionCounts>> {
   const counts = new Map<string, SessionCounts>();
   if (sessionIds.length === 0) return counts;
 
   const admin = createAdminClient();
 
   const [{ data: participants }, { data: waitlist }, { data: sessions }] = await Promise.all([
-    admin
-      .from('session_participants')
-      .select('session_id, status')
-      .in('session_id', sessionIds),
+    admin.from('session_participants').select('session_id, status').in('session_id', sessionIds),
     admin
       .from('waitlist_entries')
       .select('session_id, status')
@@ -66,7 +65,12 @@ export async function loadSessionCounts(
   const targets = new Map((sessions ?? []).map((s) => [s.id, s.target_players]));
 
   for (const id of sessionIds) {
-    counts.set(id, { paid: 0, pending: 0, waitlisted: 0, slotsLeft: targets.get(id) ?? 0 });
+    counts.set(id, {
+      paid: 0,
+      pending: 0,
+      waitlisted: 0,
+      slotsLeft: targets.get(id) ?? 0,
+    });
   }
 
   for (const row of participants ?? []) {
@@ -209,7 +213,9 @@ export async function loadSessionTimeline(sessionId: string, limit = 50) {
 
 export async function loadSessionProgress(sessionId: string) {
   const admin = createAdminClient();
-  const { data } = await admin.rpc('session_progress', { p_session_id: sessionId });
+  const { data } = await admin.rpc('session_progress', {
+    p_session_id: sessionId,
+  });
   const progress = (data ?? {}) as Record<string, unknown>;
 
   return {

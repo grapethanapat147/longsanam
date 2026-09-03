@@ -24,16 +24,16 @@ function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: st
  */
 function LineSignInPlaceholder() {
   return (
-    <div className="mt-4 border-t border-ink-200 pt-4 dark:border-white/10">
+    <div className="mt-4 border-t border-ink-200 pt-4">
       <button
         type="button"
         disabled
         title={t.auth.lineNotConfigured}
-        className="w-full rounded-xl border border-ink-300 bg-ink-50 px-4 py-2.5 text-sm font-semibold text-ink-400 dark:border-white/10 dark:bg-white/5 dark:text-ink-500"
+        className="w-full rounded-xl border border-ink-300 bg-ink-50 px-4 py-2.5 text-sm font-semibold text-ink-400"
       >
         {t.auth.lineSoon}
       </button>
-      <p className="mt-1.5 text-xs text-ink-500 dark:text-ink-400">{t.auth.lineNotConfigured}</p>
+      <p className="mt-1.5 text-xs text-ink-500">{t.auth.lineNotConfigured}</p>
     </div>
   );
 }
@@ -47,11 +47,9 @@ const DEMO_ACCOUNTS = [
 
 function DemoAccounts() {
   return (
-    <details className="mt-4 rounded-xl border border-ink-200 px-3 py-2 text-sm dark:border-white/10">
-      <summary className="cursor-pointer font-medium text-ink-700 dark:text-ink-200">
-        {t.auth.demoAccounts}
-      </summary>
-      <ul className="mt-2 space-y-1 text-xs text-ink-600 dark:text-ink-300">
+    <details className="mt-4 rounded-xl border border-ink-200 px-3 py-2 text-sm">
+      <summary className="cursor-pointer font-medium text-ink-700">{t.auth.demoAccounts}</summary>
+      <ul className="mt-2 space-y-1 text-xs text-ink-600">
         {DEMO_ACCOUNTS.map((account) => (
           <li key={account.email} className="flex justify-between gap-2">
             <code className="font-mono">{account.email}</code>
@@ -59,7 +57,7 @@ function DemoAccounts() {
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-xs text-ink-500 dark:text-ink-400">
+      <p className="mt-2 text-xs text-ink-500">
         รหัสผ่านทุกบัญชี: <code className="font-mono">password123</code>
       </p>
     </details>
@@ -111,8 +109,19 @@ export function SignUpForm() {
     <form action={formAction} className="mt-5 flex flex-col gap-4">
       {state?.error ? <Alert tone="danger">{state.error}</Alert> : null}
 
-      <Field label={t.auth.displayName} htmlFor="displayName" required hint="ชื่อที่เพื่อนในก๊วนจะเห็น">
-        <Input id="displayName" name="displayName" required maxLength={60} placeholder="เช่น ก้อง" />
+      <Field
+        label={t.auth.displayName}
+        htmlFor="displayName"
+        required
+        hint="ชื่อที่เพื่อนในก๊วนจะเห็น"
+      >
+        <Input
+          id="displayName"
+          name="displayName"
+          required
+          maxLength={60}
+          placeholder="เช่น ก้อง"
+        />
       </Field>
 
       <Field label={t.auth.email} htmlFor="email" required>

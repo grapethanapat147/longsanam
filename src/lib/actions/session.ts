@@ -99,7 +99,11 @@ export async function createSessionAction(
   const paymentDeadline = bangkokInstant(v.paymentDeadlineDate, v.paymentDeadlineTime);
 
   if (new Date(startsAt).getTime() <= Date.now()) {
-    return { ok: false, error: 'วันเวลาที่เล่นต้องอยู่ในอนาคต', fieldErrors: { date: 'ต้องเป็นอนาคต' } };
+    return {
+      ok: false,
+      error: 'วันเวลาที่เล่นต้องอยู่ในอนาคต',
+      fieldErrors: { date: 'ต้องเป็นอนาคต' },
+    };
   }
   if (new Date(paymentDeadline).getTime() > new Date(startsAt).getTime()) {
     return {
@@ -144,10 +148,7 @@ export async function createSessionAction(
 
   // Court ids arrive in the order the organizer ranked them.
   const admin = createAdminClient();
-  const { data: courts } = await admin
-    .from('courts')
-    .select('id, venue_id')
-    .in('id', v.courtIds);
+  const { data: courts } = await admin.from('courts').select('id, venue_id').in('id', v.courtIds);
 
   const venueByCourt = new Map((courts ?? []).map((c) => [c.id, c.venue_id]));
 
@@ -167,7 +168,11 @@ export async function createSessionAction(
 
   if (preferences.length === 0) {
     await supabase.from('sessions').delete().eq('id', session.id);
-    return { ok: false, error: 'ไม่พบคอร์ตที่เลือก กรุณาเลือกใหม่', fieldErrors: { courtIds: 'ไม่ถูกต้อง' } };
+    return {
+      ok: false,
+      error: 'ไม่พบคอร์ตที่เลือก กรุณาเลือกใหม่',
+      fieldErrors: { courtIds: 'ไม่ถูกต้อง' },
+    };
   }
 
   await supabase.from('session_venue_preferences').insert(preferences);
@@ -176,7 +181,9 @@ export async function createSessionAction(
   redirect(`/organizer/sessions/${session.id}?created=1`);
 }
 
-export async function publishSessionAction(sessionId: string): Promise<{ ok: boolean; error?: string }> {
+export async function publishSessionAction(
+  sessionId: string,
+): Promise<{ ok: boolean; error?: string }> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: reasonLabel.not_authenticated };
 
@@ -194,7 +201,10 @@ export async function publishSessionAction(sessionId: string): Promise<{ ok: boo
   try {
     assertSessionTransition(session.status, 'open');
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : t.common.unexpectedError };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : t.common.unexpectedError,
+    };
   }
 
   const { error } = await supabase.from('sessions').update({ status: 'open' }).eq('id', sessionId);
@@ -255,7 +265,12 @@ export async function triggerBookingAction(
   sessionId: string,
 ): Promise<{ ok: boolean; outcome: string; message: string }> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, outcome: 'forbidden', message: reasonLabel.not_authenticated };
+  if (!user)
+    return {
+      ok: false,
+      outcome: 'forbidden',
+      message: reasonLabel.not_authenticated,
+    };
 
   const supabase = await createClient();
   const { data: session } = await supabase
@@ -274,11 +289,23 @@ export async function triggerBookingAction(
 
   switch (result.outcome) {
     case 'booked':
-      return { ok: true, outcome: result.outcome, message: 'จองสนามสำเร็จแล้ว' };
+      return {
+        ok: true,
+        outcome: result.outcome,
+        message: 'จองสนามสำเร็จแล้ว',
+      };
     case 'awaiting_venue':
-      return { ok: true, outcome: result.outcome, message: 'ส่งคำขอจองแล้ว กำลังรอสนามยืนยัน' };
+      return {
+        ok: true,
+        outcome: result.outcome,
+        message: 'ส่งคำขอจองแล้ว กำลังรอสนามยืนยัน',
+      };
     case 'already_in_progress':
-      return { ok: true, outcome: result.outcome, message: 'มีคำขอจองที่กำลังดำเนินการอยู่แล้ว' };
+      return {
+        ok: true,
+        outcome: result.outcome,
+        message: 'มีคำขอจองที่กำลังดำเนินการอยู่แล้ว',
+      };
     case 'not_eligible':
       return {
         ok: false,
@@ -300,8 +327,7 @@ export async function triggerBookingAction(
 }
 
 export type CancelSessionResult =
-  | { ok: true; refundedPlayers: number; refundedThb: number }
-  | { ok: false; error: string };
+  { ok: true; refundedPlayers: number; refundedThb: number } | { ok: false; error: string };
 
 /**
  * Cancelling a session refunds every paid player according to the policy that
@@ -334,7 +360,10 @@ export async function cancelSessionAction(
 
   const cancelled = cancelData as { ok?: boolean; reason?: string } | null;
   if (!cancelled?.ok) {
-    return { ok: false, error: reasonLabel[cancelled?.reason ?? ''] ?? t.common.unexpectedError };
+    return {
+      ok: false,
+      error: reasonLabel[cancelled?.reason ?? ''] ?? t.common.unexpectedError,
+    };
   }
 
   const { refundedPlayers, refundedThb } = await refundAllPaidParticipants({

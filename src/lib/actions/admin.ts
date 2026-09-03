@@ -28,7 +28,11 @@ const manualRefundSchema = z.object({
   reason: z.string().trim().min(3, 'กรุณาระบุเหตุผล').max(300),
 });
 
-export type AdminActionState = { ok: boolean; error?: string; message?: string };
+export type AdminActionState = {
+  ok: boolean;
+  error?: string;
+  message?: string;
+};
 
 /**
  * Dispute support: refund a payment outside the normal cancellation flow.
@@ -58,7 +62,10 @@ export async function manualRefundAction(
 
   if (!payment) return { ok: false, error: reasonLabel.payment_not_found };
   if (payment.status !== 'paid') {
-    return { ok: false, error: 'คืนเงินได้เฉพาะรายการที่ชำระเงินสำเร็จแล้วเท่านั้น' };
+    return {
+      ok: false,
+      error: 'คืนเงินได้เฉพาะรายการที่ชำระเงินสำเร็จแล้วเท่านั้น',
+    };
   }
   if (parsed.data.amountThb > payment.amount_thb) {
     return { ok: false, error: 'จำนวนเงินคืนมากกว่ายอดที่ชำระไว้' };
@@ -73,9 +80,16 @@ export async function manualRefundAction(
     p_actor: admin.id,
   });
 
-  const result = data as { ok?: boolean; reason?: string; refundId?: string } | null;
+  const result = data as {
+    ok?: boolean;
+    reason?: string;
+    refundId?: string;
+  } | null;
   if (!result?.ok) {
-    return { ok: false, error: reasonLabel[result?.reason ?? ''] ?? t.common.unexpectedError };
+    return {
+      ok: false,
+      error: reasonLabel[result?.reason ?? ''] ?? t.common.unexpectedError,
+    };
   }
 
   if (result.refundId) {
@@ -83,7 +97,10 @@ export async function manualRefundAction(
   }
 
   revalidatePath('/admin', 'layout');
-  return { ok: true, message: `บันทึกการคืนเงิน ${parsed.data.amountThb} บาท เรียบร้อย` };
+  return {
+    ok: true,
+    message: `บันทึกการคืนเงิน ${parsed.data.amountThb} บาท เรียบร้อย`,
+  };
 }
 
 export async function setUserRoleAction(

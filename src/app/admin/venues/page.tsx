@@ -44,7 +44,7 @@ export default async function AdminVenuesPage() {
   return (
     <Card className="overflow-x-auto">
       <table className="w-full min-w-[46rem] text-sm">
-        <thead className="border-b border-ink-200 text-left text-xs text-ink-500 dark:border-white/10 dark:text-ink-400">
+        <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
           <tr>
             <th className="px-4 py-3 font-medium">สนาม</th>
             <th className="px-4 py-3 font-medium">พื้นที่</th>
@@ -54,21 +54,21 @@ export default async function AdminVenuesPage() {
             <th className="px-4 py-3 text-right font-medium">สถานะ</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-ink-200 dark:divide-white/10">
+        <tbody className="divide-y divide-ink-200">
           {rows.map((venue) => (
             <tr key={venue.id}>
-              <td className="px-4 py-3 font-medium text-ink-900 dark:text-white">
+              <td className="px-4 py-3 font-medium text-ink-900">
                 <Link href={`/venue/${venue.id}`} className="hover:underline focus-ring">
                   {venue.name}
                 </Link>
               </td>
-              <td className="px-4 py-3 text-ink-600 dark:text-ink-300">
+              <td className="px-4 py-3 text-ink-600">
                 {venue.district} · {venue.province}
               </td>
-              <td className="px-4 py-3 text-right tabular-nums text-ink-700 dark:text-ink-200">
+              <td className="px-4 py-3 text-right tabular-nums text-ink-700">
                 {courtCount.get(venue.id) ?? 0}
               </td>
-              <td className="px-4 py-3 text-right tabular-nums text-ink-900 dark:text-white">
+              <td className="px-4 py-3 text-right tabular-nums text-ink-900">
                 {formatThb(revenue.get(venue.id) ?? 0)}
               </td>
               <td className="px-4 py-3">

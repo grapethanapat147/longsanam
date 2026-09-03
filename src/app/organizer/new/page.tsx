@@ -26,7 +26,11 @@ export default async function NewSessionPage() {
   ]);
 
   const courts = (courtRows ?? []).map((row) => {
-    const venue = row.venues as unknown as { id: string; name: string; district: string };
+    const venue = row.venues as unknown as {
+      id: string;
+      name: string;
+      district: string;
+    };
     const sportIds = (row.court_sports as unknown as { sport_id: string }[]).map((s) => s.sport_id);
     return {
       id: row.id,

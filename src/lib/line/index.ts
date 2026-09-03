@@ -82,7 +82,11 @@ export async function pushLineMessage(notification: LineNotification): Promise<L
     });
 
     if (!response.ok) {
-      return { ok: false, reason: 'request_failed', detail: `HTTP ${response.status}` };
+      return {
+        ok: false,
+        reason: 'request_failed',
+        detail: `HTTP ${response.status}`,
+      };
     }
     return { ok: true, delivered: 1 };
   } catch (error) {

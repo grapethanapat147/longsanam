@@ -27,7 +27,10 @@ export async function signInAction(
   });
 
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? t.common.unexpectedError };
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? t.common.unexpectedError,
+    };
   }
 
   const supabase = await createClient();
@@ -54,7 +57,10 @@ export async function signUpAction(
   });
 
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? t.common.unexpectedError };
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? t.common.unexpectedError,
+    };
   }
 
   const supabase = await createClient();
@@ -62,7 +68,9 @@ export async function signUpAction(
     email: parsed.data.email,
     password: parsed.data.password,
     // Consumed by the handle_new_user trigger, which creates the profile.
-    options: { data: { display_name: parsed.data.displayName, role: 'player' } },
+    options: {
+      data: { display_name: parsed.data.displayName, role: 'player' },
+    },
   });
 
   if (error) {

@@ -40,7 +40,7 @@ function FilePicker({
     <div>
       <label
         htmlFor={id}
-        className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-ink-300 px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-ink-50 focus-within:ring-2 focus-within:ring-brand-500 dark:border-white/15 dark:text-ink-200 dark:hover:bg-white/10"
+        className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-ink-300 px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-ink-50 focus-within:ring-2 focus-within:ring-brand-500"
       >
         {t.upload.choose}
         <input
@@ -52,7 +52,7 @@ function FilePicker({
           onChange={(event) => onPick(event.target.files?.[0]?.name ?? null)}
         />
       </label>
-      <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{hint}</p>
+      <p className="mt-1 text-xs text-ink-500">{hint}</p>
     </div>
   );
 }
@@ -77,7 +77,7 @@ export function AvatarUpload({
 
   return (
     <div className="space-y-3">
-      <h2 className="font-semibold text-ink-900 dark:text-white">{t.upload.avatarTitle}</h2>
+      <h2 className="font-semibold text-ink-900">{t.upload.avatarTitle}</h2>
 
       {state?.error ? <Alert tone="danger">{state.error}</Alert> : null}
       {state?.ok && state.message ? <Alert tone="success">{state.message}</Alert> : null}
@@ -92,9 +92,7 @@ export function AvatarUpload({
           onSubmit={() => setPicked(null)}
         >
           <FilePicker id="avatar-file" onPick={setPicked} hint={t.upload.avatarHint} />
-          {picked ? (
-            <p className="truncate text-xs text-ink-600 dark:text-ink-300">{picked}</p>
-          ) : null}
+          {picked ? <p className="truncate text-xs text-ink-600">{picked}</p> : null}
           <div className="flex gap-2">
             {picked ? <SubmitButton label={t.upload.save} /> : null}
             {url ? (
@@ -141,13 +139,13 @@ export function VenueCoverUpload({
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-ink-900 dark:text-white">{t.upload.venueCoverTitle}</h3>
+      <h3 className="font-semibold text-ink-900">{t.upload.venueCoverTitle}</h3>
 
       {state?.error ? <Alert tone="danger">{state.error}</Alert> : null}
       {state?.ok && state.message ? <Alert tone="success">{state.message}</Alert> : null}
 
       {url ? (
-        <div className="relative aspect-[16/9] w-full max-w-sm overflow-hidden rounded-xl border border-ink-200 dark:border-white/10">
+        <div className="relative aspect-[16/9] w-full max-w-sm overflow-hidden rounded-xl border border-ink-200">
           <Image
             src={url}
             alt={venueName}
@@ -157,7 +155,7 @@ export function VenueCoverUpload({
           />
         </div>
       ) : (
-        <div className="grid aspect-[16/9] w-full max-w-sm place-items-center rounded-xl border border-dashed border-ink-300 text-sm text-ink-500 dark:border-white/15 dark:text-ink-400">
+        <div className="grid aspect-[16/9] w-full max-w-sm place-items-center rounded-xl border border-dashed border-ink-300 text-sm text-ink-500">
           {t.upload.noVenueImage}
         </div>
       )}
@@ -165,8 +163,12 @@ export function VenueCoverUpload({
       <form action={formAction} className="flex flex-col gap-2" onSubmit={() => setPicked(null)}>
         <input type="hidden" name="venueId" value={venueId} />
         <FilePicker id={`venue-cover-${venueId}`} onPick={setPicked} hint={t.upload.venueHint} />
-        {picked ? <p className="truncate text-xs text-ink-600 dark:text-ink-300">{picked}</p> : null}
-        {picked ? <div><SubmitButton label={t.upload.save} /></div> : null}
+        {picked ? <p className="truncate text-xs text-ink-600">{picked}</p> : null}
+        {picked ? (
+          <div>
+            <SubmitButton label={t.upload.save} />
+          </div>
+        ) : null}
       </form>
     </div>
   );
@@ -198,8 +200,12 @@ export function AvatarImage({
   return (
     <span
       aria-hidden
-      className="grid shrink-0 place-items-center rounded-full bg-brand-100 font-bold text-brand-700 dark:bg-brand-500/20 dark:text-brand-200"
-      style={{ width: size, height: size, fontSize: Math.max(11, Math.round(size / 2.6)) }}
+      className="grid shrink-0 place-items-center rounded-full bg-brand-100 font-bold text-brand-700"
+      style={{
+        width: size,
+        height: size,
+        fontSize: Math.max(11, Math.round(size / 2.6)),
+      }}
     >
       {displayName.trim().charAt(0) || '?'}
     </span>

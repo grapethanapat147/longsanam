@@ -104,7 +104,10 @@ export function planWaitlistPromotion(input: WaitlistPromotionInput): WaitlistPl
 
 /** The single next promotion, which is what the cancellation flow needs. */
 export function nextWaitlistPromotion(input: WaitlistPromotionInput): WaitlistPromotion | null {
-  const plan = planWaitlistPromotion({ ...input, freeSlots: Math.min(input.freeSlots, 1) });
+  const plan = planWaitlistPromotion({
+    ...input,
+    freeSlots: Math.min(input.freeSlots, 1),
+  });
   return plan.promotions[0] ?? null;
 }
 

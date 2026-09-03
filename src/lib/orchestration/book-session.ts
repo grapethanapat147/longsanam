@@ -50,7 +50,12 @@ export type OrchestrationResult =
       priceThb: number;
       attempts: number;
     }
-  | { outcome: 'not_eligible'; reason: string; missingPlayers: number; shortfallThb: number }
+  | {
+      outcome: 'not_eligible';
+      reason: string;
+      missingPlayers: number;
+      shortfallThb: number;
+    }
   | { outcome: 'failed'; reason: string; triedCourtIds: string[] }
   | { outcome: 'already_in_progress'; bookingId: string };
 
@@ -161,7 +166,11 @@ export async function runBookingOrchestration(
     .maybeSingle();
 
   if (sessionError || !session) {
-    return { outcome: 'failed', reason: 'session_not_found', triedCourtIds: [] };
+    return {
+      outcome: 'failed',
+      reason: 'session_not_found',
+      triedCourtIds: [],
+    };
   }
 
   const { data: preferenceRows } = await admin
@@ -199,7 +208,9 @@ export async function runBookingOrchestration(
     })
     .filter((a): a is BookingAttempt => a !== null);
 
-  const { data: progress } = await admin.rpc('session_progress', { p_session_id: sessionId });
+  const { data: progress } = await admin.rpc('session_progress', {
+    p_session_id: sessionId,
+  });
   const paidParticipants = Number((progress as Record<string, unknown>)?.paidParticipants ?? 0);
   const paidTotalThb = Number((progress as Record<string, unknown>)?.paidTotalThb ?? 0);
 
@@ -272,7 +283,11 @@ export async function runBookingOrchestration(
         p_actor: actor,
       });
 
-      return { outcome: 'failed', reason, triedCourtIds: selection.triedCourtIds };
+      return {
+        outcome: 'failed',
+        reason,
+        triedCourtIds: selection.triedCourtIds,
+      };
     }
 
     const { preference, attemptNo } = selection;
@@ -288,10 +303,17 @@ export async function runBookingOrchestration(
       p_actor: actor,
     });
 
-    const hold = holdData as { ok?: boolean; holdId?: string; reason?: string } | null;
+    const hold = holdData as {
+      ok?: boolean;
+      holdId?: string;
+      reason?: string;
+    } | null;
 
     if (!hold?.ok || !hold.holdId) {
-      workingAttempts.push({ courtId: preference.courtId, outcome: 'hold_failed' });
+      workingAttempts.push({
+        courtId: preference.courtId,
+        outcome: 'hold_failed',
+      });
       continue;
     }
 
@@ -316,7 +338,10 @@ export async function runBookingOrchestration(
         p_reason: booking?.reason ?? 'booking_request_failed',
         p_actor: actor,
       });
-      workingAttempts.push({ courtId: preference.courtId, outcome: 'unavailable' });
+      workingAttempts.push({
+        courtId: preference.courtId,
+        outcome: 'unavailable',
+      });
       continue;
     }
 

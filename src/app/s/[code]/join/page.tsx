@@ -47,7 +47,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
           ) : null}
 
           <Card className="px-5 py-4">
-            <h2 className="font-semibold text-ink-900 dark:text-white">สรุปรายการ</h2>
+            <h2 className="font-semibold text-ink-900">สรุปรายการ</h2>
             <dl className="mt-3 space-y-2 text-sm">
               <Row label="ก๊วน" value={session.title} />
               <Row label="สถานที่" value={session.area_text} />
@@ -55,10 +55,13 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
                 label="เวลา"
                 value={`${formatDateLong(session.starts_at)} ${formatTimeRange(session.starts_at, session.ends_at)}`}
               />
-              <Row label="ผู้เล่นที่ยืนยันแล้ว" value={`${counts.paid} / ${session.target_players} คน`} />
-              <div className="flex justify-between border-t border-ink-200 pt-2 dark:border-white/10">
-                <dt className="font-semibold text-ink-900 dark:text-white">{t.payment.amountDue}</dt>
-                <dd className="font-bold text-ink-900 dark:text-white">
+              <Row
+                label="ผู้เล่นที่ยืนยันแล้ว"
+                value={`${counts.paid} / ${session.target_players} คน`}
+              />
+              <div className="flex justify-between border-t border-ink-200 pt-2">
+                <dt className="font-semibold text-ink-900">{t.payment.amountDue}</dt>
+                <dd className="font-bold text-ink-900">
                   {formatThb(participant?.amount_due_thb ?? session.budget_per_person_thb)}
                 </dd>
               </div>
@@ -66,8 +69,8 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
           </Card>
 
           <Card className="px-5 py-4">
-            <h2 className="font-semibold text-ink-900 dark:text-white">{t.session.policy}</h2>
-            <ul className="mt-2 space-y-1 text-sm text-ink-600 dark:text-ink-300">
+            <h2 className="font-semibold text-ink-900">{t.session.policy}</h2>
+            <ul className="mt-2 space-y-1 text-sm text-ink-600">
               {describePolicy(policy).map((line) => (
                 <li key={line}>• {line}</li>
               ))}
@@ -76,13 +79,13 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
 
           <Link
             href={`/s/${code}`}
-            className="inline-block text-sm font-semibold text-brand-700 hover:underline dark:text-brand-300"
+            className="inline-block text-sm font-semibold text-brand-700 hover:underline"
           >
             ← กลับไปหน้ารายละเอียดก๊วน
           </Link>
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside className="order-first lg:order-none lg:sticky lg:top-24 lg:self-start">
           <JoinPanel
             sessionId={session.id}
             publicCode={session.public_code}
@@ -109,8 +112,8 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt className="text-ink-500 dark:text-ink-400">{label}</dt>
-      <dd className="text-right font-medium text-ink-900 dark:text-white">{value}</dd>
+      <dt className="text-ink-500">{label}</dt>
+      <dd className="text-right font-medium text-ink-900">{value}</dd>
     </div>
   );
 }

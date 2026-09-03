@@ -35,16 +35,13 @@ export type CourtSlot = {
 };
 
 export type AvailabilityResult =
-  | { available: true; priceThb: number }
-  | { available: false; reason: string };
+  { available: true; priceThb: number } | { available: false; reason: string };
 
 export type HoldResult =
-  | { ok: true; holdRef: string; expiresAt: Date }
-  | { ok: false; reason: string };
+  { ok: true; holdRef: string; expiresAt: Date } | { ok: false; reason: string };
 
 export type ConfirmResult =
-  | { ok: true; bookingRef: string; requiresVenueApproval: boolean }
-  | { ok: false; reason: string };
+  { ok: true; bookingRef: string; requiresVenueApproval: boolean } | { ok: false; reason: string };
 
 export type VenueIntegrationKind = 'partner_portal' | 'calendar_sync' | 'court_api';
 

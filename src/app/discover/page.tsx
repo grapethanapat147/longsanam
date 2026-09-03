@@ -66,7 +66,7 @@ function FilterChip({ href, active, label }: { href: string; active: boolean; la
         'rounded-full px-3 py-1.5 text-sm font-medium transition focus-ring',
         active
           ? 'bg-brand-600 text-white'
-          : 'border border-ink-300 bg-white text-ink-700 hover:bg-ink-50 dark:border-white/15 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10',
+          : 'border border-ink-300 bg-white text-ink-700 hover:bg-ink-50',
       )}
     >
       {label}

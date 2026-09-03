@@ -31,13 +31,19 @@ export function ProfileForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <h2 className="font-semibold text-ink-900 dark:text-white">ข้อมูลส่วนตัว</h2>
+      <h2 className="font-semibold text-ink-900">ข้อมูลส่วนตัว</h2>
 
       {state?.error ? <Alert tone="danger">{state.error}</Alert> : null}
       {state?.ok && state.message ? <Alert tone="success">{state.message}</Alert> : null}
 
       <Field label={t.auth.displayName} htmlFor="displayName" required>
-        <Input id="displayName" name="displayName" defaultValue={displayName} required maxLength={60} />
+        <Input
+          id="displayName"
+          name="displayName"
+          defaultValue={displayName}
+          required
+          maxLength={60}
+        />
       </Field>
 
       <Field

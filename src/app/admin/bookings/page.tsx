@@ -74,8 +74,8 @@ export default async function AdminBookingsPage() {
   return (
     <div className="space-y-5">
       <Card className="px-5 py-4">
-        <h2 className="font-semibold text-ink-900 dark:text-white">{t.admin.disputes}</h2>
-        <p className="mt-1 mb-4 text-sm text-ink-600 dark:text-ink-300">
+        <h2 className="font-semibold text-ink-900">{t.admin.disputes}</h2>
+        <p className="mt-1 mb-4 text-sm text-ink-600">
           ใช้เมื่อผู้เล่นร้องเรียนและต้องคืนเงินนอกเหนือจากเงื่อนไขปกติ
           ระบบจะจำกัดยอดคืนไม่ให้เกินยอดที่ชำระจริง
         </p>
@@ -83,9 +83,9 @@ export default async function AdminBookingsPage() {
       </Card>
 
       <Card className="overflow-x-auto">
-        <h2 className="px-5 pt-4 font-semibold text-ink-900 dark:text-white">การจองล่าสุด</h2>
+        <h2 className="px-5 pt-4 font-semibold text-ink-900">การจองล่าสุด</h2>
         <table className="mt-3 w-full min-w-[46rem] text-sm">
-          <thead className="border-b border-ink-200 text-left text-xs text-ink-500 dark:border-white/10 dark:text-ink-400">
+          <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
             <tr>
               <th className="px-4 py-3 font-medium">ก๊วน</th>
               <th className="px-4 py-3 font-medium">สนาม / คอร์ต</th>
@@ -94,10 +94,10 @@ export default async function AdminBookingsPage() {
               <th className="px-4 py-3 font-medium">สถานะ</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-ink-200 dark:divide-white/10">
+          <tbody className="divide-y divide-ink-200">
             {bookingRows.map((booking) => (
               <tr key={booking.id}>
-                <td className="max-w-48 truncate px-4 py-3 text-ink-900 dark:text-white">
+                <td className="max-w-48 truncate px-4 py-3 text-ink-900">
                   {booking.sessions ? (
                     <Link
                       href={`/s/${booking.sessions.public_code}`}
@@ -110,13 +110,11 @@ export default async function AdminBookingsPage() {
                   )}
                   <span className="block text-xs text-ink-500">ครั้งที่ {booking.attempt_no}</span>
                 </td>
-                <td className="px-4 py-3 text-ink-600 dark:text-ink-300">
+                <td className="px-4 py-3 text-ink-600">
                   {booking.venues?.name} · {booking.courts?.name}
                 </td>
-                <td className="px-4 py-3 text-ink-600 dark:text-ink-300">
-                  {formatDate(booking.starts_at)}
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums text-ink-900 dark:text-white">
+                <td className="px-4 py-3 text-ink-600">{formatDate(booking.starts_at)}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-ink-900">
                   {formatThb(booking.price_thb)}
                 </td>
                 <td className="px-4 py-3">
@@ -136,9 +134,9 @@ export default async function AdminBookingsPage() {
       </Card>
 
       <Card className="overflow-x-auto">
-        <h2 className="px-5 pt-4 font-semibold text-ink-900 dark:text-white">การชำระเงินล่าสุด</h2>
+        <h2 className="px-5 pt-4 font-semibold text-ink-900">การชำระเงินล่าสุด</h2>
         <table className="mt-3 w-full min-w-[42rem] text-sm">
-          <thead className="border-b border-ink-200 text-left text-xs text-ink-500 dark:border-white/10 dark:text-ink-400">
+          <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
             <tr>
               <th className="px-4 py-3 font-medium">ผู้เล่น</th>
               <th className="px-4 py-3 font-medium">ก๊วน</th>
@@ -147,20 +145,18 @@ export default async function AdminBookingsPage() {
               <th className="px-4 py-3 font-medium">สถานะ</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-ink-200 dark:divide-white/10">
+          <tbody className="divide-y divide-ink-200">
             {paymentRows.map((payment) => (
               <tr key={payment.id}>
-                <td className="px-4 py-3 text-ink-900 dark:text-white">
-                  {payment.profiles?.display_name ?? '—'}
-                </td>
-                <td className="max-w-48 truncate px-4 py-3 text-ink-600 dark:text-ink-300">
+                <td className="px-4 py-3 text-ink-900">{payment.profiles?.display_name ?? '—'}</td>
+                <td className="max-w-48 truncate px-4 py-3 text-ink-600">
                   {payment.sessions?.title ?? '—'}
                 </td>
-                <td className="px-4 py-3 text-xs text-ink-500 dark:text-ink-400">
+                <td className="px-4 py-3 text-xs text-ink-500">
                   {formatDateTime(payment.paid_at ?? payment.created_at)}
                   {payment.provider === 'mock' ? ` · ${t.mock.badge}` : ''}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-ink-900 dark:text-white">
+                <td className="px-4 py-3 text-right tabular-nums text-ink-900">
                   {formatThb(payment.amount_thb)}
                 </td>
                 <td className="px-4 py-3">
@@ -173,9 +169,9 @@ export default async function AdminBookingsPage() {
       </Card>
 
       <Card className="overflow-x-auto">
-        <h2 className="px-5 pt-4 font-semibold text-ink-900 dark:text-white">การคืนเงินล่าสุด</h2>
+        <h2 className="px-5 pt-4 font-semibold text-ink-900">การคืนเงินล่าสุด</h2>
         <table className="mt-3 w-full min-w-[38rem] text-sm">
-          <thead className="border-b border-ink-200 text-left text-xs text-ink-500 dark:border-white/10 dark:text-ink-400">
+          <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
             <tr>
               <th className="px-4 py-3 font-medium">ก๊วน</th>
               <th className="px-4 py-3 font-medium">เหตุผล</th>
@@ -183,16 +179,14 @@ export default async function AdminBookingsPage() {
               <th className="px-4 py-3 font-medium">สถานะ</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-ink-200 dark:divide-white/10">
+          <tbody className="divide-y divide-ink-200">
             {refundRows.map((refund) => (
               <tr key={refund.id}>
-                <td className="max-w-40 truncate px-4 py-3 text-ink-900 dark:text-white">
+                <td className="max-w-40 truncate px-4 py-3 text-ink-900">
                   {refund.sessions?.title ?? '—'}
                 </td>
-                <td className="max-w-64 truncate px-4 py-3 text-ink-600 dark:text-ink-300">
-                  {refund.reason}
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums text-ink-900 dark:text-white">
+                <td className="max-w-64 truncate px-4 py-3 text-ink-600">{refund.reason}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-ink-900">
                   {formatThb(refund.amount_thb)}
                 </td>
                 <td className="px-4 py-3">

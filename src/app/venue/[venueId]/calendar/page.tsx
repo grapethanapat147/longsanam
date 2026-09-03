@@ -35,7 +35,9 @@ export default async function VenueCalendarPage({
       supabase.from('courts').select('id, name').eq('venue_id', venueId).order('name'),
       admin
         .from('bookings')
-        .select('id, status, price_thb, starts_at, ends_at, court_id, courts (name), sessions!bookings_session_id_fkey (title)')
+        .select(
+          'id, status, price_thb, starts_at, ends_at, court_id, courts (name), sessions!bookings_session_id_fkey (title)',
+        )
         .eq('venue_id', venueId)
         .in('status', ['requested', 'held', 'confirmed'])
         .gte('starts_at', since)
@@ -68,13 +70,15 @@ export default async function VenueCalendarPage({
     sessions: { title: string } | null;
   }[];
 
-  const holdRows = ((holds ?? []) as unknown as {
-    id: string;
-    starts_at: string;
-    ends_at: string;
-    expires_at: string;
-    courts: { name: string; venue_id: string } | null;
-  }[]).filter((hold) => hold.courts && courtList.some((c) => c.name === hold.courts!.name));
+  const holdRows = (
+    (holds ?? []) as unknown as {
+      id: string;
+      starts_at: string;
+      ends_at: string;
+      expires_at: string;
+      courts: { name: string; venue_id: string } | null;
+    }[]
+  ).filter((hold) => hold.courts && courtList.some((c) => c.name === hold.courts!.name));
 
   const blockRows = (blocks ?? []) as unknown as {
     id: string;
@@ -104,10 +108,10 @@ export default async function VenueCalendarPage({
       node: (
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-ink-900 dark:text-white">
+            <p className="truncate text-sm font-medium text-ink-900">
               {booking.sessions?.title ?? 'ก๊วน'}
             </p>
-            <p className="text-xs text-ink-500 dark:text-ink-400">
+            <p className="text-xs text-ink-500">
               {booking.courts?.name} · {formatTimeRange(booking.starts_at, booking.ends_at)} ·{' '}
               {formatThb(booking.price_thb)}
             </p>
@@ -125,10 +129,8 @@ export default async function VenueCalendarPage({
       node: (
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-ink-900 dark:text-white">
-              กันคอร์ตชั่วคราว
-            </p>
-            <p className="text-xs text-ink-500 dark:text-ink-400">
+            <p className="truncate text-sm font-medium text-ink-900">กันคอร์ตชั่วคราว</p>
+            <p className="text-xs text-ink-500">
               {hold.courts?.name} · {formatTimeRange(hold.starts_at, hold.ends_at)}
             </p>
           </div>
@@ -145,10 +147,10 @@ export default async function VenueCalendarPage({
       node: (
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-ink-900 dark:text-white">
+            <p className="truncate text-sm font-medium text-ink-900">
               {block.kind === 'blackout' ? 'ปิดปรับปรุง' : 'ปิดชั่วคราว'}
             </p>
-            <p className="text-xs text-ink-500 dark:text-ink-400">
+            <p className="text-xs text-ink-500">
               {block.courts?.name} · {formatTimeRange(block.starts_at, block.ends_at)}
               {block.reason ? ` · ${block.reason}` : ''}
             </p>
@@ -173,10 +175,10 @@ export default async function VenueCalendarPage({
         ) : (
           days.map((day) => (
             <Card key={day} className="px-5 py-4">
-              <h2 className="font-semibold text-ink-900 dark:text-white">
+              <h2 className="font-semibold text-ink-900">
                 {formatDateLong(`${day}T00:00:00+07:00`)}
               </h2>
-              <ul className="mt-3 divide-y divide-ink-200 dark:divide-white/10">
+              <ul className="mt-3 divide-y divide-ink-200">
                 {items
                   .filter((item) => item.day === day)
                   .map((item) => (
@@ -192,7 +194,7 @@ export default async function VenueCalendarPage({
 
       <aside>
         <Card className="px-5 py-5">
-          <h2 className="mb-3 font-semibold text-ink-900 dark:text-white">{t.venue.blockSlot}</h2>
+          <h2 className="mb-3 font-semibold text-ink-900">{t.venue.blockSlot}</h2>
           {courtList.length === 0 ? (
             <p className="text-sm text-ink-500">เพิ่มคอร์ตก่อนจึงจะปิดช่วงเวลาได้</p>
           ) : (

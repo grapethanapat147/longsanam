@@ -189,12 +189,12 @@ export function CourtForm({
       </div>
 
       <fieldset>
-        <legend className="text-sm font-medium text-ink-800 dark:text-ink-100">กีฬาที่รองรับ</legend>
+        <legend className="text-sm font-medium text-ink-800">กีฬาที่รองรับ</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {sports.map((sport) => (
             <label
               key={sport.id}
-              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-300 px-2.5 py-1.5 text-sm dark:border-white/15"
+              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-300 px-2.5 py-1.5 text-sm"
             >
               <input
                 type="checkbox"
@@ -210,7 +210,7 @@ export function CourtForm({
         </div>
       </fieldset>
 
-      <label className="flex items-center gap-2 text-sm text-ink-700 dark:text-ink-200">
+      <label className="flex items-center gap-2 text-sm text-ink-700">
         <input
           type="checkbox"
           name="isActive"
@@ -274,12 +274,12 @@ export function OpeningHoursForm({
       </div>
 
       <fieldset>
-        <legend className="text-sm font-medium text-ink-800 dark:text-ink-100">วันที่เปิด</legend>
+        <legend className="text-sm font-medium text-ink-800">วันที่เปิด</legend>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {WEEKDAYS.map((label, weekday) => (
             <label
               key={weekday}
-              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-300 px-2 py-1 text-xs dark:border-white/15"
+              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-300 px-2 py-1 text-xs"
             >
               <input
                 type="checkbox"
@@ -391,16 +391,20 @@ export function BookingDecisionButtons({ bookingId }: { bookingId: string }) {
   const [pending, startTransition] = useTransition();
   const [reason, setReason] = useState('');
   const [showReject, setShowReject] = useState(false);
-  const [feedback, setFeedback] = useState<{ tone: 'success' | 'danger'; text: string } | null>(
-    null,
-  );
+  const [feedback, setFeedback] = useState<{
+    tone: 'success' | 'danger';
+    text: string;
+  } | null>(null);
 
   function decide(approve: boolean) {
     startTransition(async () => {
       const result = await decideBookingAction(bookingId, approve, reason.trim() || undefined);
       setFeedback(
         result.ok
-          ? { tone: 'success', text: approve ? 'ยืนยันการจองแล้ว' : 'ปฏิเสธคำขอแล้ว' }
+          ? {
+              tone: 'success',
+              text: approve ? 'ยืนยันการจองแล้ว' : 'ปฏิเสธคำขอแล้ว',
+            }
           : { tone: 'danger', text: result.error ?? t.common.unexpectedError },
       );
       setShowReject(false);
@@ -434,7 +438,12 @@ export function BookingDecisionButtons({ bookingId }: { bookingId: string }) {
           <Button size="sm" disabled={pending} onClick={() => decide(true)}>
             {pending ? t.common.loading : t.venue.approve}
           </Button>
-          <Button size="sm" variant="secondary" disabled={pending} onClick={() => setShowReject(true)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={pending}
+            onClick={() => setShowReject(true)}
+          >
             {t.venue.reject}
           </Button>
         </div>
@@ -443,13 +452,7 @@ export function BookingDecisionButtons({ bookingId }: { bookingId: string }) {
   );
 }
 
-export function AutoConfirmToggle({
-  venueId,
-  enabled,
-}: {
-  venueId: string;
-  enabled: boolean;
-}) {
+export function AutoConfirmToggle({ venueId, enabled }: { venueId: string; enabled: boolean }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -458,8 +461,8 @@ export function AutoConfirmToggle({
     <Card className="px-5 py-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="font-semibold text-ink-900 dark:text-white">{t.venue.autoConfirm}</h3>
-          <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
+          <h3 className="font-semibold text-ink-900">{t.venue.autoConfirm}</h3>
+          <p className="mt-1 text-sm text-ink-600">
             {enabled
               ? 'คำขอจองจะถูกยืนยันทันทีเมื่อคอร์ตว่าง ก๊วนจะได้สนามโดยไม่ต้องรอคุณ'
               : 'คำขอจองจะเข้ามารอในกล่องคำขอ และคอร์ตจะถูกกันไว้จนกว่าคุณจะตอบ'}

@@ -2,11 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { AppShell } from '@/components/shell';
-import {
-  BookingStatusChip,
-  ParticipantStatusChip,
-  SessionStatusChip,
-} from '@/components/status';
+import { BookingStatusChip, ParticipantStatusChip, SessionStatusChip } from '@/components/status';
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
 import { SessionTimeline } from '@/components/session-timeline';
@@ -24,13 +20,22 @@ import {
 } from '@/lib/queries';
 import { evaluateBookingEligibility } from '@/lib/domain/booking-eligibility';
 import { parseCancellationPolicy } from '@/lib/domain/types';
-import { formatCountdown, formatDateLong, formatThb, formatTimeRange, sessionShareUrl } from '@/lib/format';
+import {
+  formatCountdown,
+  formatDateLong,
+  formatThb,
+  formatTimeRange,
+  sessionShareUrl,
+} from '@/lib/format';
 import { sessionStatusHint, t } from '@/i18n';
 import type { BookingStatus, ParticipantStatus, SessionStatus } from '@/lib/domain/types';
 
 export const metadata: Metadata = { title: t.organizer.dashboard };
 
-type Params = { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string }> };
+type Params = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string }>;
+};
 
 export default async function OrganizerSessionPage({ params, searchParams }: Params) {
   const { id } = await params;
@@ -76,28 +81,38 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
 
   const admin = createAdminClient();
 
-  const [preferences, progress, timeline, { data: participantRows }, { data: waitlistRows }, { data: bookingRows }] =
-    await Promise.all([
-      loadSessionPreferences(session.id),
-      loadSessionProgress(session.id),
-      loadSessionTimeline(session.id),
-      admin
-        .from('session_participants')
-        .select('id, status, amount_due_thb, payment_due_at, joined_at, user_id, profiles (display_name, avatar_url)')
-        .eq('session_id', session.id)
-        .order('joined_at', { ascending: true }),
-      admin
-        .from('waitlist_entries')
-        .select('id, position, status, user_id, profiles (display_name)')
-        .eq('session_id', session.id)
-        .in('status', ['waiting', 'promoted'])
-        .order('position', { ascending: true }),
-      admin
-        .from('bookings')
-        .select('id, status, price_thb, attempt_no, starts_at, ends_at, decision_reason, venues (name), courts (name)')
-        .eq('session_id', session.id)
-        .order('attempt_no', { ascending: true }),
-    ]);
+  const [
+    preferences,
+    progress,
+    timeline,
+    { data: participantRows },
+    { data: waitlistRows },
+    { data: bookingRows },
+  ] = await Promise.all([
+    loadSessionPreferences(session.id),
+    loadSessionProgress(session.id),
+    loadSessionTimeline(session.id),
+    admin
+      .from('session_participants')
+      .select(
+        'id, status, amount_due_thb, payment_due_at, joined_at, user_id, profiles (display_name, avatar_url)',
+      )
+      .eq('session_id', session.id)
+      .order('joined_at', { ascending: true }),
+    admin
+      .from('waitlist_entries')
+      .select('id, position, status, user_id, profiles (display_name)')
+      .eq('session_id', session.id)
+      .in('status', ['waiting', 'promoted'])
+      .order('position', { ascending: true }),
+    admin
+      .from('bookings')
+      .select(
+        'id, status, price_thb, attempt_no, starts_at, ends_at, decision_reason, venues (name), courts (name)',
+      )
+      .eq('session_id', session.id)
+      .order('attempt_no', { ascending: true }),
+  ]);
 
   const participants = (participantRows ?? []) as unknown as {
     id: string;
@@ -194,9 +209,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
         </div>
       ) : null}
 
-      <p className="mb-4 text-sm text-ink-600 dark:text-ink-300">
-        {sessionStatusHint[session.status]}
-      </p>
+      <p className="mb-4 text-sm text-ink-600">{sessionStatusHint[session.status]}</p>
 
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
@@ -220,10 +233,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
               : 'ยังไม่ได้อนุมัติสนาม'
           }
         />
-        <Stat
-          label={t.organizer.refunded}
-          value={formatThb(progress.refundedTotalThb)}
-        />
+        <Stat label={t.organizer.refunded} value={formatThb(progress.refundedTotalThb)} />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_20rem]">
@@ -248,13 +258,13 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
           />
 
           <Card className="px-5 py-4">
-            <h2 className="font-semibold text-ink-900 dark:text-white">
+            <h2 className="font-semibold text-ink-900">
               {t.session.participants} ({participants.length})
             </h2>
             {participants.length === 0 ? (
               <p className="mt-2 text-sm text-ink-500">{t.common.empty}</p>
             ) : (
-              <ul className="mt-3 divide-y divide-ink-200 dark:divide-white/10">
+              <ul className="mt-3 divide-y divide-ink-200">
                 {participants.map((participant) => (
                   <li key={participant.id} className="flex items-center justify-between gap-3 py-2">
                     <div className="flex min-w-0 items-center gap-2.5">
@@ -264,15 +274,15 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
                         size={32}
                       />
                       <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-ink-900 dark:text-white">
-                        {participant.profiles?.display_name ?? 'ผู้เล่น'}
-                      </p>
-                      <p className="text-xs text-ink-500 dark:text-ink-400">
-                        {formatThb(participant.amount_due_thb)}
-                        {participant.status === 'joined_pending_payment'
-                          ? ` · ต้องชำระภายใน ${formatCountdown(participant.payment_due_at)}`
-                          : ''}
-                      </p>
+                        <p className="truncate text-sm font-medium text-ink-900">
+                          {participant.profiles?.display_name ?? 'ผู้เล่น'}
+                        </p>
+                        <p className="text-xs text-ink-500">
+                          {formatThb(participant.amount_due_thb)}
+                          {participant.status === 'joined_pending_payment'
+                            ? ` · ต้องชำระภายใน ${formatCountdown(participant.payment_due_at)}`
+                            : ''}
+                        </p>
                       </div>
                     </div>
                     <ParticipantStatusChip status={participant.status} />
@@ -284,14 +294,14 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
 
           {waitlist.length > 0 ? (
             <Card className="px-5 py-4">
-              <h2 className="font-semibold text-ink-900 dark:text-white">
+              <h2 className="font-semibold text-ink-900">
                 {t.session.waitlist} ({waitlist.length})
               </h2>
               <ol className="mt-3 space-y-1">
                 {waitlist.map((entry) => (
                   <li
                     key={entry.id}
-                    className="flex items-center justify-between gap-3 text-sm text-ink-700 dark:text-ink-200"
+                    className="flex items-center justify-between gap-3 text-sm text-ink-700"
                   >
                     <span>
                       <Chip tone="neutral">{entry.position}</Chip>{' '}
@@ -305,7 +315,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
           ) : null}
 
           <Card className="px-5 py-4">
-            <h2 className="font-semibold text-ink-900 dark:text-white">ความพยายามจองสนาม</h2>
+            <h2 className="font-semibold text-ink-900">ความพยายามจองสนาม</h2>
             {bookings.length === 0 ? (
               <p className="mt-2 text-sm text-ink-500">
                 ยังไม่มีการจอง ระบบจะเริ่มจองอัตโนมัติเมื่อผู้เล่นชำระเงินครบตามขั้นต่ำ
@@ -315,13 +325,14 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
                 {bookings.map((booking) => (
                   <li
                     key={booking.id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-ink-200 px-3 py-2 dark:border-white/10"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-ink-200 px-3 py-2"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-ink-900 dark:text-white">
-                        ครั้งที่ {booking.attempt_no} · {booking.venues?.name} · {booking.courts?.name}
+                      <p className="truncate text-sm font-medium text-ink-900">
+                        ครั้งที่ {booking.attempt_no} · {booking.venues?.name} ·{' '}
+                        {booking.courts?.name}
                       </p>
-                      <p className="text-xs text-ink-500 dark:text-ink-400">
+                      <p className="text-xs text-ink-500">
                         {formatThb(booking.price_thb)}
                         {booking.decision_reason ? ` · ${booking.decision_reason}` : ''}
                       </p>
@@ -334,7 +345,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
           </Card>
 
           <Card className="px-5 py-4">
-            <h2 className="font-semibold text-ink-900 dark:text-white">{t.session.timeline}</h2>
+            <h2 className="font-semibold text-ink-900">{t.session.timeline}</h2>
             <SessionTimeline entries={timeline} />
           </Card>
         </div>
@@ -344,7 +355,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
           <Card className="px-4 py-3 text-sm">
             <Link
               href={`/s/${session.public_code}`}
-              className="font-semibold text-brand-700 hover:underline dark:text-brand-300"
+              className="font-semibold text-brand-700 hover:underline"
             >
               ดูหน้าก๊วนแบบที่ผู้เล่นเห็น →
             </Link>

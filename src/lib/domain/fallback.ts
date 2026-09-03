@@ -16,12 +16,7 @@ export type VenuePreference = {
 };
 
 export type AttemptOutcome =
-  | 'confirmed'
-  | 'rejected'
-  | 'unavailable'
-  | 'hold_failed'
-  | 'expired'
-  | 'error';
+  'confirmed' | 'rejected' | 'unavailable' | 'hold_failed' | 'expired' | 'error';
 
 export type BookingAttempt = {
   courtId: string;
@@ -29,7 +24,12 @@ export type BookingAttempt = {
 };
 
 export type FallbackSelection =
-  | { kind: 'attempt'; preference: VenuePreference; attemptNo: number; remainingOptions: number }
+  | {
+      kind: 'attempt';
+      preference: VenuePreference;
+      attemptNo: number;
+      remainingOptions: number;
+    }
   | { kind: 'already_booked'; preference: VenuePreference }
   | { kind: 'exhausted'; triedCourtIds: string[]; unapprovedSkipped: number };
 

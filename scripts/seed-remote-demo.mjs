@@ -98,9 +98,7 @@ async function main() {
   // ---- organizer: the real platform admin already on the project ----------
   const admins = await rest('profiles?select=id,display_name,role&role=eq.platform_admin');
   if (admins.length === 0) {
-    throw new Error(
-      'No platform_admin found. Sign up through the app and promote yourself first.',
-    );
+    throw new Error('No platform_admin found. Sign up through the app and promote yourself first.');
   }
   const organizer = admins[0];
   console.log(`organizer: ${organizer.display_name} (${organizer.id})`);
@@ -130,7 +128,9 @@ async function main() {
     }
     players.push({ id: user.id, name, email });
   }
-  console.log(`players:   ${players.length} (${created} created, ${players.length - created} existing)`);
+  console.log(
+    `players:   ${players.length} (${created} created, ${players.length - created} existing)`,
+  );
 
   // ---- venues -------------------------------------------------------------
   const venueSpecs = [
@@ -200,13 +200,55 @@ async function main() {
 
   // ---- courts -------------------------------------------------------------
   const courtSpecs = [
-    { venue: 'ladprao-badminton-center', name: 'คอร์ต 1', cap: 8, price: 220, sports: ['badminton'] },
-    { venue: 'ladprao-badminton-center', name: 'คอร์ต 2', cap: 8, price: 220, sports: ['badminton'] },
-    { venue: 'ladprao-badminton-center', name: 'คอร์ต 3', cap: 8, price: 200, sports: ['badminton'] },
-    { venue: 'thonglor-football-arena', name: 'สนาม A (7 คน)', cap: 14, price: 1400, sports: ['football'] },
-    { venue: 'thonglor-football-arena', name: 'สนาม B (7 คน)', cap: 14, price: 1200, sports: ['football'] },
-    { venue: 'rama9-pickleball-club', name: 'คอร์ต P1', cap: 4, price: 300, sports: ['pickleball', 'tennis'] },
-    { venue: 'rama9-pickleball-club', name: 'คอร์ต P2', cap: 4, price: 300, sports: ['pickleball'] },
+    {
+      venue: 'ladprao-badminton-center',
+      name: 'คอร์ต 1',
+      cap: 8,
+      price: 220,
+      sports: ['badminton'],
+    },
+    {
+      venue: 'ladprao-badminton-center',
+      name: 'คอร์ต 2',
+      cap: 8,
+      price: 220,
+      sports: ['badminton'],
+    },
+    {
+      venue: 'ladprao-badminton-center',
+      name: 'คอร์ต 3',
+      cap: 8,
+      price: 200,
+      sports: ['badminton'],
+    },
+    {
+      venue: 'thonglor-football-arena',
+      name: 'สนาม A (7 คน)',
+      cap: 14,
+      price: 1400,
+      sports: ['football'],
+    },
+    {
+      venue: 'thonglor-football-arena',
+      name: 'สนาม B (7 คน)',
+      cap: 14,
+      price: 1200,
+      sports: ['football'],
+    },
+    {
+      venue: 'rama9-pickleball-club',
+      name: 'คอร์ต P1',
+      cap: 4,
+      price: 300,
+      sports: ['pickleball', 'tennis'],
+    },
+    {
+      venue: 'rama9-pickleball-club',
+      name: 'คอร์ต P2',
+      cap: 4,
+      price: 300,
+      sports: ['pickleball'],
+    },
   ];
 
   const courts = await insert(

@@ -62,9 +62,7 @@ function useLiveRefresh(channelName: string, subscriptions: Subscription[]) {
         await supabase.realtime.setAuth(token);
       }
 
-      const bindings = token
-        ? wanted
-        : wanted.filter((s) => ANONYMOUS_READABLE.includes(s.table));
+      const bindings = token ? wanted : wanted.filter((s) => ANONYMOUS_READABLE.includes(s.table));
 
       if (bindings.length === 0) return;
 
@@ -79,7 +77,12 @@ function useLiveRefresh(channelName: string, subscriptions: Subscription[]) {
       for (const binding of bindings) {
         next = next.on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: binding.table, filter: binding.filter },
+          {
+            event: '*',
+            schema: 'public',
+            table: binding.table,
+            filter: binding.filter,
+          },
           scheduleRefresh,
         );
       }
@@ -125,7 +128,7 @@ function Indicator({ connected }: { connected: boolean }) {
   if (!connected) return null;
   return (
     <span
-      className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-500 dark:text-ink-400"
+      className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-500"
       title={t.live.tooltip}
     >
       <span className="relative flex h-2 w-2">

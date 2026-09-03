@@ -34,7 +34,12 @@ export type BookingBlockedReason =
   | 'below_required_total';
 
 export type BookingEligibility =
-  | { eligible: true; paidParticipants: number; paidTotalThb: number; shortfallThb: 0 }
+  | {
+      eligible: true;
+      paidParticipants: number;
+      paidTotalThb: number;
+      shortfallThb: 0;
+    }
   | {
       eligible: false;
       reason: BookingBlockedReason;
@@ -56,7 +61,12 @@ export function evaluateBookingEligibility(input: BookingEligibilityInput): Book
     reason: BookingBlockedReason,
     missingPlayers = 0,
     shortfallThb = 0,
-  ): BookingEligibility => ({ eligible: false, reason, missingPlayers, shortfallThb });
+  ): BookingEligibility => ({
+    eligible: false,
+    reason,
+    missingPlayers,
+    shortfallThb,
+  });
 
   if (input.status === 'cancelled' || input.status === 'completed') {
     return blocked('session_terminal');
@@ -81,7 +91,11 @@ export function evaluateBookingEligibility(input: BookingEligibilityInput): Book
 
   const missingPlayers = Math.max(0, input.minPlayers - input.paidParticipants);
   if (missingPlayers > 0) {
-    return blocked('below_min_players', missingPlayers, Math.max(0, input.requiredTotalThb - input.paidTotalThb));
+    return blocked(
+      'below_min_players',
+      missingPlayers,
+      Math.max(0, input.requiredTotalThb - input.paidTotalThb),
+    );
   }
 
   const shortfallThb = Math.max(0, input.requiredTotalThb - input.paidTotalThb);

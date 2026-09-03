@@ -36,7 +36,9 @@ export async function joinSessionAction(sessionId: string): Promise<Participatio
   const supabase = await createClient();
   // Called with the user's own client so join_session sees auth.uid() and
   // cannot be pointed at somebody else.
-  const { data, error } = await supabase.rpc('join_session', { p_session_id: sessionId });
+  const { data, error } = await supabase.rpc('join_session', {
+    p_session_id: sessionId,
+  });
 
   if (error) {
     console.error('[joinSessionAction] join_session failed', error);
@@ -61,7 +63,11 @@ export async function joinSessionAction(sessionId: string): Promise<Participatio
     return { ok: true, outcome: 'waitlisted', position: result.position ?? 0 };
   }
   if (result.outcome === 'already_joined') {
-    return { ok: true, outcome: 'already_joined', participantId: result.participantId! };
+    return {
+      ok: true,
+      outcome: 'already_joined',
+      participantId: result.participantId!,
+    };
   }
   return {
     ok: true,
@@ -72,7 +78,12 @@ export async function joinSessionAction(sessionId: string): Promise<Participatio
 }
 
 export type PayResult =
-  | { ok: true; sessionStatus: string; booked: boolean; bookingOutcome?: string }
+  | {
+      ok: true;
+      sessionStatus: string;
+      booked: boolean;
+      bookingOutcome?: string;
+    }
   | { ok: false; error: string; retryable: boolean };
 
 /**
@@ -85,7 +96,12 @@ export type PayResult =
  */
 export async function payForSlotAction(participantId: string): Promise<PayResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: reasonLabel.not_authenticated, retryable: false };
+  if (!user)
+    return {
+      ok: false,
+      error: reasonLabel.not_authenticated,
+      retryable: false,
+    };
 
   const supabase = await createClient();
   const { data: participant } = await supabase
@@ -180,7 +196,9 @@ export async function payForSlotAction(participantId: string): Promise<PayResult
 
   // Journey C: crossing the threshold is what starts the booking workflow.
   if (sessionStatus === 'ready_to_book') {
-    const outcome = await runBookingOrchestration(participant.session_id, { actorId: user.id });
+    const outcome = await runBookingOrchestration(participant.session_id, {
+      actorId: user.id,
+    });
     revalidatePath('/organizer');
     return {
       ok: true,
@@ -196,7 +214,12 @@ export async function payForSlotAction(participantId: string): Promise<PayResult
 export type RefundOutcome = 'none' | 'completed' | 'pending' | 'failed';
 
 export type CancelResult =
-  | { ok: true; refundThb: number; refundOutcome: RefundOutcome; promotedUserId?: string }
+  | {
+      ok: true;
+      refundThb: number;
+      refundOutcome: RefundOutcome;
+      promotedUserId?: string;
+    }
   | { ok: false; error: string };
 
 export async function cancelParticipationAction(
@@ -247,12 +270,20 @@ export async function cancelParticipationAction(
     p_participant_id: participantId,
     p_refund_thb: refund.refundThb,
     p_reason: reason,
-    p_policy_snapshot: { ...policy, appliedRule: refund.rule, percent: refund.percent },
+    p_policy_snapshot: {
+      ...policy,
+      appliedRule: refund.rule,
+      percent: refund.percent,
+    },
     p_idempotency_key: `cancel:${participantId}`,
     p_actor: user.id,
   });
 
-  const cancelled = cancelData as { ok?: boolean; reason?: string; refundId?: string } | null;
+  const cancelled = cancelData as {
+    ok?: boolean;
+    reason?: string;
+    refundId?: string;
+  } | null;
   if (!cancelled?.ok) return { ok: false, error: describe(cancelled?.reason) };
 
   // The slot is released either way; the refund is reported as whatever it
@@ -267,17 +298,19 @@ export async function cancelParticipationAction(
   revalidatePath('/s', 'layout');
   revalidatePath('/organizer');
 
-  return { ok: true, refundThb: refund.refundThb, refundOutcome, promotedUserId };
+  return {
+    ok: true,
+    refundThb: refund.refundThb,
+    refundOutcome,
+    promotedUserId,
+  };
 }
 
 /**
  * Runs a created refund through the provider and records the outcome.
  * Returns what actually happened so callers can report it truthfully.
  */
-export async function processRefund(
-  refundId: string,
-  actorId?: string,
-): Promise<RefundOutcome> {
+export async function processRefund(refundId: string, actorId?: string): Promise<RefundOutcome> {
   const admin = createAdminClient();
   const provider = getPaymentProvider();
 
@@ -337,7 +370,9 @@ async function promoteNextWaitlisted(
   return promoted?.ok ? promoted.userId : undefined;
 }
 
-export async function leaveWaitlistAction(waitlistEntryId: string): Promise<{ ok: boolean; error?: string }> {
+export async function leaveWaitlistAction(
+  waitlistEntryId: string,
+): Promise<{ ok: boolean; error?: string }> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: reasonLabel.not_authenticated };
 

@@ -93,7 +93,12 @@ export function calculateRefund(input: RefundInput): RefundResult {
   }
 
   if (hoursBeforeStart >= input.policy.partialRefundHoursBefore) {
-    return settle(paid, input.policy.partialRefundPercent, 'partial_refund_window', hoursBeforeStart);
+    return settle(
+      paid,
+      input.policy.partialRefundPercent,
+      'partial_refund_window',
+      hoursBeforeStart,
+    );
   }
 
   return settle(paid, 0, 'no_refund_window', hoursBeforeStart);

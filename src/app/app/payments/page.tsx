@@ -39,12 +39,16 @@ export default async function PaymentsPage() {
   const [{ data: payments }, { data: refunds }] = await Promise.all([
     supabase
       .from('payments')
-      .select('id, amount_thb, status, provider, provider_ref, created_at, paid_at, sessions (public_code, title)')
+      .select(
+        'id, amount_thb, status, provider, provider_ref, created_at, paid_at, sessions (public_code, title)',
+      )
       .eq('user_id', user.id)
       .order('created_at', { ascending: false }),
     supabase
       .from('refunds')
-      .select('id, amount_thb, status, reason, created_at, processed_at, sessions (public_code, title)')
+      .select(
+        'id, amount_thb, status, reason, created_at, processed_at, sessions (public_code, title)',
+      )
       .eq('user_id', user.id)
       .order('created_at', { ascending: false }),
   ]);
@@ -67,11 +71,15 @@ export default async function PaymentsPage() {
       <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Stat label="ชำระแล้วทั้งหมด" value={formatThb(totalPaid)} tone="positive" />
         <Stat label="ได้รับคืน" value={formatThb(totalRefunded)} />
-        <Stat label="รอชำระ" value={`${pending} รายการ`} tone={pending > 0 ? 'negative' : 'default'} />
+        <Stat
+          label="รอชำระ"
+          value={`${pending} รายการ`}
+          tone={pending > 0 ? 'negative' : 'default'}
+        />
       </div>
 
       <section className="mb-6">
-        <h2 className="mb-2 font-semibold text-ink-900 dark:text-white">{t.payment.history}</h2>
+        <h2 className="mb-2 font-semibold text-ink-900">{t.payment.history}</h2>
         {paymentRows.length === 0 ? (
           <EmptyState icon="🧾" title="ยังไม่มีรายการชำระเงิน" />
         ) : (
@@ -83,21 +91,21 @@ export default async function PaymentsPage() {
                     {payment.sessions ? (
                       <Link
                         href={`/s/${payment.sessions.public_code}`}
-                        className="truncate font-medium text-ink-900 hover:underline focus-ring dark:text-white"
+                        className="truncate font-medium text-ink-900 hover:underline focus-ring"
                       >
                         {payment.sessions.title}
                       </Link>
                     ) : (
-                      <p className="font-medium text-ink-900 dark:text-white">—</p>
+                      <p className="font-medium text-ink-900">—</p>
                     )}
-                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                    <p className="mt-0.5 text-xs text-ink-500">
                       {formatDateTime(payment.paid_at ?? payment.created_at)}
                       {payment.provider === 'mock' ? ` · ${t.mock.badge}` : ''}
                       {payment.provider_ref ? ` · ${payment.provider_ref}` : ''}
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="font-bold tabular-nums text-ink-900 dark:text-white">
+                    <span className="font-bold tabular-nums text-ink-900">
                       {formatThb(payment.amount_thb)}
                     </span>
                     <PaymentStatusChip status={payment.status} />
@@ -110,7 +118,7 @@ export default async function PaymentsPage() {
       </section>
 
       <section>
-        <h2 className="mb-2 font-semibold text-ink-900 dark:text-white">{t.payment.refunds}</h2>
+        <h2 className="mb-2 font-semibold text-ink-900">{t.payment.refunds}</h2>
         {refundRows.length === 0 ? (
           <EmptyState icon="↩️" title="ยังไม่มีรายการคืนเงิน" />
         ) : (
@@ -119,15 +127,15 @@ export default async function PaymentsPage() {
               <Card key={refund.id} className="px-4 py-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-ink-900 dark:text-white">
+                    <p className="truncate font-medium text-ink-900">
                       {refund.sessions?.title ?? '—'}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                    <p className="mt-0.5 text-xs text-ink-500">
                       {refund.reason} · {formatDateTime(refund.processed_at ?? refund.created_at)}
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="font-bold tabular-nums text-brand-700 dark:text-brand-300">
+                    <span className="font-bold tabular-nums text-brand-700">
                       +{formatThb(refund.amount_thb)}
                     </span>
                     <RefundStatusChip status={refund.status} />

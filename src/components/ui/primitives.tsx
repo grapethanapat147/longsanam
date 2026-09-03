@@ -2,6 +2,14 @@ import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/cn';
 
+/* =========================================================================
+ * Court Lines — the shared vocabulary.
+ *
+ * Every screen in this product answers one question: what is the state of my
+ * session, and what can I do about it. So status and action are the two things
+ * these primitives are tuned to make unmissable; everything else recedes.
+ * ====================================================================== */
+
 /* -------------------------------------------------------------------------
  * Surfaces
  * ---------------------------------------------------------------------- */
@@ -10,16 +18,19 @@ export function Card({
   className,
   children,
   as: Tag = 'div',
+  /** Marks the focal element of a screen with painted court corners. */
+  focal = false,
 }: {
   className?: string;
   children: ReactNode;
   as?: ElementType;
+  focal?: boolean;
 }) {
   return (
     <Tag
       className={cn(
-        'rounded-card border border-ink-200/70 bg-white shadow-sm',
-        'dark:border-white/10 dark:bg-white/[0.03]',
+        'rounded-card border hairline bg-white shadow-line',
+        focal && 'court-tick shadow-lift',
         className,
       )}
     >
@@ -40,15 +51,19 @@ export function PageHeader({
   eyebrow?: string;
 }) {
   return (
-    <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <header className="mb-7 flex flex-wrap items-start justify-between gap-4">
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">{eyebrow}</p>
+          <p className="mb-1.5 flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-brand-600">
+            {/* A short painted rule instead of a bullet. */}
+            <span aria-hidden className="h-px w-5 bg-brand-400" />
+            {eyebrow}
+          </p>
         ) : null}
-        <h1 className="text-xl font-bold text-ink-900 sm:text-2xl dark:text-white">{title}</h1>
-        {description ? (
-          <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">{description}</p>
-        ) : null}
+        <h1 className="text-[1.6rem] font-semibold leading-tight text-ink-900 sm:text-3xl">
+          {title}
+        </h1>
+        {description ? <p className="mt-1.5 text-sm text-ink-600">{description}</p> : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </header>
@@ -67,13 +82,17 @@ export function EmptyState({
   icon?: ReactNode;
 }) {
   return (
-    <Card className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-      {icon ? <div className="text-3xl">{icon}</div> : null}
-      <p className="font-semibold text-ink-800 dark:text-ink-100">{title}</p>
-      {description ? (
-        <p className="max-w-sm text-sm text-ink-500 dark:text-ink-400">{description}</p>
+    <Card className="flex flex-col items-center gap-3 px-6 py-14 text-center">
+      {icon ? (
+        <div className="grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-2xl">
+          {icon}
+        </div>
       ) : null}
-      {action}
+      <p className="font-display text-lg font-semibold text-ink-900">{title}</p>
+      {description ? (
+        <p className="max-w-sm text-sm leading-relaxed text-ink-500">{description}</p>
+      ) : null}
+      {action ? <div className="mt-1">{action}</div> : null}
     </Card>
   );
 }
@@ -85,15 +104,18 @@ export function EmptyState({
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
+/* A 1px downward nudge on press: the whole feedback budget goes here, where a
+   thumb expects it, rather than into decorative motion elsewhere. */
 const buttonBase =
-  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition focus-ring disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold tracking-tight ' +
+  'transition-[background-color,box-shadow,transform] duration-150 focus-ring ' +
+  'active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0';
 
 const buttonVariants: Record<ButtonVariant, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800',
-  secondary:
-    'border border-ink-300 bg-white text-ink-800 hover:bg-ink-50 dark:border-white/15 dark:bg-white/5 dark:text-ink-100 dark:hover:bg-white/10',
-  ghost: 'text-ink-700 hover:bg-ink-100 dark:text-ink-200 dark:hover:bg-white/10',
-  danger: 'bg-red-600 text-white hover:bg-red-700',
+  primary: 'bg-brand-600 text-white shadow-line hover:bg-brand-700 active:bg-brand-800',
+  secondary: 'border hairline bg-white text-ink-800 shadow-line hover:bg-ink-50 active:bg-ink-100',
+  ghost: 'text-ink-700 hover:bg-ink-100 active:bg-ink-200',
+  danger: 'bg-clay-700 text-white shadow-line hover:bg-clay-900',
 };
 
 const buttonSizes: Record<ButtonSize, string> = {
@@ -115,7 +137,10 @@ export function Button({
   size = 'md',
   className,
   ...props
-}: ComponentPropsWithoutRef<'button'> & { variant?: ButtonVariant; size?: ButtonSize }) {
+}: ComponentPropsWithoutRef<'button'> & {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+}) {
   return <button className={buttonClass(variant, size, className)} {...props} />;
 }
 
@@ -140,8 +165,8 @@ export function ButtonLink({
 }
 
 /**
- * A control that cannot act right now. Rendered disabled with the reason
- * attached, rather than as a live button that quietly does nothing.
+ * A control that cannot act right now. Rendered genuinely disabled with the
+ * reason attached, rather than as a live button that quietly does nothing.
  */
 export function DisabledAction({
   label,
@@ -155,11 +180,11 @@ export function DisabledAction({
   className?: string;
 }) {
   return (
-    <div className={cn('flex flex-col gap-1', className)}>
+    <div className={cn('flex flex-col gap-1.5', className)}>
       <button type="button" disabled title={reason} className={buttonClass('secondary', size)}>
         {label}
       </button>
-      <p className="text-xs text-ink-500 dark:text-ink-400">{reason}</p>
+      <p className="text-xs leading-relaxed text-ink-500">{reason}</p>
     </div>
   );
 }
@@ -170,32 +195,40 @@ export function DisabledAction({
 
 export type ChipTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'brand';
 
-const chipTones: Record<ChipTone, string> = {
-  neutral: 'bg-ink-100 text-ink-700 dark:bg-white/10 dark:text-ink-200',
-  info: 'bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-200',
-  success: 'bg-brand-100 text-brand-800 dark:bg-brand-500/15 dark:text-brand-200',
-  warning: 'bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-200',
-  danger: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-200',
-  brand: 'bg-brand-600 text-white',
+/* Each tone pairs a tinted surface with a saturated dot. The dot does the
+   scanning work — colour-blind readers and anyone glancing at a phone in
+   sunlight get position and label, not hue alone. */
+const chipTones: Record<ChipTone, { chip: string; dot: string }> = {
+  neutral: { chip: 'bg-ink-100 text-ink-700', dot: 'bg-ink-400' },
+  info: { chip: 'bg-sky-50 text-sky-900', dot: 'bg-sky-500' },
+  success: { chip: 'bg-brand-50 text-brand-800', dot: 'bg-brand-500' },
+  warning: { chip: 'bg-clay-50 text-clay-900', dot: 'bg-clay-500' },
+  danger: { chip: 'bg-red-50 text-red-900', dot: 'bg-red-500' },
+  brand: { chip: 'bg-brand-600 text-white', dot: 'bg-accent-400' },
 };
 
 export function Chip({
   tone = 'neutral',
   children,
   className,
+  dot = false,
 }: {
   tone?: ChipTone;
   children: ReactNode;
   className?: string;
+  /** Adds the leading status dot. On for status, off for plain metadata. */
+  dot?: boolean;
 }) {
+  const style = chipTones[tone];
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold',
-        chipTones[tone],
+        'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold leading-none',
+        style.chip,
         className,
       )}
     >
+      {dot ? <span aria-hidden className={cn('h-1.5 w-1.5 rounded-full', style.dot)} /> : null}
       {children}
     </span>
   );
@@ -214,19 +247,24 @@ export function Progress({
 }) {
   const safeMax = Math.max(1, max);
   const percent = Math.min(100, Math.round((value / safeMax) * 100));
+  const complete = value >= max;
 
   return (
     <div>
       {label ? (
-        <div className="mb-1 flex items-baseline justify-between text-xs text-ink-600 dark:text-ink-300">
-          <span>{label}</span>
-          <span className="font-semibold tabular-nums">
-            {value}/{max}
+        <div className="mb-1.5 flex items-baseline justify-between gap-3 text-xs text-ink-600">
+          <span className="truncate">{label}</span>
+          <span className="shrink-0 font-semibold tabular-nums text-ink-800">
+            {value}
+            <span className="text-ink-400">/{max}</span>
           </span>
         </div>
       ) : null}
+      {/* Squared ends and a track hairline: a painted line on a court, not a
+          rounded capsule. Lime fill when full, so "we have enough players"
+          registers before the number is read. */}
       <div
-        className="h-2 w-full overflow-hidden rounded-full bg-ink-200 dark:bg-white/10"
+        className="h-2 w-full overflow-hidden rounded-sm bg-ink-200/70 ring-1 ring-inset ring-[var(--hairline)]"
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={0}
@@ -235,8 +273,8 @@ export function Progress({
       >
         <div
           className={cn(
-            'h-full rounded-full transition-all',
-            tone === 'brand' ? 'bg-brand-500' : 'bg-accent-500',
+            'h-full rounded-sm transition-[width] duration-500 ease-out',
+            complete ? 'bg-accent-500' : tone === 'brand' ? 'bg-brand-500' : 'bg-accent-500',
           )}
           style={{ width: `${percent}%` }}
         />
@@ -258,20 +296,25 @@ export function Alert({
   title?: string;
   children: ReactNode;
 }) {
+  /* A 3px painted edge on the leading side carries the tone, so the fill can
+     stay pale enough for body text to hold contrast. */
   const tones = {
-    info: 'border-sky-300 bg-sky-50 text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100',
-    success:
-      'border-brand-300 bg-brand-50 text-brand-900 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-100',
-    warning:
-      'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100',
-    danger:
-      'border-red-300 bg-red-50 text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100',
+    info: 'border-l-sky-500 bg-sky-50/70 text-sky-950',
+    success: 'border-l-brand-500 bg-brand-50/70 text-brand-900',
+    warning: 'border-l-clay-500 bg-clay-50/80 text-clay-900',
+    danger: 'border-l-red-500 bg-red-50/70 text-red-950',
   } as const;
 
   return (
-    <div className={cn('rounded-xl border px-4 py-3 text-sm', tones[tone])} role="status">
-      {title ? <p className="font-semibold">{title}</p> : null}
-      <div className={title ? 'mt-1' : undefined}>{children}</div>
+    <div
+      className={cn(
+        'rounded-r-xl rounded-l-sm border border-l-[3px] hairline px-4 py-3 text-sm leading-relaxed',
+        tones[tone],
+      )}
+      role="status"
+    >
+      {title ? <p className="font-display font-semibold">{title}</p> : null}
+      <div className={title ? 'mt-0.5' : undefined}>{children}</div>
     </div>
   );
 }
@@ -288,19 +331,21 @@ export function Stat({
   tone?: 'default' | 'positive' | 'negative';
 }) {
   return (
-    <Card className="px-4 py-3">
-      <p className="text-xs font-medium text-ink-500 dark:text-ink-400">{label}</p>
+    <Card className="px-4 py-3.5">
+      <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-500">
+        {label}
+      </p>
       <p
         className={cn(
-          'mt-1 text-lg font-bold tabular-nums',
-          tone === 'positive' && 'text-brand-700 dark:text-brand-300',
-          tone === 'negative' && 'text-red-700 dark:text-red-300',
-          (!tone || tone === 'default') && 'text-ink-900 dark:text-white',
+          'font-display mt-1 text-xl font-semibold tabular-nums tracking-tight',
+          tone === 'positive' && 'text-brand-700',
+          tone === 'negative' && 'text-clay-700',
+          (!tone || tone === 'default') && 'text-ink-900',
         )}
       >
         {value}
       </p>
-      {hint ? <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">{hint}</p> : null}
+      {hint ? <p className="mt-0.5 text-xs leading-snug text-ink-500">{hint}</p> : null}
     </Card>
   );
 }
@@ -326,24 +371,29 @@ export function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-sm font-medium text-ink-800 dark:text-ink-100">
+      <label htmlFor={htmlFor} className="text-sm font-medium text-ink-800">
         {label}
-        {required ? <span className="ml-0.5 text-red-600">*</span> : null}
+        {required ? (
+          <span className="ml-0.5 text-clay-500" aria-hidden>
+            *
+          </span>
+        ) : null}
       </label>
       {children}
       {error ? (
-        <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-xs font-medium text-clay-700">{error}</p>
       ) : hint ? (
-        <p className="text-xs text-ink-500 dark:text-ink-400">{hint}</p>
+        <p className="text-xs leading-relaxed text-ink-500">{hint}</p>
       ) : null}
     </div>
   );
 }
 
 export const inputClass = cn(
-  'w-full rounded-xl border border-ink-300 bg-white px-3 py-2.5 text-sm text-ink-900',
+  'w-full rounded-xl border hairline bg-white px-3 py-2.5 text-sm text-ink-900',
+  'shadow-[inset_0_1px_2px_0_rgb(18_33_28_/_0.04)]',
   'placeholder:text-ink-400 focus-ring',
-  'dark:border-white/15 dark:bg-white/5 dark:text-white',
+  'transition-colors hover:border-ink-300',
 );
 
 export function Input({ className, ...props }: ComponentPropsWithoutRef<'input'>) {
@@ -355,5 +405,5 @@ export function Select({ className, ...props }: ComponentPropsWithoutRef<'select
 }
 
 export function Textarea({ className, ...props }: ComponentPropsWithoutRef<'textarea'>) {
-  return <textarea className={cn(inputClass, 'min-h-24', className)} {...props} />;
+  return <textarea className={cn(inputClass, 'min-h-24 leading-relaxed', className)} {...props} />;
 }

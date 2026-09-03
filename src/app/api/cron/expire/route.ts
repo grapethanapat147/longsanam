@@ -31,11 +31,18 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await runLifecycleSweeps();
-    return NextResponse.json({ ok: true, ranAt: new Date().toISOString(), ...result });
+    return NextResponse.json({
+      ok: true,
+      ranAt: new Date().toISOString(),
+      ...result,
+    });
   } catch (error) {
     console.error('[cron/expire] sweep failed', error);
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : 'sweep failed' },
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : 'sweep failed',
+      },
       { status: 500 },
     );
   }

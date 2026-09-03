@@ -39,7 +39,10 @@ export async function runLifecycleSweeps(): Promise<SweepResult> {
     admin.rpc('complete_finished_sessions'),
   ]);
 
-  const h = holds.data as { expiredHolds?: number; expiredBookings?: number } | null;
+  const h = holds.data as {
+    expiredHolds?: number;
+    expiredBookings?: number;
+  } | null;
   const p = payments.data as { expiredPayments?: number } | null;
   const w = promotions.data as { expiredPromotions?: number } | null;
   const c = completed.data as { completedSessions?: number } | null;

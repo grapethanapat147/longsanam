@@ -49,7 +49,11 @@ const ACTION_LABEL: Record<string, string> = {
 };
 
 function toneFor(action: string): ChipTone {
-  if (action.endsWith('.failed') || action.endsWith('.rejected') || action.includes('booking_failed')) {
+  if (
+    action.endsWith('.failed') ||
+    action.endsWith('.rejected') ||
+    action.includes('booking_failed')
+  ) {
     return 'danger';
   }
   if (action.endsWith('.expired')) return 'neutral';
@@ -78,7 +82,7 @@ export function SessionTimeline({ entries }: { entries: Entry[] }) {
 
         return (
           <li key={entry.id} className="flex gap-3">
-            <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ink-300 dark:bg-white/25" />
+            <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ink-300" />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <Chip tone={toneFor(entry.action)}>
@@ -90,7 +94,7 @@ export function SessionTimeline({ entries }: { entries: Entry[] }) {
                   </span>
                 ) : null}
               </div>
-              <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+              <p className="mt-0.5 text-xs text-ink-500">
                 {formatDateTime(entry.created_at)}
                 {detail ? ` · ${detail}` : ''}
               </p>
