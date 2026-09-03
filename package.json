@@ -19,7 +19,9 @@
     "db:push": "supabase db push",
     "db:diff": "supabase db diff --linked",
     "deploy": "vercel deploy --prod",
-    "deploy:preview": "vercel deploy"
+    "deploy:preview": "vercel deploy",
+    "demo:seed": "node scripts/seed-remote-demo.mjs",
+    "demo:clear": "node scripts/clear-remote-demo.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
