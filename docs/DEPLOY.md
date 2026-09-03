@@ -2,6 +2,19 @@
 
 Target: **Vercel** for the app, **Supabase Cloud** for the database.
 
+## Live deployment
+
+| | |
+| --- | --- |
+| Production URL | https://longsanam.vercel.app |
+| Vercel project | `grapethanapat147-gmailcoms-projects/longsanam` |
+| Supabase ref | `xqhptxkmllahptzhjaup` (ap-southeast-1) |
+| Payment provider | `mock` — no money moves, every surface is labelled |
+
+Deployment-specific URLs (`longsanam-<hash>-...vercel.app`) sit behind Vercel
+Deployment Protection and answer 302; the production alias above is the public
+one.
+
 Two things only you can do — creating the Supabase project and logging into
 Vercel. Everything else is scripted.
 
