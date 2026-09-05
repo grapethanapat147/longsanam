@@ -21,7 +21,8 @@
     "deploy": "vercel deploy --prod",
     "deploy:preview": "vercel deploy",
     "demo:seed": "node scripts/seed-remote-demo.mjs",
-    "demo:clear": "node scripts/clear-remote-demo.mjs"
+    "demo:clear": "node scripts/clear-remote-demo.mjs",
+    "test:db": "supabase test db"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

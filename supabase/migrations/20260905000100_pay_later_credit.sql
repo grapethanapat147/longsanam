@@ -65,11 +65,32 @@ drop policy if exists player_credit_self_read on public.player_credit;
 create policy player_credit_self_read on public.player_credit
   for select using (user_id = auth.uid());
 
--- An organizer sees the score of people in their own sessions and nobody
--- else's. `shares_session_with` is the existing helper for exactly this.
+-- An organizer sees the score of people in their own sessions and nobody else.
+--
+-- Deliberately NOT `shares_session_with`, which was written for display names
+-- and is true for any co-participant, and also true for any organizer of a
+-- public session. Borrowing it here would have let every player read every
+-- teammate's score, and made every organizer's own score world-readable. A
+-- score says "this person does not pay what they owe"; it is not a display
+-- name. supabase/tests/pay_later_rls.test.sql pins both cases.
+create or replace function public.organizes_session_with(p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select exists (
+    select 1
+    from public.sessions s
+    join public.session_participants sp on sp.session_id = s.id
+    where s.organizer_id = auth.uid() and sp.user_id = p_user_id
+  );
+$$;
+
 drop policy if exists player_credit_organizer_read on public.player_credit;
 create policy player_credit_organizer_read on public.player_credit
-  for select using (public.shares_session_with(user_id));
+  for select using (public.organizes_session_with(user_id));
 
 drop policy if exists player_credit_admin_read on public.player_credit;
 create policy player_credit_admin_read on public.player_credit
