@@ -403,3 +403,45 @@ export async function leaveWaitlistAction(
   revalidatePath('/s', 'layout');
   return { ok: true };
 }
+
+/* -------------------------------------------------------------------------
+ * Pay later (LSN-0019).
+ *
+ * Both actions go through the caller's own client, so the RPC's
+ * is_session_organizer() check sees the real caller and cannot be pointed at
+ * somebody else's session. The server-side check is the boundary; the UI's
+ * eligibility check only decides what to offer.
+ * ---------------------------------------------------------------------- */
+
+export type PayLaterResult = { ok: true } | { ok: false; error: string };
+
+async function callPayLaterRpc(
+  fn: 'grant_pay_later' | 'revoke_pay_later',
+  participantId: string,
+): Promise<PayLaterResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: reasonLabel.not_authenticated };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(fn, { p_participant_id: participantId });
+
+  if (error) {
+    console.error(`[${fn}] rpc failed`, error);
+    return { ok: false, error: t.common.unexpectedError };
+  }
+
+  const result = data as { ok?: boolean; reason?: string } | null;
+  if (!result?.ok) return { ok: false, error: describe(result?.reason) };
+
+  revalidatePath('/organizer', 'layout');
+  revalidatePath('/s', 'layout');
+  return { ok: true };
+}
+
+export async function grantPayLaterAction(participantId: string): Promise<PayLaterResult> {
+  return callPayLaterRpc('grant_pay_later', participantId);
+}
+
+export async function revokePayLaterAction(participantId: string): Promise<PayLaterResult> {
+  return callPayLaterRpc('revoke_pay_later', participantId);
+}

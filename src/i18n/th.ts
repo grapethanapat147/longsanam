@@ -82,6 +82,10 @@ export const waitlistStatusLabel: Record<WaitlistStatus, string> = {
 export const reasonLabel: Record<string, string> = {
   not_authenticated: 'กรุณาเข้าสู่ระบบก่อน',
   forbidden: 'คุณไม่มีสิทธิ์ทำรายการนี้',
+  not_found: 'ไม่พบรายการนี้',
+  not_organizer: 'เฉพาะผู้จัดก๊วนเท่านั้นที่ทำรายการนี้ได้',
+  wrong_state: 'สถานะของผู้เล่นไม่รองรับการทำรายการนี้',
+  credit_too_low: 'เครดิตของผู้เล่นต่ำกว่าเกณฑ์ที่ให้จ่ายทีหลังได้',
   session_not_found: 'ไม่พบก๊วนนี้',
   session_not_open: 'ก๊วนนี้ไม่เปิดรับผู้เล่นแล้ว',
   session_closed: 'ก๊วนนี้ปิดรับแล้ว',
