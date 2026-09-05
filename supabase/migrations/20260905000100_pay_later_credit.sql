@@ -102,6 +102,7 @@ as $$
 declare
   v_p       public.session_participants%rowtype;
   v_session public.sessions%rowtype;
+  v_payment public.payments%rowtype;
   v_score   integer;
 begin
   select * into v_p from public.session_participants where id = p_participant_id for update;
@@ -137,15 +138,29 @@ begin
       pay_later_granted_by = auth.uid()
   where id = p_participant_id;
 
-  -- The debt is real from this moment. `expires_at` stays null so
-  -- expire_overdue_payments() leaves it alone; the idempotency key makes a
-  -- repeated grant a no-op rather than a second debt.
-  insert into public.payments
-    (session_id, participant_id, user_id, amount_thb, status, idempotency_key, expires_at)
-  values
-    (v_p.session_id, p_participant_id, v_p.user_id, v_p.amount_due_thb, 'pending',
-     'paylater:' || p_participant_id::text, null)
-  on conflict (idempotency_key) do nothing;
+  -- The debt is real from this moment, and `expires_at` must end up null so
+  -- expire_overdue_payments() leaves it alone.
+  --
+  -- A player who joined normally already has a live pending payment carrying
+  -- the original deadline, and `payments_one_live_per_participant` allows only
+  -- one. So the existing row is adopted — clearing its deadline — rather than a
+  -- second one inserted. Getting this wrong is not cosmetic: a granted seat
+  -- whose payment row kept its expires_at would be swept away as an expired
+  -- payment, silently, some minutes later.
+  select * into v_payment
+  from public.payments
+  where participant_id = p_participant_id and status in ('pending', 'paid')
+  limit 1;
+
+  if v_payment.id is null then
+    insert into public.payments
+      (session_id, participant_id, user_id, amount_thb, status, idempotency_key, expires_at)
+    values
+      (v_p.session_id, p_participant_id, v_p.user_id, v_p.amount_due_thb, 'pending',
+       'paylater:' || p_participant_id::text, null);
+  elsif v_payment.status = 'pending' then
+    update public.payments set expires_at = null where id = v_payment.id;
+  end if;
 
   perform public.app_log(auth.uid(), 'session_participant', p_participant_id, v_p.session_id,
     'participant.pay_later_granted', 'joined_pending_payment', 'joined_pay_later',

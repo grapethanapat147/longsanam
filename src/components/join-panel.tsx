@@ -247,6 +247,32 @@ export function JoinPanel(props: Props) {
       );
     }
 
+    // A pay-later debt. The button is the same payment flow; what changes is
+    // that there is no deadline left to count down to, only a balance owed.
+    if (participant?.status === 'joined_pay_later' || participant?.status === 'payment_overdue') {
+      const overdue = participant.status === 'payment_overdue';
+      return (
+        <div className="space-y-2">
+          <Button
+            size="lg"
+            className="w-full"
+            disabled={pending}
+            onClick={() => handlePay(participant.id)}
+          >
+            {pending
+              ? t.payment.paying
+              : `ชำระยอดค้าง ${formatThb(participant.amount_due_thb)}`}
+          </Button>
+          <p className="text-xs leading-relaxed text-ink-500">
+            {overdue
+              ? 'ก๊วนจบแล้วและยังค้างชำระ ระบบจะเตือนทุกวันและเครดิตของคุณจะลดลงจนกว่าจะชำระ'
+              : 'ผู้จัดให้คุณจ่ายทีหลังได้ ระบบจะเตือนหลังก๊วนจบ'}{' '}
+            · {t.mock.short}
+          </p>
+        </div>
+      );
+    }
+
     if (participant?.status === 'joined_pending_payment') {
       if (props.participantPaymentOverdue) {
         return <DisabledAction label={t.payment.payNow} reason={t.payment.expired} />;
