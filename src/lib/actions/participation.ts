@@ -126,20 +126,42 @@ export async function payForSlotAction(participantId: string): Promise<PayResult
 
   const idempotencyKey = `pay:${participantId}:${count ?? 0}`;
 
-  const { data: startData } = await admin.rpc('start_payment', {
-    p_participant_id: participantId,
-    p_idempotency_key: idempotencyKey,
-    p_provider: provider.name,
-    p_actor: user.id,
-  });
-
-  const started = startData as {
+  type StartedPayment = {
     ok?: boolean;
     reason?: string;
     paymentId?: string;
     status?: string;
     amountThb?: number;
-  } | null;
+  };
+
+  let started: StartedPayment | null;
+
+  // A pay-later debt already has its payment row, created when the organizer
+  // granted the seat. start_payment would refuse it twice over — the status is
+  // not `joined_pending_payment` and the deadline has passed by design — so the
+  // debt is settled against the existing row rather than opening a second one.
+  if (participant.status === 'joined_pay_later' || participant.status === 'payment_overdue') {
+    const { data: debt } = await admin
+      .from('payments')
+      .select('id, status, amount_thb')
+      .eq('participant_id', participantId)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (!debt) {
+      return { ok: false, error: describe('payment_not_found'), retryable: false };
+    }
+
+    started = { ok: true, paymentId: debt.id, status: debt.status, amountThb: debt.amount_thb };
+  } else {
+    const { data: startData } = await admin.rpc('start_payment', {
+      p_participant_id: participantId,
+      p_idempotency_key: idempotencyKey,
+      p_provider: provider.name,
+      p_actor: user.id,
+    });
+    started = startData as StartedPayment | null;
+  }
 
   if (!started?.ok || !started.paymentId) {
     return { ok: false, error: describe(started?.reason), retryable: false };
@@ -402,4 +424,46 @@ export async function leaveWaitlistAction(
   revalidatePath('/app');
   revalidatePath('/s', 'layout');
   return { ok: true };
+}
+
+/* -------------------------------------------------------------------------
+ * Pay later (LSN-0019).
+ *
+ * Both actions go through the caller's own client, so the RPC's
+ * is_session_organizer() check sees the real caller and cannot be pointed at
+ * somebody else's session. The server-side check is the boundary; the UI's
+ * eligibility check only decides what to offer.
+ * ---------------------------------------------------------------------- */
+
+export type PayLaterResult = { ok: true } | { ok: false; error: string };
+
+async function callPayLaterRpc(
+  fn: 'grant_pay_later' | 'revoke_pay_later',
+  participantId: string,
+): Promise<PayLaterResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: reasonLabel.not_authenticated };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(fn, { p_participant_id: participantId });
+
+  if (error) {
+    console.error(`[${fn}] rpc failed`, error);
+    return { ok: false, error: t.common.unexpectedError };
+  }
+
+  const result = data as { ok?: boolean; reason?: string } | null;
+  if (!result?.ok) return { ok: false, error: describe(result?.reason) };
+
+  revalidatePath('/organizer', 'layout');
+  revalidatePath('/s', 'layout');
+  return { ok: true };
+}
+
+export async function grantPayLaterAction(participantId: string): Promise<PayLaterResult> {
+  return callPayLaterRpc('grant_pay_later', participantId);
+}
+
+export async function revokePayLaterAction(participantId: string): Promise<PayLaterResult> {
+  return callPayLaterRpc('revoke_pay_later', participantId);
 }

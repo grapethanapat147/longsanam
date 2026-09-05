@@ -23,12 +23,29 @@ export const SESSION_TRANSITIONS: Readonly<Record<SessionStatus, readonly Sessio
 export const PARTICIPANT_TRANSITIONS: Readonly<
   Record<ParticipantStatus, readonly ParticipantStatus[]>
 > = {
-  joined_pending_payment: ['paid_confirmed', 'cancelled', 'payment_expired'],
+  joined_pending_payment: ['paid_confirmed', 'cancelled', 'payment_expired', 'joined_pay_later'],
   paid_confirmed: ['cancelled', 'refunded'],
   waitlisted: ['joined_pending_payment', 'cancelled'],
   payment_expired: ['joined_pending_payment', 'waitlisted', 'cancelled'],
   cancelled: ['joined_pending_payment', 'waitlisted'],
   refunded: [],
+  // A granted seat can be paid, fall overdue, be revoked back to whichever
+  // state the original deadline implies, or be cancelled outright.
+  joined_pay_later: [
+    'paid_confirmed',
+    'payment_overdue',
+    'joined_pending_payment',
+    'payment_expired',
+    'cancelled',
+  ],
+  // Overdue is not terminal: the whole point of the credit design is that
+  // settling late is always possible.
+  payment_overdue: [
+    'paid_confirmed',
+    'joined_pending_payment',
+    'payment_expired',
+    'cancelled',
+  ],
 };
 
 export const BOOKING_TRANSITIONS: Readonly<Record<BookingStatus, readonly BookingStatus[]>> = {

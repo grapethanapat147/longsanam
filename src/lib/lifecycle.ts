@@ -2,6 +2,7 @@ import 'server-only';
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { refundAllPaidParticipants } from '@/lib/refunds';
+import { runPaymentChase } from '@/lib/chase';
 
 /**
  * The unattended maintenance pass.
@@ -24,6 +25,8 @@ export type SweepResult = {
   strandedSessions: number;
   refundedPlayers: number;
   refundedThb: number;
+  chasedParticipants: number;
+  creditCharged: number;
 };
 
 const STRANDED_REASON =
@@ -56,6 +59,8 @@ export async function runLifecycleSweeps(): Promise<SweepResult> {
     strandedSessions: 0,
     refundedPlayers: 0,
     refundedThb: 0,
+    chasedParticipants: 0,
+    creditCharged: 0,
   };
 
   // A session whose start time passed without a confirmed court can never
@@ -105,6 +110,13 @@ export async function runLifecycleSweeps(): Promise<SweepResult> {
     result.refundedPlayers += refunds.refundedPlayers;
     result.refundedThb += refunds.refundedThb;
   }
+
+  // Chasing runs last: it only reads sessions that have already ended, so it
+  // cannot be affected by anything above, and putting it here keeps a failure
+  // in the debt reminders from costing us the expiries that free up capacity.
+  const chase = await runPaymentChase();
+  result.chasedParticipants = chase.chasedParticipants;
+  result.creditCharged = chase.creditCharged;
 
   return result;
 }
