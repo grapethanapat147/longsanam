@@ -431,6 +431,48 @@ export type Database = {
           },
         ]
       }
+      credit_events: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          reason: string
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          reason: string
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          reason?: string
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -556,6 +598,32 @@ export type Database = {
             foreignKeyName: "payments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_credit: {
+        Row: {
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_credit_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -701,6 +769,9 @@ export type Database = {
           created_at: string
           id: string
           joined_at: string
+          last_chased_at: string | null
+          pay_later_granted_at: string | null
+          pay_later_granted_by: string | null
           payment_due_at: string
           session_id: string
           status: Database["public"]["Enums"]["participant_status"]
@@ -714,6 +785,9 @@ export type Database = {
           created_at?: string
           id?: string
           joined_at?: string
+          last_chased_at?: string | null
+          pay_later_granted_at?: string | null
+          pay_later_granted_by?: string | null
           payment_due_at: string
           session_id: string
           status?: Database["public"]["Enums"]["participant_status"]
@@ -727,6 +801,9 @@ export type Database = {
           created_at?: string
           id?: string
           joined_at?: string
+          last_chased_at?: string | null
+          pay_later_granted_at?: string | null
+          pay_later_granted_by?: string | null
           payment_due_at?: string
           session_id?: string
           status?: Database["public"]["Enums"]["participant_status"]
@@ -734,6 +811,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "session_participants_pay_later_granted_by_fkey"
+            columns: ["pay_later_granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "session_participants_session_id_fkey"
             columns: ["session_id"]
@@ -1164,6 +1248,7 @@ export type Database = {
         Returns: Json
       }
       generate_session_code: { Args: never; Returns: string }
+      grant_pay_later: { Args: { p_participant_id: string }; Returns: Json }
       is_booking_venue_member: {
         Args: { p_session_id: string }
         Returns: boolean
@@ -1179,6 +1264,20 @@ export type Database = {
       join_session: {
         Args: { p_actor?: string; p_session_id: string }
         Returns: Json
+      }
+      list_chaseable_participants: {
+        Args: never
+        Returns: {
+          amount_due_thb: number
+          ends_at: string
+          last_chased_at: string
+          line_user_id: string
+          participant_id: string
+          session_id: string
+          session_title: string
+          status: Database["public"]["Enums"]["participant_status"]
+          user_id: string
+        }[]
       }
       list_stranded_sessions: {
         Args: never
@@ -1211,6 +1310,16 @@ export type Database = {
         }
         Returns: Json
       }
+      record_chase: {
+        Args: {
+          p_body: string
+          p_delta: number
+          p_participant_id: string
+          p_reason: string
+          p_title: string
+        }
+        Returns: Json
+      }
       release_hold: {
         Args: { p_actor?: string; p_hold_id: string; p_reason?: string }
         Returns: Json
@@ -1219,6 +1328,7 @@ export type Database = {
         Args: { p_actor?: string; p_hold_id: string; p_idempotency_key: string }
         Returns: Json
       }
+      revoke_pay_later: { Args: { p_participant_id: string }; Returns: Json }
       session_has_public_booking: {
         Args: { p_session_id: string }
         Returns: boolean
@@ -1258,6 +1368,7 @@ export type Database = {
         }
         Returns: Json
       }
+      storage_owner_id: { Args: { p_name: string }; Returns: string }
       try_hold_court: {
         Args: {
           p_actor?: string
@@ -1300,6 +1411,8 @@ export type Database = {
         | "waitlisted"
         | "payment_expired"
         | "refunded"
+        | "joined_pay_later"
+        | "payment_overdue"
       payment_status: "pending" | "paid" | "failed" | "refunded" | "expired"
       refund_status: "pending" | "processing" | "completed" | "failed"
       session_status:
@@ -1468,6 +1581,8 @@ export const Constants = {
         "waitlisted",
         "payment_expired",
         "refunded",
+        "joined_pay_later",
+        "payment_overdue",
       ],
       payment_status: ["pending", "paid", "failed", "refunded", "expired"],
       refund_status: ["pending", "processing", "completed", "failed"],
