@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { AppShell } from '@/components/shell';
 import { BookingStatusChip, ParticipantStatusChip, SessionStatusChip } from '@/components/status';
+import { PayLaterControl } from '@/components/pay-later-control';
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
 import { SessionTimeline } from '@/components/session-timeline';
@@ -95,7 +96,10 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     admin
       .from('session_participants')
       .select(
-        'id, status, amount_due_thb, payment_due_at, joined_at, user_id, profiles (display_name, avatar_url)',
+        'id, status, amount_due_thb, payment_due_at, joined_at, user_id, ' +
+          // Two FKs now point at profiles (user_id and pay_later_granted_by),
+          // so the embed must name which one it means.
+          'profiles!session_participants_user_id_fkey (display_name, avatar_url, player_credit (score))',
       )
       .eq('session_id', session.id)
       .order('joined_at', { ascending: true }),
@@ -121,7 +125,11 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     payment_due_at: string;
     joined_at: string;
     user_id: string;
-    profiles: { display_name: string; avatar_url: string | null } | null;
+    profiles: {
+      display_name: string;
+      avatar_url: string | null;
+      player_credit: { score: number } | null;
+    } | null;
   }[];
 
   const waitlist = (waitlistRows ?? []) as unknown as {
@@ -285,7 +293,20 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
                         </p>
                       </div>
                     </div>
-                    <ParticipantStatusChip status={participant.status} />
+                    <div className="flex shrink-0 items-center gap-2">
+                      <ParticipantStatusChip status={participant.status} />
+                      <PayLaterControl
+                        participantId={participant.id}
+                        status={participant.status}
+                        amountDueThb={participant.amount_due_thb}
+                        score={participant.profiles?.player_credit?.score ?? null}
+                        paidParticipants={progress.paidParticipants}
+                        minPlayers={session.min_players}
+                        sessionClosed={
+                          session.status === 'completed' || session.status === 'cancelled'
+                        }
+                      />
+                    </div>
                   </li>
                 ))}
               </ul>
