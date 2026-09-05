@@ -41,6 +41,8 @@ export const participantStatusLabel: Record<ParticipantStatus, string> = {
   waitlisted: 'อยู่ในคิวสำรอง',
   payment_expired: 'หมดเวลาชำระเงิน',
   refunded: 'คืนเงินแล้ว',
+  joined_pay_later: 'จ่ายทีหลัง',
+  payment_overdue: 'ค้างชำระ',
 };
 
 export const bookingStatusLabel: Record<BookingStatus, string> = {

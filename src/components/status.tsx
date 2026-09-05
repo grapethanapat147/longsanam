@@ -39,6 +39,8 @@ const participantTone: Record<ParticipantStatus, ChipTone> = {
   waitlisted: 'info',
   payment_expired: 'danger',
   refunded: 'neutral',
+  joined_pay_later: 'warning',
+  payment_overdue: 'danger',
 };
 
 const bookingTone: Record<BookingStatus, ChipTone> = {
