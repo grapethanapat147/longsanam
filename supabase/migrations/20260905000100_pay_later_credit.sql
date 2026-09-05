@@ -365,3 +365,69 @@ revoke execute on function public.record_chase(uuid, integer, text, text, text)
   from public, authenticated;
 grant execute on function public.list_chaseable_participants() to service_role;
 grant execute on function public.record_chase(uuid, integer, text, text, text) to service_role;
+
+-- ---------------------------------------------------------------------------
+-- Retrying a declined pay-later payment.
+--
+-- start_payment() refuses a pay-later debt twice over: the status is not
+-- `joined_pending_payment`, and payment_due_at has passed by design. That is
+-- correct for it and useless here, because a declined card must not make a debt
+-- permanently unpayable — settle_payment() marks the row `failed`, and without
+-- this function there is no live row left for the player to settle against.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.open_pay_later_payment(
+  p_participant_id  uuid,
+  p_idempotency_key text,
+  p_provider        text default 'mock'
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_p       public.session_participants%rowtype;
+  v_payment public.payments%rowtype;
+  v_id      uuid;
+begin
+  select * into v_p from public.session_participants where id = p_participant_id for update;
+  if v_p.id is null then
+    return jsonb_build_object('ok', false, 'reason', 'participant_not_found');
+  end if;
+
+  if v_p.status not in ('joined_pay_later', 'payment_overdue') then
+    return jsonb_build_object('ok', false, 'reason', 'wrong_state');
+  end if;
+
+  -- A live row already exists (the usual case): settle against that one.
+  select * into v_payment
+  from public.payments
+  where participant_id = p_participant_id and status in ('pending', 'paid')
+  limit 1;
+
+  if v_payment.id is not null then
+    return jsonb_build_object('ok', true, 'replayed', true, 'paymentId', v_payment.id,
+      'status', v_payment.status, 'amountThb', v_payment.amount_thb);
+  end if;
+
+  -- expires_at stays null, as it must for every pay-later row.
+  insert into public.payments
+    (session_id, participant_id, user_id, amount_thb, status, provider,
+     idempotency_key, expires_at)
+  values
+    (v_p.session_id, v_p.id, v_p.user_id, v_p.amount_due_thb, 'pending', p_provider,
+     p_idempotency_key, null)
+  returning id into v_id;
+
+  perform public.app_log(coalesce(auth.uid(), v_p.user_id), 'payment', v_id, v_p.session_id,
+    'payment.created', null, 'pending',
+    jsonb_build_object('amountThb', v_p.amount_due_thb, 'provider', p_provider,
+      'payLaterRetry', true));
+
+  return jsonb_build_object('ok', true, 'replayed', false, 'paymentId', v_id,
+    'status', 'pending', 'amountThb', v_p.amount_due_thb);
+end;
+$$;
+
+revoke execute on function public.open_pay_later_payment(uuid, text, text) from public;
+grant execute on function public.open_pay_later_payment(uuid, text, text) to authenticated;

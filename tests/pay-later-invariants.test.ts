@@ -41,6 +41,17 @@ describe('a pay-later seat', () => {
   });
 });
 
+describe('a retried pay-later payment', () => {
+  // A declined card used to make a debt permanently unpayable: settle_payment
+  // marks the row `failed`, start_payment refuses a pay-later participant, and
+  // nothing was left to settle against. open_pay_later_payment opens a fresh
+  // row — and it must carry the same null expires_at, or the retry reintroduces
+  // exactly the sweep-deletes-the-seat bug the original grant avoided.
+  it('must not be sweepable either', () => {
+    expect(isSweptByPaymentExpiry({ status: 'pending', expiresAt: null })).toBe(false);
+  });
+});
+
 describe('pay-later state transitions', () => {
   it('lets a granted seat be paid, fall overdue, or be revoked', () => {
     const from = PARTICIPANT_TRANSITIONS.joined_pay_later;
