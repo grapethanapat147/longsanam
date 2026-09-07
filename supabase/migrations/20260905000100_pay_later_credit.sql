@@ -452,3 +452,80 @@ $$;
 
 revoke execute on function public.open_pay_later_payment(uuid, text, text) from public;
 grant execute on function public.open_pay_later_payment(uuid, text, text) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- A cancelled session cancels its debts.
+--
+-- When a session reaches its start time without a court, the platform cancels
+-- it and refunds everyone who paid — the landing page promises exactly that:
+-- ไม่ได้สนาม คืนเต็ม. Without this, a pay-later player got the opposite of the
+-- promise: paid players were made whole while the one who had not paid yet kept
+-- the bill, stayed in the chase list, and lost five credit a day for a session
+-- that never happened because we could not find a court.
+--
+-- A trigger rather than an edit to cancel_session(): there are two paths into a
+-- cancelled session (cancel_session and fail_session_booking) and this must
+-- cover both without either remembering to call it.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.void_pay_later_on_session_end()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_row     record;
+  v_charged integer;
+begin
+  if new.status not in ('cancelled', 'booking_failed') then return new; end if;
+
+  for v_row in
+    select sp.id, sp.user_id, sp.amount_due_thb
+    from public.session_participants sp
+    where sp.session_id = new.id
+      and sp.status in ('joined_pay_later', 'payment_overdue')
+  loop
+    update public.payments
+    set status = 'expired'
+    where participant_id = v_row.id and status = 'pending';
+
+    update public.session_participants
+    set status = 'cancelled', cancelled_at = now(), last_chased_at = null
+    where id = v_row.id;
+
+    -- Give back whatever this session's debt already cost them. The charge was
+    -- for money they were never going to owe.
+    select coalesce(sum(delta), 0) into v_charged
+    from public.credit_events
+    where user_id = v_row.user_id and session_id = new.id and delta < 0;
+
+    if v_charged < 0 then
+      update public.player_credit
+      set score = greatest(0, least(100, score - v_charged))
+      where user_id = v_row.user_id;
+
+      insert into public.credit_events (user_id, session_id, delta, reason)
+      values (v_row.user_id, new.id, -v_charged, 'session_cancelled_refund');
+    end if;
+
+    perform public.notify_user(v_row.user_id, new.id, 'debt_cancelled',
+      'ยกเลิกยอดค้างชำระแล้ว',
+      'ก๊วนถูกยกเลิกและระบบไม่ได้จองสนามให้ ยอดค้าง ฿' || v_row.amount_due_thb ||
+      ' จึงถูกยกเลิก และเครดิตที่ถูกหักไปได้คืนแล้ว', null);
+
+    perform public.app_log(null, 'session_participant', v_row.id, new.id,
+      'participant.pay_later_voided', 'payment_overdue', 'cancelled',
+      jsonb_build_object('amountThb', v_row.amount_due_thb, 'creditRestored', -v_charged));
+  end loop;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists sessions_void_pay_later on public.sessions;
+create trigger sessions_void_pay_later
+  after update of status on public.sessions
+  for each row
+  when (old.status is distinct from new.status)
+  execute function public.void_pay_later_on_session_end();
