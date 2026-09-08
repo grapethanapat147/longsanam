@@ -27,6 +27,7 @@ export type SweepResult = {
   refundedThb: number;
   chasedParticipants: number;
   creditCharged: number;
+  noShows: number;
 };
 
 const STRANDED_REASON =
@@ -61,6 +62,7 @@ export async function runLifecycleSweeps(): Promise<SweepResult> {
     refundedThb: 0,
     chasedParticipants: 0,
     creditCharged: 0,
+    noShows: 0,
   };
 
   // A session whose start time passed without a confirmed court can never
@@ -114,6 +116,18 @@ export async function runLifecycleSweeps(): Promise<SweepResult> {
   // Chasing runs last: it only reads sessions that have already ended, so it
   // cannot be affected by anything above, and putting it here keeps a failure
   // in the debt reminders from costing us the expiries that free up capacity.
+  // After the stranded-session loop on purpose. A session about to be cancelled
+  // for want of a court still looks like an ordinary finished session while the
+  // Promise.all above is running, and charging its players for not turning up
+  // would repeat LSN-0019's worst bug in a new place. mark_no_shows() also
+  // filters cancelled sessions itself; this ordering is the second guard.
+  const { data: noShowData, error: noShowError } = await admin.rpc('mark_no_shows');
+  if (noShowError) {
+    console.error('[sweep] mark_no_shows failed', noShowError);
+  } else {
+    result.noShows = (noShowData as { noShows?: number } | null)?.noShows ?? 0;
+  }
+
   const chase = await runPaymentChase();
   result.chasedParticipants = chase.chasedParticipants;
   result.creditCharged = chase.creditCharged;
