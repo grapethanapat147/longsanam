@@ -6,7 +6,10 @@ import {
   applyDelta,
   chaseDecision,
   creditDeltaForOverdueDay,
+  CREDIT_NO_SHOW_UNPAID,
+  checkInWindow,
   isPayLaterEligible,
+  noShowDelta,
   overdueDayIndex,
 } from '@/lib/domain/credit';
 
@@ -110,5 +113,44 @@ describe('chaseDecision', () => {
       now: at('2026-09-16T14:00:00Z'),
     });
     expect(d.shouldChase).toBe(false);
+  });
+});
+
+const CI_STARTS = new Date('2026-09-09T12:00:00Z');
+const CI_ENDS = new Date('2026-09-09T14:00:00Z');
+
+describe('checkInWindow', () => {
+  it('opens thirty minutes before the session starts', () => {
+    expect(checkInWindow(CI_STARTS, CI_ENDS).opensAt.toISOString()).toBe('2026-09-09T11:30:00.000Z');
+  });
+
+  it('closes two hours after it ends, where the chase begins', () => {
+    expect(checkInWindow(CI_STARTS, CI_ENDS).closesAt.toISOString()).toBe('2026-09-09T16:00:00.000Z');
+  });
+
+  it('is shut before it opens and after it closes', () => {
+    const w = checkInWindow(CI_STARTS, CI_ENDS);
+    expect(w.isOpenAt(new Date('2026-09-09T11:29:00Z'))).toBe(false);
+    expect(w.isOpenAt(new Date('2026-09-09T11:30:00Z'))).toBe(true);
+    expect(w.isOpenAt(new Date('2026-09-09T16:00:00Z'))).toBe(false);
+  });
+});
+
+describe('noShowDelta', () => {
+  it('charges an unpaid seat that never showed', () => {
+    expect(noShowDelta('joined_pay_later', false)).toBe(CREDIT_NO_SHOW_UNPAID);
+    expect(noShowDelta('payment_overdue', false)).toBe(CREDIT_NO_SHOW_UNPAID);
+  });
+
+  it('charges nothing when they checked in', () => {
+    expect(noShowDelta('payment_overdue', true)).toBe(0);
+  });
+
+  it('charges nothing to a paid no-show — they paid; the absence cost only them', () => {
+    expect(noShowDelta('paid_confirmed', false)).toBe(0);
+  });
+
+  it('charges nothing to a cancelled seat', () => {
+    expect(noShowDelta('cancelled', false)).toBe(0);
   });
 });
