@@ -1302,6 +1302,14 @@ export type Database = {
         }
         Returns: string
       }
+      open_pay_later_payment: {
+        Args: {
+          p_idempotency_key: string
+          p_participant_id: string
+          p_provider?: string
+        }
+        Returns: Json
+      }
       promote_waitlist: {
         Args: {
           p_actor?: string

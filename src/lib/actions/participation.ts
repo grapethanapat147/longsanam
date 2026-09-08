@@ -141,18 +141,16 @@ export async function payForSlotAction(participantId: string): Promise<PayResult
   // not `joined_pending_payment` and the deadline has passed by design — so the
   // debt is settled against the existing row rather than opening a second one.
   if (participant.status === 'joined_pay_later' || participant.status === 'payment_overdue') {
-    const { data: debt } = await admin
-      .from('payments')
-      .select('id, status, amount_thb')
-      .eq('participant_id', participantId)
-      .eq('status', 'pending')
-      .maybeSingle();
-
-    if (!debt) {
-      return { ok: false, error: describe('payment_not_found'), retryable: false };
-    }
-
-    started = { ok: true, paymentId: debt.id, status: debt.status, amountThb: debt.amount_thb };
+    // Returns the live row when there is one, and opens a fresh one when the
+    // last attempt was declined. Without the second half, a single declined
+    // card would leave the debt permanently unpayable: settle_payment marks the
+    // row `failed`, and start_payment refuses a pay-later participant outright.
+    const { data: debtData } = await admin.rpc('open_pay_later_payment', {
+      p_participant_id: participantId,
+      p_idempotency_key: idempotencyKey,
+      p_provider: provider.name,
+    });
+    started = debtData as StartedPayment | null;
   } else {
     const { data: startData } = await admin.rpc('start_payment', {
       p_participant_id: participantId,

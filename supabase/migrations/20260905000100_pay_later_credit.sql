@@ -65,11 +65,32 @@ drop policy if exists player_credit_self_read on public.player_credit;
 create policy player_credit_self_read on public.player_credit
   for select using (user_id = auth.uid());
 
--- An organizer sees the score of people in their own sessions and nobody
--- else's. `shares_session_with` is the existing helper for exactly this.
+-- An organizer sees the score of people in their own sessions and nobody else.
+--
+-- Deliberately NOT `shares_session_with`, which was written for display names
+-- and is true for any co-participant, and also true for any organizer of a
+-- public session. Borrowing it here would have let every player read every
+-- teammate's score, and made every organizer's own score world-readable. A
+-- score says "this person does not pay what they owe"; it is not a display
+-- name. supabase/tests/pay_later_rls.test.sql pins both cases.
+create or replace function public.organizes_session_with(p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select exists (
+    select 1
+    from public.sessions s
+    join public.session_participants sp on sp.session_id = s.id
+    where s.organizer_id = auth.uid() and sp.user_id = p_user_id
+  );
+$$;
+
 drop policy if exists player_credit_organizer_read on public.player_credit;
 create policy player_credit_organizer_read on public.player_credit
-  for select using (public.shares_session_with(user_id));
+  for select using (public.organizes_session_with(user_id));
 
 drop policy if exists player_credit_admin_read on public.player_credit;
 create policy player_credit_admin_read on public.player_credit
@@ -365,3 +386,146 @@ revoke execute on function public.record_chase(uuid, integer, text, text, text)
   from public, authenticated;
 grant execute on function public.list_chaseable_participants() to service_role;
 grant execute on function public.record_chase(uuid, integer, text, text, text) to service_role;
+
+-- ---------------------------------------------------------------------------
+-- Retrying a declined pay-later payment.
+--
+-- start_payment() refuses a pay-later debt twice over: the status is not
+-- `joined_pending_payment`, and payment_due_at has passed by design. That is
+-- correct for it and useless here, because a declined card must not make a debt
+-- permanently unpayable — settle_payment() marks the row `failed`, and without
+-- this function there is no live row left for the player to settle against.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.open_pay_later_payment(
+  p_participant_id  uuid,
+  p_idempotency_key text,
+  p_provider        text default 'mock'
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_p       public.session_participants%rowtype;
+  v_payment public.payments%rowtype;
+  v_id      uuid;
+begin
+  select * into v_p from public.session_participants where id = p_participant_id for update;
+  if v_p.id is null then
+    return jsonb_build_object('ok', false, 'reason', 'participant_not_found');
+  end if;
+
+  if v_p.status not in ('joined_pay_later', 'payment_overdue') then
+    return jsonb_build_object('ok', false, 'reason', 'wrong_state');
+  end if;
+
+  -- A live row already exists (the usual case): settle against that one.
+  select * into v_payment
+  from public.payments
+  where participant_id = p_participant_id and status in ('pending', 'paid')
+  limit 1;
+
+  if v_payment.id is not null then
+    return jsonb_build_object('ok', true, 'replayed', true, 'paymentId', v_payment.id,
+      'status', v_payment.status, 'amountThb', v_payment.amount_thb);
+  end if;
+
+  -- expires_at stays null, as it must for every pay-later row.
+  insert into public.payments
+    (session_id, participant_id, user_id, amount_thb, status, provider,
+     idempotency_key, expires_at)
+  values
+    (v_p.session_id, v_p.id, v_p.user_id, v_p.amount_due_thb, 'pending', p_provider,
+     p_idempotency_key, null)
+  returning id into v_id;
+
+  perform public.app_log(coalesce(auth.uid(), v_p.user_id), 'payment', v_id, v_p.session_id,
+    'payment.created', null, 'pending',
+    jsonb_build_object('amountThb', v_p.amount_due_thb, 'provider', p_provider,
+      'payLaterRetry', true));
+
+  return jsonb_build_object('ok', true, 'replayed', false, 'paymentId', v_id,
+    'status', 'pending', 'amountThb', v_p.amount_due_thb);
+end;
+$$;
+
+revoke execute on function public.open_pay_later_payment(uuid, text, text) from public;
+grant execute on function public.open_pay_later_payment(uuid, text, text) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- A cancelled session cancels its debts.
+--
+-- When a session reaches its start time without a court, the platform cancels
+-- it and refunds everyone who paid — the landing page promises exactly that:
+-- ไม่ได้สนาม คืนเต็ม. Without this, a pay-later player got the opposite of the
+-- promise: paid players were made whole while the one who had not paid yet kept
+-- the bill, stayed in the chase list, and lost five credit a day for a session
+-- that never happened because we could not find a court.
+--
+-- A trigger rather than an edit to cancel_session(): there are two paths into a
+-- cancelled session (cancel_session and fail_session_booking) and this must
+-- cover both without either remembering to call it.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.void_pay_later_on_session_end()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_row     record;
+  v_charged integer;
+begin
+  if new.status not in ('cancelled', 'booking_failed') then return new; end if;
+
+  for v_row in
+    select sp.id, sp.user_id, sp.amount_due_thb
+    from public.session_participants sp
+    where sp.session_id = new.id
+      and sp.status in ('joined_pay_later', 'payment_overdue')
+  loop
+    update public.payments
+    set status = 'expired'
+    where participant_id = v_row.id and status = 'pending';
+
+    update public.session_participants
+    set status = 'cancelled', cancelled_at = now(), last_chased_at = null
+    where id = v_row.id;
+
+    -- Give back whatever this session's debt already cost them. The charge was
+    -- for money they were never going to owe.
+    select coalesce(sum(delta), 0) into v_charged
+    from public.credit_events
+    where user_id = v_row.user_id and session_id = new.id and delta < 0;
+
+    if v_charged < 0 then
+      update public.player_credit
+      set score = greatest(0, least(100, score - v_charged))
+      where user_id = v_row.user_id;
+
+      insert into public.credit_events (user_id, session_id, delta, reason)
+      values (v_row.user_id, new.id, -v_charged, 'session_cancelled_refund');
+    end if;
+
+    perform public.notify_user(v_row.user_id, new.id, 'debt_cancelled',
+      'ยกเลิกยอดค้างชำระแล้ว',
+      'ก๊วนถูกยกเลิกและระบบไม่ได้จองสนามให้ ยอดค้าง ฿' || v_row.amount_due_thb ||
+      ' จึงถูกยกเลิก และเครดิตที่ถูกหักไปได้คืนแล้ว', null);
+
+    perform public.app_log(null, 'session_participant', v_row.id, new.id,
+      'participant.pay_later_voided', 'payment_overdue', 'cancelled',
+      jsonb_build_object('amountThb', v_row.amount_due_thb, 'creditRestored', -v_charged));
+  end loop;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists sessions_void_pay_later on public.sessions;
+create trigger sessions_void_pay_later
+  after update of status on public.sessions
+  for each row
+  when (old.status is distinct from new.status)
+  execute function public.void_pay_later_on_session_end();
