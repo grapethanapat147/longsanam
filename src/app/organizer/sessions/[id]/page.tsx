@@ -5,6 +5,7 @@ import { AppShell } from '@/components/shell';
 import { BookingStatusChip, ParticipantStatusChip, SessionStatusChip } from '@/components/status';
 import { PayLaterControl } from '@/components/pay-later-control';
 import { CheckInControl } from '@/components/check-in-control';
+import { SettleControl } from '@/components/settle-control';
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
 import { SessionTimeline } from '@/components/session-timeline';
@@ -50,7 +51,9 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     .select(
       `id, public_code, title, description, area_text, district, starts_at, ends_at, status,
        budget_per_person_thb, target_players, min_players, payment_deadline, organizer_id,
-       cancellation_policy, failure_reason, cancelled_reason, sports (name_th, emoji)`,
+       cancellation_policy, failure_reason, cancelled_reason,
+       shuttle_cost_thb, split_mode, settled_per_person_thb,
+       sports (name_th, emoji)`,
     )
     .eq('id', id)
     .maybeSingle();
@@ -75,6 +78,9 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     cancellation_policy: unknown;
     failure_reason: string | null;
     cancelled_reason: string | null;
+    shuttle_cost_thb: number;
+    split_mode: 'equal' | 'by_games';
+    settled_per_person_thb: number | null;
     sports: { name_th: string; emoji: string } | null;
   };
 
@@ -98,6 +104,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
       .from('session_participants')
       .select(
         'id, status, amount_due_thb, payment_due_at, joined_at, user_id, checked_in_at, ' +
+          'games_played, ' +
           // Two FKs now point at profiles (user_id and pay_later_granted_by),
           // so the embed must name which one it means.
           'profiles!session_participants_user_id_fkey (display_name, avatar_url, player_credit (score))',
@@ -127,6 +134,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     joined_at: string;
     user_id: string;
     checked_in_at: string | null;
+    games_played: number | null;
     profiles: {
       display_name: string;
       avatar_url: string | null;
@@ -265,6 +273,20 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
             startsAt={session.starts_at}
             paidParticipants={progress.paidParticipants}
             paidTotalThb={progress.paidTotalThb}
+          />
+
+          <SettleControl
+            sessionId={session.id}
+            courtCostThb={bookings.find((b) => b.status === 'confirmed')?.price_thb ?? 0}
+            shuttleCostThb={session.shuttle_cost_thb}
+            splitMode={session.split_mode}
+            settledPerPersonThb={session.settled_per_person_thb}
+            players={participants
+              .filter((p) =>
+                ['paid_confirmed', 'joined_pay_later', 'payment_overdue'].includes(p.status),
+              )
+              .map((p) => ({ participantId: p.id, gamesPlayed: p.games_played }))}
+            closed={session.status === 'cancelled' || session.status === 'booking_failed'}
           />
 
           <Card className="px-5 py-4">
