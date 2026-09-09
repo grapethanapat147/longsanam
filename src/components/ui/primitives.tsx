@@ -115,7 +115,9 @@ const buttonBase =
   'active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0';
 
 const buttonVariants: Record<ButtonVariant, string> = {
-  primary: 'bg-brand-600 text-white shadow-line hover:bg-brand-700 active:bg-brand-800',
+  /* Bright green with ink on it, not white: white on brand-500 is 3.19:1.
+     See rule 2 in globals.css. */
+  primary: 'bg-brand-500 text-on-brand shadow-line hover:bg-brand-400 active:bg-brand-500',
   secondary: 'border hairline bg-white text-ink-800 shadow-line hover:bg-ink-50 active:bg-ink-100',
   ghost: 'text-ink-700 hover:bg-ink-100 active:bg-ink-200',
   danger: 'bg-clay-700 text-white shadow-line hover:bg-clay-900',
@@ -207,7 +209,7 @@ const chipTones: Record<ChipTone, { chip: string; dot: string }> = {
   success: { chip: 'bg-brand-50 text-brand-800', dot: 'bg-brand-500' },
   warning: { chip: 'bg-clay-50 text-clay-900', dot: 'bg-clay-500' },
   danger: { chip: 'bg-red-50 text-red-900', dot: 'bg-red-500' },
-  brand: { chip: 'bg-brand-600 text-white', dot: 'bg-accent-400' },
+  brand: { chip: 'bg-brand-500 text-on-brand', dot: 'bg-on-brand' },
 };
 
 export function Chip({

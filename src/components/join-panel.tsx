@@ -9,7 +9,7 @@ import {
   leaveWaitlistAction,
   payForSlotAction,
 } from '@/lib/actions/participation';
-import { Alert, Button, Card, Chip, DisabledAction } from '@/components/ui/primitives';
+import { Alert, Button, Card, Chip, DisabledAction, buttonClass } from '@/components/ui/primitives';
 import { ParticipantStatusChip, WaitlistStatusChip } from '@/components/status';
 import { formatCountdown, formatThb } from '@/lib/format';
 import { t } from '@/i18n';
@@ -184,7 +184,7 @@ export function JoinPanel(props: Props) {
       return (
         <Link
           href={`/auth/sign-in?next=${encodeURIComponent(`/s/${props.publicCode}`)}`}
-          className="block w-full rounded-xl bg-brand-600 px-5 py-3 text-center text-base font-semibold text-white hover:bg-brand-700 focus-ring"
+          className={buttonClass('primary', 'lg', 'w-full')}
         >
           เข้าสู่ระบบเพื่อเข้าร่วม
         </Link>

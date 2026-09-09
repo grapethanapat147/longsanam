@@ -1,42 +1,51 @@
 @import 'tailwindcss';
 
 /* ===========================================================================
- * ลงสนาม — "เส้นสนาม" (Court Lines)
+ * ลงสนาม — "เส้นสนาม" (Court Lines), รุ่น 2
  *
- * The product exists to secure a court, so the interface borrows one: a warm
- * playing-surface ground, crisp painted lines, and scoreboard numerals.
+ * The product exists to secure a court, so the interface borrows one: a white
+ * ground, crisp painted lines, and scoreboard numerals. Round two moved the
+ * ground from warm clay to true white, lifted the pitch green one step, and
+ * promoted the lime from ornament to the line that ties everything together.
  *
  * Three rules hold the system together:
  *
  *   1. Light only. One theme executed properly beats two executed adequately,
  *      and the app is opened from a LINE chat in daylight far more often than
  *      it is browsed at night.
- *   2. Pitch green carries every action. The lime is line paint — it fills
- *      progress and marks "live", and is never used for text, where it would
- *      fail contrast against any surface we use.
+ *   2. 500 paints, 600 writes, ink sits on 500. Brand-500 is bright enough to
+ *      make the app feel alive, but white text on it measures 3.19:1 and fails
+ *      AA — so anything written on brand-500 uses `on-brand` (5.37:1), and any
+ *      green text on white uses 600 (5.37:1). The lime is line paint: fills
+ *      and bars only, never text (1.38:1 on white).
  *   3. Numbers are the content. Money and headcount get tabular figures and
  *      tighter tracking so a glance is enough.
+ *
+ * Every ratio above was computed, not estimated; docs/build_sen_sanam.py
+ * asserts them and generates the reference page.
  * ======================================================================== */
 
 @theme {
-  /* Pitch green. Deepened from the old palette so 600 clears AA on white for
-     button labels and link text at body size. */
-  --color-brand-50: #eefaf3;
-  --color-brand-100: #d3f2e0;
-  --color-brand-200: #a7e5c3;
-  --color-brand-300: #6fd0a0;
-  --color-brand-400: #38b57e;
-  --color-brand-500: #159463;
+  /* Pitch green. 500 for fills, 600 for text. */
+  --color-brand-50: #ecfbf2;
+  --color-brand-100: #cff5e0;
+  --color-brand-200: #9fe9c2;
+  --color-brand-300: #63d79e;
+  --color-brand-400: #2ec27b;
+  --color-brand-500: #12a563;
   --color-brand-600: #0a7a4f;
   --color-brand-700: #076140;
   --color-brand-800: #084d34;
-  --color-brand-900: #073a28;
+  --color-brand-900: #06301f;
+
+  /* Text on a brand-500 fill. White fails there; ink does not. */
+  --color-on-brand: #0d1f18;
 
   /* Line paint. Surfaces and fills only — never text. */
-  --color-accent-300: #e2fa8f;
-  --color-accent-400: #cdf25c;
-  --color-accent-500: #b4e02e;
-  --color-accent-600: #8fb81f;
+  --color-accent-300: #e9fbaa;
+  --color-accent-400: #d6f56e;
+  --color-accent-500: #bfec33;
+  --color-accent-600: #9ac41c;
 
   /* Clay, for the warning register. Warmer and less shrill than amber. */
   --color-clay-50: #fdf4ee;
@@ -47,19 +56,17 @@
   --color-clay-900: #5c2c18;
 
   /* Ink carries a green undertone so text never looks cold against the
-     warm ground. */
-  --color-ink-50: #f7f7f4;
-  --color-ink-100: #eeeeea;
-  --color-ink-200: #e0e0d9;
-  --color-ink-300: #c8c9c0;
-  /* Darkened from #9a9c92, which measured 2.78:1 on white — below the 3:1
-     that non-text UI needs, and this tier carries the card icons. */
-  --color-ink-400: #8b8d83;
-  --color-ink-500: #6f7268;
-  --color-ink-600: #53564d;
-  --color-ink-700: #3c3f38;
-  --color-ink-800: #262a25;
-  --color-ink-900: #12211c;
+     white ground. 400 must clear 3:1 because it carries the card icons. */
+  --color-ink-50: #f6f9f7;
+  --color-ink-100: #eff5f1;
+  --color-ink-200: #dfe8e2;
+  --color-ink-300: #b9c7bf;
+  --color-ink-400: #7f8f86;
+  --color-ink-500: #64766c;
+  --color-ink-600: #4b5c53;
+  --color-ink-700: #35473f;
+  --color-ink-800: #1c302a;
+  --color-ink-900: #0d1f18;
 
   --font-sans: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-jamjuree), var(--font-anuphan), ui-sans-serif, sans-serif;
@@ -68,16 +75,20 @@
 
   /* One shadow language: tight, low, and tinted with the ink hue rather than
      pure black, so cards sit on the surface instead of floating over it. */
-  --shadow-line: 0 1px 2px 0 rgb(18 33 28 / 0.05);
-  --shadow-lift: 0 1px 2px 0 rgb(18 33 28 / 0.06), 0 8px 24px -12px rgb(18 33 28 / 0.18);
+  --shadow-line: 0 1px 2px 0 rgb(13 31 24 / 0.05);
+  --shadow-lift: 0 1px 2px 0 rgb(13 31 24 / 0.06), 0 8px 24px -12px rgb(13 31 24 / 0.18);
 }
 
 :root {
   color-scheme: light;
-  --surface: #f4f3ee;
+  --surface: #ffffff;
+  /* Section bands. With the ground and the cards both white, a card needs its
+     hairline to exist at all — Card always carries one — and this tint is what
+     separates one region of a page from the next instead of shadow. */
+  --surface-tint: #f1f9f4;
   --surface-raised: #ffffff;
   --foreground: var(--color-ink-900);
-  --hairline: rgb(18 33 28 / 0.09);
+  --hairline: rgb(13 31 24 / 0.1);
 }
 
 body {
@@ -86,8 +97,8 @@ body {
      faint green wash at the base. Cheap to paint, and it stops the page
      reading as a flat sheet of grey. */
   background-image:
-    radial-gradient(60rem 32rem at 50% -14rem, rgb(10 122 79 / 0.07), transparent 70%),
-    radial-gradient(48rem 24rem at 100% 100%, rgb(180 224 46 / 0.06), transparent 70%);
+    radial-gradient(52rem 26rem at 50% -12rem, rgb(18 165 99 / 0.1), transparent 70%),
+    radial-gradient(40rem 20rem at 105% 8%, rgb(191 236 51 / 0.16), transparent 70%);
   /* Not `fixed`: that forces a full repaint on every scroll frame on mobile,
      which is exactly the jank this was supposed to be too subtle to cause. */
   background-repeat: no-repeat;

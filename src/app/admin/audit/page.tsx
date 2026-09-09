@@ -140,7 +140,7 @@ function FilterLink({ href, active, label }: { href: string; active: boolean; la
       href={href}
       className={
         active
-          ? 'rounded-full bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white focus-ring'
+          ? 'rounded-full bg-brand-500 px-3 py-1.5 text-xs font-semibold text-on-brand focus-ring'
           : 'rounded-full border border-ink-300 px-3 py-1.5 text-xs font-medium text-ink-600 hover:bg-ink-50 focus-ring'
       }
     >
