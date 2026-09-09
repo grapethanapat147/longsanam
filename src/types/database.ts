@@ -768,6 +768,7 @@ export type Database = {
           checked_in_at: string | null
           confirmed_at: string | null
           created_at: string
+          games_played: number | null
           id: string
           joined_at: string
           last_chased_at: string | null
@@ -786,6 +787,7 @@ export type Database = {
           checked_in_at?: string | null
           confirmed_at?: string | null
           created_at?: string
+          games_played?: number | null
           id?: string
           joined_at?: string
           last_chased_at?: string | null
@@ -804,6 +806,7 @@ export type Database = {
           checked_in_at?: string | null
           confirmed_at?: string | null
           created_at?: string
+          games_played?: number | null
           id?: string
           joined_at?: string
           last_chased_at?: string | null
@@ -910,6 +913,10 @@ export type Database = {
           organizer_id: string
           payment_deadline: string
           public_code: string | null
+          settled_at: string | null
+          settled_per_person_thb: number | null
+          shuttle_cost_thb: number
+          split_mode: Database["public"]["Enums"]["split_mode"]
           sport_id: string
           starts_at: string
           status: Database["public"]["Enums"]["session_status"]
@@ -934,6 +941,10 @@ export type Database = {
           organizer_id: string
           payment_deadline: string
           public_code?: string | null
+          settled_at?: string | null
+          settled_per_person_thb?: number | null
+          shuttle_cost_thb?: number
+          split_mode?: Database["public"]["Enums"]["split_mode"]
           sport_id: string
           starts_at: string
           status?: Database["public"]["Enums"]["session_status"]
@@ -958,6 +969,10 @@ export type Database = {
           organizer_id?: string
           payment_deadline?: string
           public_code?: string | null
+          settled_at?: string | null
+          settled_per_person_thb?: number | null
+          shuttle_cost_thb?: number
+          split_mode?: Database["public"]["Enums"]["split_mode"]
           sport_id?: string
           starts_at?: string
           status?: Database["public"]["Enums"]["session_status"]
@@ -1379,6 +1394,14 @@ export type Database = {
         }
         Returns: Json
       }
+      settle_session_costs: {
+        Args: {
+          p_session_id: string
+          p_shuttle_cost_thb: number
+          p_split_mode: Database["public"]["Enums"]["split_mode"]
+        }
+        Returns: Json
+      }
       shares_session_with: { Args: { p_user_id: string }; Returns: boolean }
       start_payment: {
         Args: {
@@ -1445,6 +1468,7 @@ export type Database = {
         | "booking_failed"
         | "cancelled"
         | "completed"
+      split_mode: "equal" | "by_games"
       venue_member_role: "owner" | "manager" | "staff"
       waitlist_status:
         | "waiting"
@@ -1617,6 +1641,7 @@ export const Constants = {
         "cancelled",
         "completed",
       ],
+      split_mode: ["equal", "by_games"],
       venue_member_role: ["owner", "manager", "staff"],
       waitlist_status: [
         "waiting",
