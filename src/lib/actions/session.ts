@@ -380,3 +380,59 @@ export async function cancelSessionAction(
 
   return { ok: true, refundedPlayers, refundedThb };
 }
+
+/* -------------------------------------------------------------------------
+ * Settling the real cost (LSN-0021).
+ *
+ * Through the organizer's own client, so is_session_organizer() inside the RPC
+ * sees the real caller.
+ * ---------------------------------------------------------------------- */
+
+export type SettleResult =
+  | { ok: true; totalThb: number; perPersonThb: number; unpaidUpdated: number }
+  | { ok: false; error: string };
+
+export async function settleSessionAction(
+  sessionId: string,
+  shuttleCostThb: number,
+  splitMode: 'equal' | 'by_games',
+): Promise<SettleResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: reasonLabel.not_authenticated };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('settle_session_costs', {
+    p_session_id: sessionId,
+    p_shuttle_cost_thb: Math.max(0, Math.round(shuttleCostThb)),
+    p_split_mode: splitMode,
+  });
+
+  if (error) {
+    console.error('[settleSessionAction] settle_session_costs failed', error);
+    return { ok: false, error: t.common.unexpectedError };
+  }
+
+  const result = data as {
+    ok?: boolean;
+    reason?: string;
+    totalThb?: number;
+    perPersonThb?: number;
+    unpaidUpdated?: number;
+  } | null;
+
+  if (!result?.ok) {
+    // session.ts has reasonLabel and t imported already, but no describe()
+    // helper the way participation.ts does; inline the same fallback.
+    const reason = result?.reason;
+    return { ok: false, error: (reason && reasonLabel[reason]) || t.common.unexpectedError };
+  }
+
+  revalidatePath('/organizer', 'layout');
+  revalidatePath('/s', 'layout');
+  return {
+    ok: true,
+    totalThb: result.totalThb ?? 0,
+    perPersonThb: result.perPersonThb ?? 0,
+    unpaidUpdated: result.unpaidUpdated ?? 0,
+  };
+}
