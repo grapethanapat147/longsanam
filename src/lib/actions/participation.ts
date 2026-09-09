@@ -494,3 +494,63 @@ export async function setCheckInAction(
   revalidatePath('/organizer', 'layout');
   return { ok: true };
 }
+
+/**
+ * Guests (LSN-0022).
+ *
+ * A guest is a seat with no account: the organizer vouches for someone who is
+ * not on the platform. `paidCash` is an attestation, not a verified payment —
+ * the RPC records who made the claim, which is the most the system can offer
+ * for money that changed hands in a car park.
+ */
+export type GuestResult = { ok: true; participantId?: string } | { ok: false; error: string };
+
+export async function addGuestAction(
+  sessionId: string,
+  guestName: string,
+  paidCash: boolean,
+): Promise<GuestResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: reasonLabel.not_authenticated };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('add_guest_participant', {
+    p_session_id: sessionId,
+    p_guest_name: guestName.trim(),
+    p_paid_cash: paidCash,
+  });
+
+  if (error) {
+    console.error('[addGuestAction] add_guest_participant failed', error);
+    return { ok: false, error: t.common.unexpectedError };
+  }
+
+  const result = data as { ok?: boolean; reason?: string; participantId?: string } | null;
+  if (!result?.ok) return { ok: false, error: describe(result?.reason) };
+
+  revalidatePath('/organizer', 'layout');
+  revalidatePath('/s', 'layout');
+  return { ok: true, participantId: result.participantId };
+}
+
+export async function removeGuestAction(participantId: string): Promise<GuestResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: reasonLabel.not_authenticated };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('remove_guest_participant', {
+    p_participant_id: participantId,
+  });
+
+  if (error) {
+    console.error('[removeGuestAction] remove_guest_participant failed', error);
+    return { ok: false, error: t.common.unexpectedError };
+  }
+
+  const result = data as { ok?: boolean; reason?: string } | null;
+  if (!result?.ok) return { ok: false, error: describe(result?.reason) };
+
+  revalidatePath('/organizer', 'layout');
+  revalidatePath('/s', 'layout');
+  return { ok: true };
+}
