@@ -10,7 +10,6 @@
 
 alter table public.session_participants
   add column if not exists checked_in_at     timestamptz,
-  add column if not exists checked_in_by     uuid references public.profiles (id),
   add column if not exists no_show_marked_at timestamptz;
 
 comment on column public.session_participants.no_show_marked_at is
@@ -55,9 +54,10 @@ begin
     return jsonb_build_object('ok', false, 'reason', 'outside_check_in_window');
   end if;
 
+  -- Who marked them present is already in audit_logs, with the actor id; a
+  -- checked_in_by column would be a second copy of the same fact.
   update public.session_participants
-  set checked_in_at = case when p_present then now() else null end,
-      checked_in_by = case when p_present then auth.uid() else null end
+  set checked_in_at = case when p_present then now() else null end
   where id = p_participant_id;
 
   perform public.app_log(auth.uid(), 'session_participant', p_participant_id, v_p.session_id,
@@ -99,7 +99,17 @@ begin
       and sp.checked_in_at is null
       and sp.no_show_marked_at is null
       and sp.user_id is not null
-      and s.status not in ('cancelled', 'booking_failed')
+      -- An allowlist, not a denylist. A no-show only means something for a
+      -- session that actually happened; `booked` and `completed` are the only
+      -- two statuses that say it did. Filtering out cancelled and
+      -- booking_failed instead would let `open`, `ready_to_book`,
+      -- `holding_court` and `draft` through — every one of them a session that
+      -- never secured a court — and charge its players for not attending it.
+      -- The stranded-session loop normally cancels those first, but it
+      -- `continue`s when cancel_session fails, and a guard that depends on
+      -- another step having run is the shape of bug this ticket already has
+      -- two other defences against.
+      and s.status in ('booked', 'completed')
       and s.ends_at + interval '2 hours' <= now()
     for update of sp skip locked
   loop

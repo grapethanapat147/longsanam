@@ -87,7 +87,14 @@ export function chaseDecision({ endsAt, lastChasedAt, now }: ChaseInput): ChaseD
 
 export const CHECK_IN_OPENS_MINUTES_BEFORE = 30;
 
-/** A pay-later seat that never came and never cancelled. */
+/**
+ * What a pay-later seat that never came and never cancelled costs.
+ *
+ * The charge itself is applied by mark_no_shows() in SQL, inside the sweep's
+ * transaction. This constant names the number and is what the parity check in
+ * the ticket greps against; it is documentation with a test, not a second
+ * implementation.
+ */
 export const CREDIT_NO_SHOW_UNPAID = -10;
 
 export type CheckInWindow = {
@@ -104,16 +111,4 @@ export function checkInWindow(startsAt: Date, endsAt: Date): CheckInWindow {
     closesAt,
     isOpenAt: (now) => now >= opensAt && now < closesAt,
   };
-}
-
-/**
- * What a missed session costs. Only the unpaid, uncancelled case charges
- * anything: a paid player who did not come has already paid for the seat they
- * wasted, and taking credit from them too would be charging twice for one
- * absence.
- */
-export function noShowDelta(status: string, checkedIn: boolean): number {
-  if (checkedIn) return 0;
-  if (status !== 'joined_pay_later' && status !== 'payment_overdue') return 0;
-  return CREDIT_NO_SHOW_UNPAID;
 }

@@ -766,7 +766,6 @@ export type Database = {
           amount_due_thb: number
           cancelled_at: string | null
           checked_in_at: string | null
-          checked_in_by: string | null
           confirmed_at: string | null
           created_at: string
           id: string
@@ -785,7 +784,6 @@ export type Database = {
           amount_due_thb: number
           cancelled_at?: string | null
           checked_in_at?: string | null
-          checked_in_by?: string | null
           confirmed_at?: string | null
           created_at?: string
           id?: string
@@ -804,7 +802,6 @@ export type Database = {
           amount_due_thb?: number
           cancelled_at?: string | null
           checked_in_at?: string | null
-          checked_in_by?: string | null
           confirmed_at?: string | null
           created_at?: string
           id?: string
@@ -820,13 +817,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "session_participants_checked_in_by_fkey"
-            columns: ["checked_in_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "session_participants_pay_later_granted_by_fkey"
             columns: ["pay_later_granted_by"]
