@@ -465,3 +465,32 @@ export async function grantPayLaterAction(participantId: string): Promise<PayLat
 export async function revokePayLaterAction(participantId: string): Promise<PayLaterResult> {
   return callPayLaterRpc('revoke_pay_later', participantId);
 }
+
+/**
+ * Attendance (LSN-0020). The organizer's own client again, so the RPC's
+ * is_session_organizer() check sees the real caller.
+ */
+export async function setCheckInAction(
+  participantId: string,
+  present: boolean,
+): Promise<PayLaterResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: reasonLabel.not_authenticated };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('set_check_in', {
+    p_participant_id: participantId,
+    p_present: present,
+  });
+
+  if (error) {
+    console.error('[setCheckInAction] set_check_in failed', error);
+    return { ok: false, error: t.common.unexpectedError };
+  }
+
+  const result = data as { ok?: boolean; reason?: string } | null;
+  if (!result?.ok) return { ok: false, error: describe(result?.reason) };
+
+  revalidatePath('/organizer', 'layout');
+  return { ok: true };
+}

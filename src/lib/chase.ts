@@ -27,6 +27,7 @@ type ChaseableRow = {
   ends_at: string;
   last_chased_at: string | null;
   line_user_id: string | null;
+  checked_in_at: string | null;
 };
 
 export async function runPaymentChase(): Promise<ChaseResult> {
@@ -49,7 +50,16 @@ export async function runPaymentChase(): Promise<ChaseResult> {
     });
     if (!decision.shouldChase) continue;
 
-    const body = `ก๊วน "${row.session_title}" จบแล้ว ยอดค้างชำระ ฿${row.amount_due_thb}`;
+    // Proof, stated plainly. A reminder that can say "you were there" is a
+    // different message from one that can only assert a debt.
+    const attended = row.checked_in_at
+      ? `คุณเช็คอินเมื่อ ${new Date(row.checked_in_at).toLocaleTimeString('th-TH', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'Asia/Bangkok',
+        })} · `
+      : '';
+    const body = `${attended}ก๊วน "${row.session_title}" จบแล้ว ยอดค้างชำระ ฿${row.amount_due_thb}`;
 
     const { error: chaseError } = await admin.rpc('record_chase', {
       p_participant_id: row.participant_id,

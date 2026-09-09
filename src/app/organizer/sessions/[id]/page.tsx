@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { AppShell } from '@/components/shell';
 import { BookingStatusChip, ParticipantStatusChip, SessionStatusChip } from '@/components/status';
 import { PayLaterControl } from '@/components/pay-later-control';
+import { CheckInControl } from '@/components/check-in-control';
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
 import { SessionTimeline } from '@/components/session-timeline';
@@ -96,7 +97,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     admin
       .from('session_participants')
       .select(
-        'id, status, amount_due_thb, payment_due_at, joined_at, user_id, ' +
+        'id, status, amount_due_thb, payment_due_at, joined_at, user_id, checked_in_at, ' +
           // Two FKs now point at profiles (user_id and pay_later_granted_by),
           // so the embed must name which one it means.
           'profiles!session_participants_user_id_fkey (display_name, avatar_url, player_credit (score))',
@@ -125,6 +126,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     payment_due_at: string;
     joined_at: string;
     user_id: string;
+    checked_in_at: string | null;
     profiles: {
       display_name: string;
       avatar_url: string | null;
@@ -295,6 +297,12 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       <ParticipantStatusChip status={participant.status} />
+                      <CheckInControl
+                        participantId={participant.id}
+                        checkedInAt={participant.checked_in_at}
+                        startsAt={session.starts_at}
+                        endsAt={session.ends_at}
+                      />
                       <PayLaterControl
                         participantId={participant.id}
                         status={participant.status}

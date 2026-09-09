@@ -76,3 +76,39 @@ export function chaseDecision({ endsAt, lastChasedAt, now }: ChaseInput): ChaseD
 
   return { shouldChase: true, dayIndex, creditDelta: creditDeltaForOverdueDay(dayIndex) };
 }
+
+/**
+ * Attendance.
+ *
+ * The window closes where the chase opens (`CHASE_START_HOURS`), so there is
+ * never a moment when someone is being reminded about a debt whose attendance
+ * the organizer could still be recording.
+ */
+
+export const CHECK_IN_OPENS_MINUTES_BEFORE = 30;
+
+/**
+ * What a pay-later seat that never came and never cancelled costs.
+ *
+ * The charge itself is applied by mark_no_shows() in SQL, inside the sweep's
+ * transaction. This constant names the number and is what the parity check in
+ * the ticket greps against; it is documentation with a test, not a second
+ * implementation.
+ */
+export const CREDIT_NO_SHOW_UNPAID = -10;
+
+export type CheckInWindow = {
+  opensAt: Date;
+  closesAt: Date;
+  isOpenAt: (now: Date) => boolean;
+};
+
+export function checkInWindow(startsAt: Date, endsAt: Date): CheckInWindow {
+  const opensAt = new Date(startsAt.getTime() - CHECK_IN_OPENS_MINUTES_BEFORE * 60 * 1000);
+  const closesAt = new Date(endsAt.getTime() + CHASE_START_HOURS * 60 * 60 * 1000);
+  return {
+    opensAt,
+    closesAt,
+    isOpenAt: (now) => now >= opensAt && now < closesAt,
+  };
+}

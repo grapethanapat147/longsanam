@@ -765,11 +765,13 @@ export type Database = {
         Row: {
           amount_due_thb: number
           cancelled_at: string | null
+          checked_in_at: string | null
           confirmed_at: string | null
           created_at: string
           id: string
           joined_at: string
           last_chased_at: string | null
+          no_show_marked_at: string | null
           pay_later_granted_at: string | null
           pay_later_granted_by: string | null
           payment_due_at: string
@@ -781,11 +783,13 @@ export type Database = {
         Insert: {
           amount_due_thb: number
           cancelled_at?: string | null
+          checked_in_at?: string | null
           confirmed_at?: string | null
           created_at?: string
           id?: string
           joined_at?: string
           last_chased_at?: string | null
+          no_show_marked_at?: string | null
           pay_later_granted_at?: string | null
           pay_later_granted_by?: string | null
           payment_due_at: string
@@ -797,11 +801,13 @@ export type Database = {
         Update: {
           amount_due_thb?: number
           cancelled_at?: string | null
+          checked_in_at?: string | null
           confirmed_at?: string | null
           created_at?: string
           id?: string
           joined_at?: string
           last_chased_at?: string | null
+          no_show_marked_at?: string | null
           pay_later_granted_at?: string | null
           pay_later_granted_by?: string | null
           payment_due_at?: string
@@ -1269,6 +1275,7 @@ export type Database = {
         Args: never
         Returns: {
           amount_due_thb: number
+          checked_in_at: string
           ends_at: string
           last_chased_at: string
           line_user_id: string
@@ -1287,6 +1294,7 @@ export type Database = {
           status: Database["public"]["Enums"]["session_status"]
         }[]
       }
+      mark_no_shows: { Args: never; Returns: Json }
       mark_session_holding: {
         Args: { p_actor?: string; p_session_id: string }
         Returns: Json
@@ -1310,6 +1318,7 @@ export type Database = {
         }
         Returns: Json
       }
+      organizes_session_with: { Args: { p_user_id: string }; Returns: boolean }
       promote_waitlist: {
         Args: {
           p_actor?: string
@@ -1347,6 +1356,10 @@ export type Database = {
       }
       session_is_published: { Args: { p_session_id: string }; Returns: boolean }
       session_progress: { Args: { p_session_id: string }; Returns: Json }
+      set_check_in: {
+        Args: { p_participant_id: string; p_present: boolean }
+        Returns: Json
+      }
       settle_payment: {
         Args: {
           p_actor?: string
