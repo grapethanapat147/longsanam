@@ -10,7 +10,7 @@
 --   มีน        1111…0004  a player in OPEN001 (participant eeee…0004)
 
 begin;
-select plan(13);
+select plan(15);
 
 create or replace function pg_temp.act_as(p_id uuid) returns void
 language plpgsql as $$
@@ -96,6 +96,42 @@ select ok(
   (select user_id is distinct from '11111111-1111-4111-8111-000000000001'::uuid
      from public.session_participants where guest_name = 'พี่ต้น'),
   'a guest row never matches a caller, so the pay action refuses it');
+
+-- ---------------------------------------------------------------------------
+-- The arithmetic the cancel dialog does.
+--
+-- session_progress() counts a cash guest in paidParticipants and their money in
+-- paidTotalThb, which is right: they hold a genuinely paid seat and belong in
+-- the progress meter and in min_players. But refundAllPaidParticipants() skips
+-- them, so the cancel dialog subtracts the guest-cash figures before saying
+-- "will be refunded". These two assertions pin that the subtraction lands
+-- exactly on the set that function actually processes — its query is
+-- `status = 'paid_confirmed'` with `user_id is not null`.
+-- ---------------------------------------------------------------------------
+
+select is(
+  ((public.session_progress((select id from public.sessions where public_code = 'OPEN001'))
+    ->> 'paidParticipants')::integer
+   - (select count(*)::integer from public.session_participants
+        where session_id = (select id from public.sessions where public_code = 'OPEN001')
+          and guest_name is not null and status = 'paid_confirmed')),
+  (select count(*)::integer from public.session_participants
+     where session_id = (select id from public.sessions where public_code = 'OPEN001')
+       and status = 'paid_confirmed' and user_id is not null),
+  'paid seats minus cash guests is exactly what the refund fan-out processes');
+
+select is(
+  ((public.session_progress((select id from public.sessions where public_code = 'OPEN001'))
+    ->> 'paidTotalThb')::integer
+   - (select coalesce(sum(amount_due_thb), 0)::integer from public.session_participants
+        where session_id = (select id from public.sessions where public_code = 'OPEN001')
+          and guest_name is not null and status = 'paid_confirmed')),
+  (select coalesce(sum(p.amount_thb), 0)::integer
+     from public.payments p
+     join public.session_participants sp on sp.id = p.participant_id
+     where sp.session_id = (select id from public.sessions where public_code = 'OPEN001')
+       and p.status = 'paid' and sp.user_id is not null),
+  'and the money left over is exactly what the platform can hand back');
 
 -- ---------------------------------------------------------------------------
 -- Guests are outside the credit system entirely.

@@ -276,6 +276,12 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
             startsAt={session.starts_at}
             paidParticipants={progress.paidParticipants}
             paidTotalThb={progress.paidTotalThb}
+            guestCashCount={
+              participants.filter((p) => p.guest_name && p.status === 'paid_confirmed').length
+            }
+            guestCashThb={participants
+              .filter((p) => p.guest_name && p.status === 'paid_confirmed')
+              .reduce((sum, p) => sum + p.amount_due_thb, 0)}
           />
 
           <SettleControl
