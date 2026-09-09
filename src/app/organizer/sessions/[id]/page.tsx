@@ -6,6 +6,7 @@ import { BookingStatusChip, ParticipantStatusChip, SessionStatusChip } from '@/c
 import { PayLaterControl } from '@/components/pay-later-control';
 import { CheckInControl } from '@/components/check-in-control';
 import { SettleControl } from '@/components/settle-control';
+import { GuestControl, RemoveGuestButton } from '@/components/guest-control';
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
 import { SessionTimeline } from '@/components/session-timeline';
@@ -104,7 +105,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
       .from('session_participants')
       .select(
         'id, status, amount_due_thb, payment_due_at, joined_at, user_id, checked_in_at, ' +
-          'games_played, ' +
+          'games_played, guest_name, ' +
           // Two FKs now point at profiles (user_id and pay_later_granted_by),
           // so the embed must name which one it means.
           'profiles!session_participants_user_id_fkey (display_name, avatar_url, player_credit (score))',
@@ -132,9 +133,11 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     amount_due_thb: number;
     payment_due_at: string;
     joined_at: string;
-    user_id: string;
+    /** Null for a guest: the seat exists without an account behind it. */
+    user_id: string | null;
     checked_in_at: string | null;
     games_played: number | null;
+    guest_name: string | null;
     profiles: {
       display_name: string;
       avatar_url: string | null;
@@ -289,6 +292,11 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
             closed={session.status === 'cancelled' || session.status === 'booking_failed'}
           />
 
+          <GuestControl
+            sessionId={session.id}
+            closed={session.status === 'cancelled' || session.status === 'booking_failed'}
+          />
+
           <Card className="px-5 py-4">
             <h2 className="font-semibold text-ink-900">
               {t.session.participants} ({participants.length})
@@ -302,12 +310,14 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
                     <div className="flex min-w-0 items-center gap-2.5">
                       <AvatarImage
                         url={participant.profiles?.avatar_url ?? null}
-                        displayName={participant.profiles?.display_name ?? 'ผู้เล่น'}
+                        displayName={
+                          participant.guest_name ?? participant.profiles?.display_name ?? 'ผู้เล่น'
+                        }
                         size={32}
                       />
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-ink-900">
-                          {participant.profiles?.display_name ?? 'ผู้เล่น'}
+                          {participant.guest_name ?? participant.profiles?.display_name ?? 'ผู้เล่น'}
                         </p>
                         <p className="text-xs text-ink-500">
                           {formatThb(participant.amount_due_thb)}
@@ -319,23 +329,40 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       <ParticipantStatusChip status={participant.status} />
+                      {participant.guest_name ? <Chip tone="guest">ผู้เล่นรับเชิญ</Chip> : null}
+                      {/* Check-in is for everyone: a guest turns up in person and
+                          counts in LSN-0021's settlement denominator like anyone
+                          else. Pay-later is not — see RemoveGuestButton for why
+                          revoking it would strand a guest seat. */}
                       <CheckInControl
                         participantId={participant.id}
                         checkedInAt={participant.checked_in_at}
                         startsAt={session.starts_at}
                         endsAt={session.ends_at}
                       />
-                      <PayLaterControl
-                        participantId={participant.id}
-                        status={participant.status}
-                        amountDueThb={participant.amount_due_thb}
-                        score={participant.profiles?.player_credit?.score ?? null}
-                        paidParticipants={progress.paidParticipants}
-                        minPlayers={session.min_players}
-                        sessionClosed={
-                          session.status === 'completed' || session.status === 'cancelled'
-                        }
-                      />
+                      {participant.guest_name ? (
+                        <RemoveGuestButton
+                          participantId={participant.id}
+                          guestName={participant.guest_name}
+                          closed={
+                            session.status === 'completed' ||
+                            session.status === 'cancelled' ||
+                            session.status === 'booking_failed'
+                          }
+                        />
+                      ) : (
+                        <PayLaterControl
+                          participantId={participant.id}
+                          status={participant.status}
+                          amountDueThb={participant.amount_due_thb}
+                          score={participant.profiles?.player_credit?.score ?? null}
+                          paidParticipants={progress.paidParticipants}
+                          minPlayers={session.min_players}
+                          sessionClosed={
+                            session.status === 'completed' || session.status === 'cancelled'
+                          }
+                        />
+                      )}
                     </div>
                   </li>
                 ))}

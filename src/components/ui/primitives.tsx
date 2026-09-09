@@ -198,7 +198,7 @@ export function DisabledAction({
  * Status
  * ---------------------------------------------------------------------- */
 
-export type ChipTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'brand';
+export type ChipTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'brand' | 'guest';
 
 /* Each tone pairs a tinted surface with a saturated dot. The dot does the
    scanning work — colour-blind readers and anyone glancing at a phone in
@@ -210,6 +210,10 @@ const chipTones: Record<ChipTone, { chip: string; dot: string }> = {
   warning: { chip: 'bg-clay-50 text-clay-900', dot: 'bg-clay-500' },
   danger: { chip: 'bg-red-50 text-red-900', dot: 'bg-red-500' },
   brand: { chip: 'bg-brand-500 text-on-brand', dot: 'bg-on-brand' },
+  /* A dashed outline rather than a fill of its own: what sets a guest apart
+     is having no account, not a payment state, and the palette has no
+     fourth hue to spend on it. */
+  guest: { chip: 'border border-dashed border-brand-300 bg-white text-brand-700', dot: 'bg-brand-400' },
 };
 
 export function Chip({
