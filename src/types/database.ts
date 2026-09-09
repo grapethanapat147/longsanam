@@ -545,7 +545,7 @@ export type Database = {
           session_id: string
           status: Database["public"]["Enums"]["payment_status"]
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           amount_thb: number
@@ -561,7 +561,7 @@ export type Database = {
           session_id: string
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           amount_thb?: number
@@ -577,7 +577,7 @@ export type Database = {
           session_id?: string
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -763,12 +763,14 @@ export type Database = {
       }
       session_participants: {
         Row: {
+          added_by_organizer: string | null
           amount_due_thb: number
           cancelled_at: string | null
           checked_in_at: string | null
           confirmed_at: string | null
           created_at: string
           games_played: number | null
+          guest_name: string | null
           id: string
           joined_at: string
           last_chased_at: string | null
@@ -779,15 +781,17 @@ export type Database = {
           session_id: string
           status: Database["public"]["Enums"]["participant_status"]
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
+          added_by_organizer?: string | null
           amount_due_thb: number
           cancelled_at?: string | null
           checked_in_at?: string | null
           confirmed_at?: string | null
           created_at?: string
           games_played?: number | null
+          guest_name?: string | null
           id?: string
           joined_at?: string
           last_chased_at?: string | null
@@ -798,15 +802,17 @@ export type Database = {
           session_id: string
           status?: Database["public"]["Enums"]["participant_status"]
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
+          added_by_organizer?: string | null
           amount_due_thb?: number
           cancelled_at?: string | null
           checked_in_at?: string | null
           confirmed_at?: string | null
           created_at?: string
           games_played?: number | null
+          guest_name?: string | null
           id?: string
           joined_at?: string
           last_chased_at?: string | null
@@ -817,9 +823,16 @@ export type Database = {
           session_id?: string
           status?: Database["public"]["Enums"]["participant_status"]
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "session_participants_added_by_organizer_fkey"
+            columns: ["added_by_organizer"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "session_participants_pay_later_granted_by_fkey"
             columns: ["pay_later_granted_by"]
@@ -1197,6 +1210,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_guest_participant: {
+        Args: {
+          p_guest_name: string
+          p_paid_cash: boolean
+          p_session_id: string
+        }
+        Returns: Json
+      }
       app_log: {
         Args: {
           p_action?: string
@@ -1354,6 +1375,10 @@ export type Database = {
       }
       release_hold: {
         Args: { p_actor?: string; p_hold_id: string; p_reason?: string }
+        Returns: Json
+      }
+      remove_guest_participant: {
+        Args: { p_participant_id: string }
         Returns: Json
       }
       request_booking: {

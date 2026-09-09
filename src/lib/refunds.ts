@@ -33,11 +33,17 @@ export async function refundAllPaidParticipants(
 ): Promise<{ refundedPlayers: number; refundedThb: number }> {
   const admin = createAdminClient();
 
+  // Guests are excluded at the query, not skipped in the loop, because there is
+  // no path here that could serve them: refunds.user_id and notifications.user_id
+  // are both NOT NULL, so cancel_participation and notify_user would each raise
+  // on a guest row. Their cash never entered the platform — the organizer took
+  // it by hand and has to give it back by hand. The cancel dialog says so.
   const { data: paidParticipants } = await admin
     .from('session_participants')
     .select('id, user_id, payments(id, amount_thb, status)')
     .eq('session_id', input.sessionId)
-    .eq('status', 'paid_confirmed');
+    .eq('status', 'paid_confirmed')
+    .not('user_id', 'is', null);
 
   const policy = parseCancellationPolicy(input.session.cancellation_policy);
   let refundedPlayers = 0;
@@ -86,7 +92,7 @@ export async function refundAllPaidParticipants(
     }
 
     await admin.rpc('notify_user', {
-      p_user_id: participant.user_id,
+      p_user_id: participant.user_id as string,
       p_session_id: input.sessionId,
       p_kind: 'session_cancelled',
       p_title: 'ก๊วนถูกยกเลิก',
