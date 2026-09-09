@@ -130,7 +130,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
               className={cn(
                 'rounded-full px-3 py-1.5 text-xs font-semibold transition focus-ring',
                 step === index
-                  ? 'bg-brand-600 text-white'
+                  ? 'bg-brand-500 text-on-brand'
                   : 'border border-ink-300 bg-white text-ink-600 hover:bg-ink-50',
               )}
             >

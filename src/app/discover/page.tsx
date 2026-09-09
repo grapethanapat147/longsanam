@@ -70,7 +70,7 @@ function FilterChip({ href, active, label }: { href: string; active: boolean; la
       className={cn(
         'rounded-full px-3 py-1.5 text-sm font-medium transition focus-ring',
         active
-          ? 'bg-brand-600 text-white'
+          ? 'bg-brand-500 text-on-brand'
           : 'border border-ink-300 bg-white text-ink-700 hover:bg-ink-50',
       )}
     >
