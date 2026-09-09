@@ -10,7 +10,7 @@
 --   มีน        1111…0004  a player in OPEN001 (participant eeee…0004)
 
 begin;
-select plan(15);
+select plan(19);
 
 create or replace function pg_temp.act_as(p_id uuid) returns void
 language plpgsql as $$
@@ -185,6 +185,37 @@ select is(
   (select no_show_marked_at from public.session_participants
      where guest_name = 'พี่ต้น'),
   null, 'but a guest is never marked, so it never costs anybody credit');
+
+-- ---------------------------------------------------------------------------
+-- Cancelling a session that holds an unpaid guest.
+--
+-- sessions_void_pay_later fires on the status change and loops joined_pay_later
+-- seats. Before review it had no user_id filter, so it reached
+-- notify_user(null, ...) and notifications.user_id is NOT NULL — the raise
+-- aborted the UPDATE, making such a session impossible to cancel.
+-- ---------------------------------------------------------------------------
+
+select pg_temp.act_as('11111111-1111-4111-8111-000000000001');
+set local role authenticated;
+select is(
+  (public.add_guest_participant(
+     (select id from public.sessions where public_code = 'READY01'), 'เจ๊หมวย', false) ->> 'ok'),
+  'true', 'an unpaid guest can be added');
+set local role postgres;
+
+select lives_ok(
+  $$update public.sessions set status = 'cancelled' where public_code = 'READY01'$$,
+  'a session holding an unpaid guest can still be cancelled');
+
+select is(
+  (select status::text from public.session_participants where guest_name = 'เจ๊หมวย'),
+  'cancelled', 'and the guest seat is voided like anyone else''s');
+
+select is(
+  (select p.status::text from public.payments p
+     join public.session_participants sp on sp.id = p.participant_id
+     where sp.guest_name = 'เจ๊หมวย'),
+  'expired', 'and their pending payment is expired, not left live');
 
 select * from finish();
 rollback;

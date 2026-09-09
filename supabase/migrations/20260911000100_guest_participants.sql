@@ -357,3 +357,184 @@ revoke execute on function public.add_guest_participant(uuid, text, boolean) fro
 revoke execute on function public.remove_guest_participant(uuid) from public;
 grant execute on function public.add_guest_participant(uuid, text, boolean) to authenticated;
 grant execute on function public.remove_guest_participant(uuid) to authenticated;
+
+
+-- ---------------------------------------------------------------------------
+-- Three functions found during review that reach a guest and dereference
+-- user_id. Bodies extracted from their own migrations and patched, not retyped.
+--
+-- The first is a live blocker: sessions_void_pay_later fires on every status
+-- change to cancelled/booking_failed and loops joined_pay_later seats with no
+-- user_id filter, so an unpaid guest reached notify_user(null, ...) and
+-- notifications.user_id is NOT NULL. The raise aborts the UPDATE, which means a
+-- session holding an unpaid guest could not be cancelled at all — not by the
+-- organizer, not by the lifecycle sweep.
+--
+-- This is the same bug already fixed in src/lib/refunds.ts. That fix caught the
+-- TypeScript fan-out and missed the SQL trigger doing the same job.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.void_pay_later_on_session_end()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_row     record;
+  v_charged integer;
+begin
+  if new.status not in ('cancelled', 'booking_failed') then return new; end if;
+
+  update public.sessions
+  set settled_per_person_thb = null, settled_at = null
+  where id = new.id and settled_per_person_thb is not null;
+
+  for v_row in
+    select sp.id, sp.user_id, sp.amount_due_thb
+    from public.session_participants sp
+    where sp.session_id = new.id
+      and sp.status in ('joined_pay_later', 'payment_overdue')
+  loop
+    update public.payments
+    set status = 'expired'
+    where participant_id = v_row.id and status = 'pending';
+
+    update public.session_participants
+    set status = 'cancelled', cancelled_at = now(), last_chased_at = null
+    where id = v_row.id;
+
+    -- A guest's seat and payment are voided exactly like anyone else's — the
+    -- debt is just as cancelled. What is skipped is everything that needs an
+    -- account: there is no credit to restore and nobody to notify.
+    if v_row.user_id is null then
+      perform public.app_log(null, 'session_participant', v_row.id, new.id,
+        'participant.pay_later_voided', 'joined_pay_later', 'cancelled',
+        jsonb_build_object('amountThb', v_row.amount_due_thb, 'guest', true));
+      continue;
+    end if;
+
+    select coalesce(sum(delta), 0) into v_charged
+    from public.credit_events
+    where user_id = v_row.user_id and session_id = new.id and delta < 0;
+
+    if v_charged < 0 then
+      update public.player_credit
+      set score = greatest(0, least(100, score - v_charged))
+      where user_id = v_row.user_id;
+
+      insert into public.credit_events (user_id, session_id, delta, reason)
+      values (v_row.user_id, new.id, -v_charged, 'session_cancelled_refund');
+    end if;
+
+    perform public.notify_user(v_row.user_id, new.id, 'debt_cancelled',
+      'ยกเลิกยอดค้างชำระแล้ว',
+      'ก๊วนถูกยกเลิกและระบบไม่ได้จองสนามให้ ยอดค้าง ฿' || v_row.amount_due_thb ||
+      ' จึงถูกยกเลิก และเครดิตที่ถูกหักไปได้คืนแล้ว', null);
+
+    perform public.app_log(null, 'session_participant', v_row.id, new.id,
+      'participant.pay_later_voided', 'payment_overdue', 'cancelled',
+      jsonb_build_object('amountThb', v_row.amount_due_thb, 'creditRestored', -v_charged));
+  end loop;
+
+  return new;
+end;
+$$;
+
+create or replace function public.revoke_pay_later(p_participant_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_p    public.session_participants%rowtype;
+  v_next public.participant_status;
+begin
+  select * into v_p from public.session_participants where id = p_participant_id for update;
+  if v_p.id is null or v_p.status not in ('joined_pay_later', 'payment_overdue') then
+    return jsonb_build_object('ok', false, 'reason', 'wrong_state');
+  end if;
+
+  if not public.is_session_organizer(v_p.session_id) then
+    return jsonb_build_object('ok', false, 'reason', 'not_organizer');
+  end if;
+
+  -- Revoking would move a guest to joined_pending_payment, whose only exit is
+  -- paying in the app — which a guest cannot do. grant_pay_later would then
+  -- refuse to put them back, and the seat would sit there consuming a slot
+  -- forever. remove_guest_participant() is the honest action on a guest seat.
+  if v_p.user_id is null then
+    return jsonb_build_object('ok', false, 'reason', 'guest_has_no_account');
+  end if;
+
+  update public.payments
+  set status = 'expired'
+  where participant_id = p_participant_id and status = 'pending';
+
+  v_next := case
+    when v_p.payment_due_at <= now() then 'payment_expired'::public.participant_status
+    else 'joined_pending_payment'::public.participant_status
+  end;
+
+  update public.session_participants
+  set status = v_next,
+      pay_later_granted_at = null,
+      pay_later_granted_by = null,
+      last_chased_at = null
+  where id = p_participant_id;
+
+  perform public.app_log(auth.uid(), 'session_participant', p_participant_id, v_p.session_id,
+    'participant.pay_later_revoked', v_p.status::text, v_next::text, '{}'::jsonb);
+
+  return jsonb_build_object('ok', true, 'status', v_next);
+end;
+$$;
+
+create or replace function public.award_credit_on_pay_later_settled()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_ends  timestamptz;
+  v_delta integer;
+  v_new   integer;
+begin
+  if new.status <> 'paid_confirmed' then return new; end if;
+  if old.status not in ('joined_pay_later', 'payment_overdue') then return new; end if;
+  -- Latent rather than live: nothing today moves a guest from joined_pay_later
+  -- to paid_confirmed. But "organizer collects the cash later" is the obvious
+  -- next feature, and this trigger would insert a null into player_credit's
+  -- primary key the moment it lands. One line now, versus a broken write then.
+  if new.user_id is null then return new; end if;
+
+  select ends_at into v_ends from public.sessions where id = new.session_id;
+
+  -- Inside the grace window the debt cost nothing, so settling returns a small
+  -- credit. Past it the score has already fallen, and +10 is what makes
+  -- recovery possible rather than permanent.
+  v_delta := case
+    when now() < v_ends + interval '2 hours' + interval '3 days' then 5
+    else 10
+  end;
+
+  insert into public.player_credit (user_id, score) values (new.user_id, 100)
+  on conflict (user_id) do nothing;
+
+  update public.player_credit
+  set score = greatest(0, least(100, score + v_delta))
+  where user_id = new.user_id
+  returning score into v_new;
+
+  insert into public.credit_events (user_id, session_id, delta, reason)
+  values (new.user_id, new.session_id, v_delta,
+    case when v_delta = 5 then 'paid_in_grace' else 'settled_late' end);
+
+  perform public.app_log(null, 'player_credit', new.user_id, new.session_id,
+    'credit.restored', old.status::text, v_new::text, jsonb_build_object('delta', v_delta));
+
+  return new;
+end;
+$$;
