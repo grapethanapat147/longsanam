@@ -5,7 +5,7 @@ import { t } from '@/i18n';
 import { getPaymentProvider } from '@/lib/payments';
 import { getCurrentUser } from '@/lib/auth';
 import { AvatarImage } from '@/components/image-upload';
-import { Chip } from '@/components/ui/primitives';
+import { Chip, buttonClass } from '@/components/ui/primitives';
 import { signOutAction } from '@/lib/actions/auth';
 
 /**
@@ -102,7 +102,7 @@ export async function SiteHeader() {
               </Link>
               <Link
                 href="/auth/sign-up"
-                className="rounded-xl bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 focus-ring"
+                className={buttonClass('primary', 'sm')}
               >
                 {t.nav.signUp}
               </Link>
