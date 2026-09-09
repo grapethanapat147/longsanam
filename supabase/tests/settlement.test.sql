@@ -6,7 +6,7 @@
 --   มีน        1111…0004  participant eeee…0004 — made joined_pay_later below
 
 begin;
-select plan(6);
+select plan(8);
 
 create or replace function pg_temp.act_as(p_id uuid) returns void
 language plpgsql as $$
@@ -64,6 +64,33 @@ select is(
   (select amount_due_thb from public.session_participants
      where id = 'eeeeeeee-0000-4000-8000-000000000002'),
   100, 'a seat that already paid is left exactly as it was');
+
+-- A guest is a player for costing purposes: they used the court. LSN-0021's
+-- denominator is `status in (...)` with no reference to user_id, so this should
+-- already hold — it is pinned because nothing else states it.
+--
+-- Placed before the cancellation below on purpose. After that block the session
+-- is booking_failed and มีน has been voided to cancelled, so the denominator
+-- would be three seats, not four, and re-opening the session to settle it again
+-- would be testing a state the product cannot reach.
+insert into public.session_participants
+  (session_id, user_id, guest_name, status, amount_due_thb, payment_due_at)
+select s.id, null, 'พี่ต้น', 'paid_confirmed', 0, s.payment_deadline
+from public.sessions s where s.public_code = 'OPEN001';
+
+select pg_temp.act_as('11111111-1111-4111-8111-000000000001');
+set local role authenticated;
+select is(
+  ((public.settle_session_costs(
+      (select id from public.sessions where public_code = 'OPEN001'), 400, 'equal')
+    ) ->> 'players')::integer,
+  5, 'a guest counts in the settlement denominator');
+set local role postgres;
+
+-- And actually moves the arithmetic: ฿1000 over five seats rather than four.
+select is(
+  (select settled_per_person_thb from public.sessions where public_code = 'OPEN001'),
+  200, 'so everybody pays less once the guest is counted');
 
 -- And the figure does not outlive the session it describes.
 update public.sessions set status = 'booking_failed' where public_code = 'OPEN001';
