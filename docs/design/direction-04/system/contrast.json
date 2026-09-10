@@ -1,0 +1,162 @@
+[
+  {
+    "foreground": "ink-900",
+    "background": "surface",
+    "ratio": 17.124722084018728,
+    "purpose": "ข้อความหลัก",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-700",
+    "background": "surface",
+    "ratio": 9.884918998044403,
+    "purpose": "ข้อความรอง",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-500",
+    "background": "surface",
+    "ratio": 4.827830036231791,
+    "purpose": "คำบรรยาย",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "brand-600",
+    "background": "surface",
+    "ratio": 5.371363197188749,
+    "purpose": "ลิงก์และตรา",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-900",
+    "background": "brand-500",
+    "ratio": 5.372223923623624,
+    "purpose": "CTA ปกติ",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "surface",
+    "background": "brand-600",
+    "ratio": 5.371363197188749,
+    "purpose": "CTA ทางเลือก",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-900",
+    "background": "accent-500",
+    "ratio": 12.44499017873401,
+    "purpose": "ข้อความบนไฮไลต์",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-900",
+    "background": "section",
+    "ratio": 15.980430107206777,
+    "purpose": "ข้อความบนแถบคั่น",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-700",
+    "background": "section",
+    "ratio": 9.224398293217655,
+    "purpose": "ข้อความรองบนแถบคั่น",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-900",
+    "background": "brand-50",
+    "ratio": 16.02189525787414,
+    "purpose": "badge",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "clay-700",
+    "background": "clay-50",
+    "ratio": 6.350628635557177,
+    "purpose": "ข้อความเตือน",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-400",
+    "background": "surface",
+    "ratio": 3.4004597314698053,
+    "purpose": "ไอคอน/ขอบ input",
+    "threshold": 3,
+    "pass": true
+  },
+  {
+    "foreground": "accent-500",
+    "background": "brand-700",
+    "ratio": 5.464217090898793,
+    "purpose": "แถบ progress/ตราบนเข้ม",
+    "threshold": 3,
+    "pass": true
+  },
+  {
+    "foreground": "surface",
+    "background": "brand-700",
+    "ratio": 7.518945193567525,
+    "purpose": "ชื่อแบรนด์บนเข้ม",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "brand-700",
+    "background": "surface",
+    "ratio": 7.518945193567525,
+    "purpose": "focus ring",
+    "threshold": 3,
+    "pass": true
+  },
+  {
+    "foreground": "surface",
+    "background": "ink-900",
+    "ratio": 17.124722084018728,
+    "purpose": "toast",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-700",
+    "background": "ink-100",
+    "ratio": 8.944101746234091,
+    "purpose": "disabled text",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "ink-400",
+    "background": "section",
+    "ratio": 3.173237428585,
+    "purpose": "decorative badge edge",
+    "threshold": 3,
+    "pass": true
+  },
+  {
+    "foreground": "ink-900",
+    "background": "brand-100",
+    "ratio": 14.507417381242794,
+    "purpose": "illustration-adjacent text if needed",
+    "threshold": 4.5,
+    "pass": true
+  },
+  {
+    "foreground": "brand-600",
+    "background": "brand-50",
+    "ratio": 5.025449062187769,
+    "purpose": "สัญลักษณ์กีฬา",
+    "threshold": 3,
+    "pass": true
+  }
+]

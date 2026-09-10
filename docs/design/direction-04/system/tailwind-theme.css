@@ -1,0 +1,32 @@
+@theme {
+  --color-brand-50: #ecfbf2;
+  --color-brand-100: #cff5e0;
+  --color-brand-200: #9fe9c2;
+  --color-brand-300: #63d79e;
+  --color-brand-400: #2ec27b;
+  --color-brand-500: #12a563;
+  --color-brand-600: #0a7a4f;
+  --color-brand-700: #076140;
+  --color-brand-800: #084d34;
+  --color-brand-900: #06301f;
+  --color-accent-300: #e9fbaa;
+  --color-accent-400: #d6f56e;
+  --color-accent-500: #bfec33;
+  --color-accent-600: #9ac41c;
+  --color-clay-50: #fdf4ee;
+  --color-clay-100: #fae3d3;
+  --color-clay-500: #c2643b;
+  --color-clay-700: #8f4526;
+  --color-ink-100: #eff5f1;
+  --color-ink-200: #dfe8e2;
+  --color-ink-300: #b9c7bf;
+  --color-ink-400: #7f8f86;
+  --color-ink-500: #64766c;
+  --color-ink-700: #35473f;
+  --color-ink-800: #1c302a;
+  --color-ink-900: #0d1f18;
+  --color-surface: #ffffff;
+  --color-section: #f1f9f4;
+  --font-heading: "Bai Jamjuree", sans-serif;
+  --font-body: "Anuphan", sans-serif;
+}
