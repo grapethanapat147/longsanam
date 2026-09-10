@@ -68,10 +68,18 @@
   --color-ink-800: #1c302a;
   --color-ink-900: #0d1f18;
 
+  --color-surface: #ffffff;
+  --color-section: #f1f9f4;
+
   --font-sans: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-jamjuree), var(--font-anuphan), ui-sans-serif, sans-serif;
 
-  --radius-card: 0.875rem;
+  /* ภาษาภาพจาก direction 04: มุมโค้งสลับมุมตัด ไม่ใช่มุมโค้งเท่ากันทั้งสี่มุม
+     ค่าเหล่านี้เป็น shorthand สี่ค่า ไม่ใช่ค่าเดียว จึงเขียนเป็น border-radius ได้ตรง ๆ */
+  --radius-button: 18px 4px 18px 4px;
+  --radius-card: 24px 6px 24px 6px;
+  --radius-input: 12px;
+  --radius-sheet: 28px;
 
   /* One shadow language: tight, low, and tinted with the ink hue rather than
      pure black, so cards sit on the surface instead of floating over it. */

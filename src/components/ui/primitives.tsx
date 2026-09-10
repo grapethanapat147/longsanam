@@ -110,7 +110,7 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 /* A 1px downward nudge on press: the whole feedback budget goes here, where a
    thumb expects it, rather than into decorative motion elsewhere. */
 const buttonBase =
-  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold tracking-tight ' +
+  'inline-flex items-center justify-center gap-2 rounded-button font-semibold tracking-tight ' +
   'transition-[background-color,box-shadow,transform] duration-150 focus-ring ' +
   'active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0';
 
@@ -123,10 +123,14 @@ const buttonVariants: Record<ButtonVariant, string> = {
   danger: 'bg-clay-700 text-white shadow-line hover:bg-clay-900',
 };
 
+/* direction 04 ระบุปุ่มไว้ขนาดเดียว: สูงอย่างน้อย 52px padding 11/24
+   แอปนี้มีสามขนาดเพราะแถวผู้เล่นต้องมีปุ่มแทรกในบรรทัด จึงรับสเปกนั้นมาที่ `lg`
+   ซึ่งเป็นปุ่มหลักของหน้าจอ ส่วน `md` ใช้ 44px ที่เป็นขนาดเป้าสัมผัสขั้นต่ำ
+   และ `sm` คงเดิมสำหรับปุ่มในแถว */
 const buttonSizes: Record<ButtonSize, string> = {
   sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2.5 text-sm',
-  lg: 'px-5 py-3 text-base',
+  md: 'min-h-11 px-4 py-2.5 text-sm',
+  lg: 'min-h-[52px] px-6 py-[11px] text-base',
 };
 
 export function buttonClass(
