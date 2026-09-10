@@ -6,6 +6,7 @@ import { getPaymentProvider } from '@/lib/payments';
 import { getCurrentUser } from '@/lib/auth';
 import { AvatarImage } from '@/components/image-upload';
 import { Chip, buttonClass } from '@/components/ui/primitives';
+import { BrandMark } from '@/components/brand-mark';
 import { signOutAction } from '@/lib/actions/auth';
 
 /**
@@ -53,9 +54,7 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-30 border-b border-ink-200/70 bg-white/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-3">
         <Link href="/" className="flex items-center gap-2 focus-ring rounded-lg">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-black text-white">
-            ลส
-          </span>
+          <BrandMark size={26} />
           <span className="text-base font-bold text-ink-900">{t.brand.name}</span>
         </Link>
 

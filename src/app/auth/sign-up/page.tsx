@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { t } from '@/i18n';
 import { SignUpForm } from '@/components/auth-forms';
 import { Card } from '@/components/ui/primitives';
+import { BrandMark } from '@/components/brand-mark';
 import { MockModeBanner } from '@/components/shell';
 
 export const metadata: Metadata = { title: t.auth.signUpTitle };
@@ -16,9 +17,7 @@ export default function SignUpPage() {
           href="/"
           className="mb-6 flex items-center justify-center gap-2 focus-ring rounded-lg"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-600 text-sm font-black text-white">
-            ลส
-          </span>
+          <BrandMark size={30} />
           <span className="text-lg font-bold text-ink-900">{t.brand.name}</span>
         </Link>
 
