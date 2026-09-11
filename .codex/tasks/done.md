@@ -23,6 +23,7 @@
 | LSN-0019 | Pay later, and the credit that backs it | 8 |
 | LSN-0020 | Check-in at the venue | 8 |
 | LSN-0021 | Group cost calculator | 8 |
+| LSN-0022 | Guests: sign a friend up without an account | 8 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,
