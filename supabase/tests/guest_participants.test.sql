@@ -195,6 +195,11 @@ select is(
 -- aborted the UPDATE, making such a session impossible to cancel.
 -- ---------------------------------------------------------------------------
 
+-- READY01 มาจาก seed เป็นพิคเคิลบอล target_players = 4 และเต็มพอดี 4 ที่นั่ง
+-- add_guest_participant จึงปฏิเสธด้วย session_full ซึ่งถูกต้องแล้ว
+-- เทสนี้ไม่ได้ทดสอบเรื่องความจุ แต่ทดสอบเส้นทางยกเลิกก๊วน จึงเปิดที่ว่างให้ก่อน
+update public.sessions set target_players = 6 where public_code = 'READY01';
+
 select pg_temp.act_as('11111111-1111-4111-8111-000000000001');
 set local role authenticated;
 select is(
