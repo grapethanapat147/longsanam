@@ -1396,6 +1396,7 @@ export type Database = {
       }
       session_is_published: { Args: { p_session_id: string }; Returns: boolean }
       session_progress: { Args: { p_session_id: string }; Returns: Json }
+      session_receipt_public: { Args: { p_session_id: string }; Returns: Json }
       set_check_in: {
         Args: { p_participant_id: string; p_present: boolean }
         Returns: Json
