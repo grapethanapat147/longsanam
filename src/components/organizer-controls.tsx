@@ -34,6 +34,13 @@ type Props = {
   startsAt: string;
   paidParticipants: number;
   paidTotalThb: number;
+  /**
+   * Cash-paid guests, who are inside paidParticipants/paidTotalThb because they
+   * hold a genuinely paid seat, but outside every refund the platform can make.
+   * Kept separate so the cancel dialog can state each figure truthfully.
+   */
+  guestCashCount: number;
+  guestCashThb: number;
 };
 
 type Feedback = {
@@ -208,11 +215,22 @@ export function OrganizerControls(props: Props) {
 
           {showCancel ? (
             <div className="mt-3 space-y-2 rounded-xl border border-red-300 bg-red-50 p-3">
+              {/* Guest cash is subtracted here rather than warned about beside the
+                  total. refundAllPaidParticipants() skips guests — their money
+                  never entered the platform — so quoting the combined figure as
+                  "will be refunded" would state a refund that cannot happen. */}
               <p className="text-sm text-red-900">
-                ผู้เล่นที่ชำระเงินแล้ว {props.paidParticipants} คน (รวม{' '}
-                {formatThb(props.paidTotalThb)}) จะได้รับเงินคืนตามเงื่อนไขข้างต้น
-                และคอร์ตที่จองไว้จะถูกยกเลิก
+                ผู้เล่นที่ชำระเงินผ่านระบบ {props.paidParticipants - props.guestCashCount} คน (รวม{' '}
+                {formatThb(props.paidTotalThb - props.guestCashThb)})
+                จะได้รับเงินคืนตามเงื่อนไขข้างต้น และคอร์ตที่จองไว้จะถูกยกเลิก
               </p>
+              {props.guestCashCount > 0 ? (
+                <p className="text-sm font-semibold text-clay-700">
+                  ผู้เล่นรับเชิญ {props.guestCashCount} คน จ่ายเงินสดกับคุณโดยตรงรวม{' '}
+                  {formatThb(props.guestCashThb)} ระบบคืนให้ไม่ได้เพราะเงินไม่เคยผ่านระบบ
+                  คุณต้องคืนเองกับมือ
+                </p>
+              ) : null}
               <Input
                 value={cancelReason}
                 onChange={(event) => setCancelReason(event.target.value)}

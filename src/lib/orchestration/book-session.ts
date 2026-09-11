@@ -134,7 +134,10 @@ async function notifySessionAudience(
 
   const recipients = new Set<string>();
   if (session?.organizer_id) recipients.add(session.organizer_id);
-  for (const row of participants ?? []) recipients.add(row.user_id);
+  // A guest holds a seat but has no account, so there is nobody to notify.
+  for (const row of participants ?? []) {
+    if (row.user_id) recipients.add(row.user_id);
+  }
 
   await Promise.all(
     [...recipients].map((userId) =>
