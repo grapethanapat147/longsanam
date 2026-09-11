@@ -2,6 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { parseCancellationPolicy, type SessionStatus } from '@/lib/domain/types';
 import { remainingSlots } from '@/lib/domain/booking-eligibility';
+import {
+  canSeeReceiptNames,
+  isReceiptOrganizer,
+} from '@/lib/domain/receipt-visibility';
 
 /**
  * Shared reads.
@@ -333,7 +337,7 @@ export async function loadSessionReceipt(code: string, viewerId: string | null) 
   // receipt from being restructured when extra charges land.
   const charges: ReceiptCharge[] = [];
 
-  const isOrganizer = viewerId !== null && viewerId === session.organizer_id;
+  const isOrganizer = isReceiptOrganizer(viewerId, session.organizer_id);
   let isParticipant = false;
   if (viewerId && !isOrganizer) {
     const { count } = await admin
@@ -344,7 +348,10 @@ export async function loadSessionReceipt(code: string, viewerId: string | null) 
     isParticipant = (count ?? 0) > 0;
   }
 
-  if (!isOrganizer && !isParticipant) {
+  // Everything below this line reads through the admin client, which ignores
+  // RLS. canSeeReceiptNames is therefore the whole boundary, and it is pinned
+  // in tests/receipt-visibility.test.ts rather than trusted here.
+  if (!canSeeReceiptNames({ viewerId, organizerId: session.organizer_id, isParticipant })) {
     return { session, totals, charges, names: null };
   }
 
