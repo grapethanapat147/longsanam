@@ -24,7 +24,8 @@
 | LSN-0020 | Check-in at the venue | 8 |
 | LSN-0021 | Group cost calculator | 8 |
 | LSN-0022 | Guests: sign a friend up without an account | 8 |
+| LSN-0023 | ใบสรุปก๊วน ที่ส่งกลับเข้า LINE ได้ | 9 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,
-LSN-0016, LSN-0017 and LSN-0018.
+LSN-0016, LSN-0017, LSN-0018 and LSN-0023.
