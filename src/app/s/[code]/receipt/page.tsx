@@ -52,11 +52,17 @@ export default async function ReceiptPage({ params }: Params) {
           <Stat label={t.receipt.owing} value={String(totals.owing)} />
         </div>
 
+        {/*
+          Only the per-head figure. "ยอดรวม" used to sit next to it and the two
+          could contradict each other: settle_session_costs() never re-bills a
+          seat that already paid, so after settling, the sum of what seats are
+          charged is not the settled per-head times the number of players. Two
+          money figures side by side read as a multiplication, and that one did
+          not multiply. The ticket's Context table asks for four lines and a
+          group total is not one of them.
+        */}
         <p className="mt-4 font-display text-xl font-bold tabular-nums text-ink-900">
           {t.receipt.perHead} {formatThb(totals.perHeadThb)}
-          <span className="ml-2 text-sm font-medium text-ink-500">
-            {t.receipt.total} {formatThb(totals.totalThb)}
-          </span>
         </p>
       </Card>
 

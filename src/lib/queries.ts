@@ -6,6 +6,7 @@ import {
   canSeeReceiptNames,
   isReceiptOrganizer,
 } from '@/lib/domain/receipt-visibility';
+import { receiptRoster } from '@/lib/domain/receipt-roster';
 
 /**
  * Shared reads.
@@ -285,6 +286,16 @@ export async function loadApprovedCourtPrices(
  */
 export type ReceiptCharge = { id: string; label: string; amountThb: number };
 
+type RosterRow = {
+  id: string;
+  status: string;
+  amount_due_thb: number;
+  guest_name: string | null;
+  checked_in_at: string | null;
+  profiles: { display_name: string } | null;
+  payments: { status: string; provider: string }[] | null;
+};
+
 export type ReceiptTotals = {
   players: number;
   paid: number;
@@ -355,34 +366,27 @@ export async function loadSessionReceipt(code: string, viewerId: string | null) 
     return { session, totals, charges, names: null };
   }
 
+  // Every seat, deliberately unfiltered: receiptRoster() has to be able to ask
+  // whether *anyone* checked in before it can say who counts, and the totals
+  // above were computed by a database function that asks the same question the
+  // same way. Filtering here would make the header and the list disagree.
   const { data: rows } = await admin
     .from('session_participants')
     .select(
-      'id, status, amount_due_thb, guest_name, ' +
+      'id, status, amount_due_thb, guest_name, checked_in_at, ' +
         'profiles!session_participants_user_id_fkey (display_name), ' +
         'payments (status, provider)',
     )
-    .eq('session_id', session.id)
-    .in('status', ['paid_confirmed', 'joined_pay_later', 'payment_overdue']);
+    .eq('session_id', session.id);
 
-  const names: ReceiptName[] = (rows ?? []).map((r) => {
-    const p = r as unknown as {
-      id: string;
-      status: string;
-      amount_due_thb: number;
-      guest_name: string | null;
-      profiles: { display_name: string } | null;
-      payments: { status: string; provider: string }[] | null;
-    };
-    return {
-      participantId: p.id,
-      displayName: p.guest_name ?? p.profiles?.display_name ?? 'ผู้เล่น',
-      isGuest: p.guest_name !== null,
-      paid: p.status === 'paid_confirmed',
-      amountThb: p.amount_due_thb,
-      paidCash: (p.payments ?? []).some((x) => x.status === 'paid' && x.provider === 'cash'),
-    };
-  });
+  const names: ReceiptName[] = receiptRoster((rows ?? []) as unknown as RosterRow[]).map((r) => ({
+    participantId: r.id,
+    displayName: r.guest_name ?? r.profiles?.display_name ?? 'ผู้เล่น',
+    isGuest: r.guest_name !== null,
+    paid: r.status === 'paid_confirmed',
+    amountThb: r.amount_due_thb,
+    paidCash: (r.payments ?? []).some((x) => x.status === 'paid' && x.provider === 'cash'),
+  }));
 
   return { session, totals, charges, names };
 }
