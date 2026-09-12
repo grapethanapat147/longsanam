@@ -63,7 +63,7 @@ select is(
   public.confirm_court_manually(
     (select id from public.sessions where public_code = 'OPEN001'),
     'คอร์ตแบดลุงหมี', 600) ->> 'reason',
-  'session_not_ready', 'ก๊วนที่เงินยังไม่ครบ ยืนยันคอร์ตไม่ได้');
+  'court_confirm_not_allowed', 'ก๊วนที่เงินยังไม่ครบ ยืนยันคอร์ตไม่ได้');
 
 select is(
   (select status::text from public.sessions where public_code = 'OPEN001'),
@@ -73,7 +73,7 @@ select is(
   public.confirm_court_manually(
     (select id from public.sessions where public_code = 'BOOKED1'),
     'คอร์ตแบดลุงหมี', 600) ->> 'reason',
-  'session_not_ready', 'ก๊วนที่จองแล้ว ยืนยันซ้ำไม่ได้');
+  'court_confirm_not_allowed', 'ก๊วนที่จองแล้ว ยืนยันซ้ำไม่ได้');
 
 -- ready_to_book → booked
 select is(

@@ -72,7 +72,7 @@ begin
   -- ส่วน holding_court ถูกปฏิเสธเพราะมีคอร์ตที่กันไว้ค้างอยู่ ต้องปล่อยก่อน
   -- ไม่งั้นก๊วนเดียวจะมีสองการจอง
   if v_session.status not in ('ready_to_book', 'booking_failed') then
-    return jsonb_build_object('ok', false, 'reason', 'session_not_ready');
+    return jsonb_build_object('ok', false, 'reason', 'court_confirm_not_allowed');
   end if;
 
   if p_price_thb is null or p_price_thb <= 0 then

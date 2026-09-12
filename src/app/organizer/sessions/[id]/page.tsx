@@ -6,6 +6,7 @@ import { BookingStatusChip, ParticipantStatusChip, SessionStatusChip } from '@/c
 import { PayLaterControl } from '@/components/pay-later-control';
 import { CheckInControl } from '@/components/check-in-control';
 import { SettleControl } from '@/components/settle-control';
+import { ManualCourtControl } from '@/components/manual-court-control';
 import { GuestControl, RemoveGuestButton } from '@/components/guest-control';
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
@@ -283,6 +284,17 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
               .filter((p) => p.guest_name && p.status === 'paid_confirmed')
               .reduce((sum, p) => sum + p.amount_due_thb, 0)}
           />
+
+          {/*
+            ขึ้นเฉพาะสองสถานะที่ยืนยันคอร์ตเองได้ ไม่ใช่ขึ้นตลอดแล้ว disabled
+            ตาม Definition of Done ที่ห้าม UI ที่กดแล้วไม่ทำอะไร
+          */}
+          {session.status === 'ready_to_book' || session.status === 'booking_failed' ? (
+            <ManualCourtControl
+              sessionId={session.id}
+              estimatedCourtCostThb={requiredTotalThb}
+            />
+          ) : null}
 
           <SettleControl
             sessionId={session.id}
