@@ -11,11 +11,19 @@ export const SESSION_TRANSITIONS: Readonly<Record<SessionStatus, readonly Sessio
   open: ['ready_to_book', 'cancelled', 'draft'],
   // Falling back to `open` covers a paid player cancelling and dropping the
   // session back below its minimum.
-  ready_to_book: ['holding_court', 'open', 'cancelled'],
+  //
+  // `booked` reaches straight out of both of these because of LSN-0025, where
+  // the organizer confirms a court they arranged themselves. That is not
+  // skipping a step: the holding step exists to reserve a court *in our system*
+  // while the venue is asked, and a court booked over the phone has nothing to
+  // reserve. What stays shut is `open` -> `booked`, because open means the
+  // money is not in yet.
+  ready_to_book: ['holding_court', 'booked', 'open', 'cancelled'],
   holding_court: ['booked', 'booking_failed', 'cancelled'],
   booked: ['completed', 'cancelled'],
-  // A failed attempt can be retried once the organizer adds another venue.
-  booking_failed: ['holding_court', 'open', 'cancelled'],
+  // A failed attempt can be retried once the organizer adds another venue, or
+  // closed out by the organizer turning up with a court of their own.
+  booking_failed: ['holding_court', 'booked', 'open', 'cancelled'],
   cancelled: [],
   completed: [],
 };

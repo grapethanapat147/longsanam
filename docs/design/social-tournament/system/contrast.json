@@ -1,0 +1,138 @@
+[
+  {
+    "foreground": "#0d1f18",
+    "background": "#12a563",
+    "ratio": 5.3722,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Primary button"
+  },
+  {
+    "foreground": "#0a7a4f",
+    "background": "#ffffff",
+    "ratio": 5.3714,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Link / mascot"
+  },
+  {
+    "foreground": "#ffffff",
+    "background": "#076140",
+    "ratio": 7.5189,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Dark panel"
+  },
+  {
+    "foreground": "#0d1f18",
+    "background": "#bfec33",
+    "ratio": 12.445,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Accent chip"
+  },
+  {
+    "foreground": "#35473f",
+    "background": "#f1f9f4",
+    "ratio": 9.2244,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Secondary text"
+  },
+  {
+    "foreground": "#8f4526",
+    "background": "#fdf4ee",
+    "ratio": 6.3506,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Warning"
+  },
+  {
+    "foreground": "#7f8f86",
+    "background": "#ffffff",
+    "ratio": 3.4005,
+    "minimum": 3,
+    "pass": true,
+    "use": "Control border"
+  },
+  {
+    "foreground": "#076140",
+    "background": "#ffffff",
+    "ratio": 7.5189,
+    "minimum": 3,
+    "pass": true,
+    "use": "Focus ring"
+  },
+  {
+    "foreground": "#bfec33",
+    "background": "#076140",
+    "ratio": 5.4642,
+    "minimum": 3,
+    "pass": true,
+    "use": "Brand graphic"
+  },
+  {
+    "foreground": "#0d1f18",
+    "background": "#ffffff",
+    "ratio": 17.1247,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Body text"
+  },
+  {
+    "foreground": "#076140",
+    "background": "#ecfbf2",
+    "ratio": 7.0347,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Success chip"
+  },
+  {
+    "foreground": "#0a7a4f",
+    "background": "#f1f9f4",
+    "ratio": 5.0124,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Link / eyebrow on section"
+  },
+  {
+    "foreground": "#0d1f18",
+    "background": "#f1f9f4",
+    "ratio": 15.9804,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Body on section"
+  },
+  {
+    "foreground": "#35473f",
+    "background": "#ffffff",
+    "ratio": 9.8849,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Secondary on white"
+  },
+  {
+    "foreground": "#35473f",
+    "background": "#dfe8e2",
+    "ratio": 7.8978,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Disabled label"
+  },
+  {
+    "foreground": "#ffffff",
+    "background": "#0d1f18",
+    "ratio": 17.1247,
+    "minimum": 4.5,
+    "pass": true,
+    "use": "Toast"
+  },
+  {
+    "foreground": "#076140",
+    "background": "#bfec33",
+    "ratio": 5.4642,
+    "minimum": 3,
+    "pass": true,
+    "use": "Racket outline on lime"
+  }
+]
