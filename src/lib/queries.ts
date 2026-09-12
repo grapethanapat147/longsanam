@@ -2,6 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { parseCancellationPolicy, type SessionStatus } from '@/lib/domain/types';
 import { remainingSlots } from '@/lib/domain/booking-eligibility';
+import {
+  canSeeReceiptNames,
+  isReceiptOrganizer,
+} from '@/lib/domain/receipt-visibility';
 
 /**
  * Shared reads.
@@ -268,4 +272,117 @@ export async function loadApprovedCourtPrices(
 
   const values = prices.map(([, price]) => price).filter((price) => price > 0);
   return { byCourt, cheapest: values.length > 0 ? Math.min(...values) : 0 };
+}
+
+/**
+ * ใบสรุปก๊วน (LSN-0023).
+ *
+ * Two views, one call. `names` is null for anyone outside the session — not an
+ * empty array, and not a list the page is trusted to mask. The masked branch
+ * never loads names at all, so there is no field a later edit could forget to
+ * strip. The totals come from `session_receipt_public()`, which returns counts
+ * and nothing else even when called with service-role credentials.
+ */
+export type ReceiptCharge = { id: string; label: string; amountThb: number };
+
+export type ReceiptTotals = {
+  players: number;
+  paid: number;
+  owing: number;
+  perHeadThb: number;
+  totalThb: number;
+  title: string;
+  startsAt: string;
+};
+
+export type ReceiptName = {
+  participantId: string;
+  displayName: string;
+  isGuest: boolean;
+  paid: boolean;
+  amountThb: number;
+  paidCash: boolean;
+};
+
+export async function loadSessionReceipt(code: string, viewerId: string | null) {
+  const supabase = await createClient();
+  const { data: row } = await supabase
+    .from('sessions')
+    .select('id, public_code, title, starts_at, ends_at, status, organizer_id')
+    .eq('public_code', code.toUpperCase())
+    .maybeSingle();
+  if (!row) return null;
+
+  const session = row as unknown as {
+    id: string;
+    public_code: string;
+    title: string;
+    starts_at: string;
+    ends_at: string;
+    status: string;
+    organizer_id: string;
+  };
+
+  const admin = createAdminClient();
+  // The RPC repeats the completed check, so this is a cheap early exit rather
+  // than the rule itself. The database stays the one that decides.
+  const { data: totalsRaw } = await admin.rpc('session_receipt_public', {
+    p_session_id: session.id,
+  });
+  if (!totalsRaw) return null;
+  const totals = totalsRaw as unknown as ReceiptTotals;
+
+  // LSN-0024 fills this in. The page renders the section only when it is
+  // non-empty, so shipping the empty array now costs nothing and saves the
+  // receipt from being restructured when extra charges land.
+  const charges: ReceiptCharge[] = [];
+
+  const isOrganizer = isReceiptOrganizer(viewerId, session.organizer_id);
+  let isParticipant = false;
+  if (viewerId && !isOrganizer) {
+    const { count } = await admin
+      .from('session_participants')
+      .select('id', { count: 'exact', head: true })
+      .eq('session_id', session.id)
+      .eq('user_id', viewerId);
+    isParticipant = (count ?? 0) > 0;
+  }
+
+  // Everything below this line reads through the admin client, which ignores
+  // RLS. canSeeReceiptNames is therefore the whole boundary, and it is pinned
+  // in tests/receipt-visibility.test.ts rather than trusted here.
+  if (!canSeeReceiptNames({ viewerId, organizerId: session.organizer_id, isParticipant })) {
+    return { session, totals, charges, names: null };
+  }
+
+  const { data: rows } = await admin
+    .from('session_participants')
+    .select(
+      'id, status, amount_due_thb, guest_name, ' +
+        'profiles!session_participants_user_id_fkey (display_name), ' +
+        'payments (status, provider)',
+    )
+    .eq('session_id', session.id)
+    .in('status', ['paid_confirmed', 'joined_pay_later', 'payment_overdue']);
+
+  const names: ReceiptName[] = (rows ?? []).map((r) => {
+    const p = r as unknown as {
+      id: string;
+      status: string;
+      amount_due_thb: number;
+      guest_name: string | null;
+      profiles: { display_name: string } | null;
+      payments: { status: string; provider: string }[] | null;
+    };
+    return {
+      participantId: p.id,
+      displayName: p.guest_name ?? p.profiles?.display_name ?? 'ผู้เล่น',
+      isGuest: p.guest_name !== null,
+      paid: p.status === 'paid_confirmed',
+      amountThb: p.amount_due_thb,
+      paidCash: (p.payments ?? []).some((x) => x.status === 'paid' && x.provider === 'cash'),
+    };
+  });
+
+  return { session, totals, charges, names };
 }
