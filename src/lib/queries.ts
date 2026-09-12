@@ -379,17 +379,14 @@ export async function loadSessionReceipt(code: string, viewerId: string | null) 
     )
     .eq('session_id', session.id);
 
-  const names: ReceiptName[] = receiptRoster((rows ?? []) as unknown as RosterRow[]).map((r) => {
-    const p = r;
-    return {
-      participantId: p.id,
-      displayName: p.guest_name ?? p.profiles?.display_name ?? 'ผู้เล่น',
-      isGuest: p.guest_name !== null,
-      paid: p.status === 'paid_confirmed',
-      amountThb: p.amount_due_thb,
-      paidCash: (p.payments ?? []).some((x) => x.status === 'paid' && x.provider === 'cash'),
-    };
-  });
+  const names: ReceiptName[] = receiptRoster((rows ?? []) as unknown as RosterRow[]).map((r) => ({
+    participantId: r.id,
+    displayName: r.guest_name ?? r.profiles?.display_name ?? 'ผู้เล่น',
+    isGuest: r.guest_name !== null,
+    paid: r.status === 'paid_confirmed',
+    amountThb: r.amount_due_thb,
+    paidCash: (r.payments ?? []).some((x) => x.status === 'paid' && x.provider === 'cash'),
+  }));
 
   return { session, totals, charges, names };
 }
