@@ -1,0 +1,34 @@
+:root{
+  --brand-50:#ecfbf2;
+  --brand-100:#cff5e0;
+  --brand-200:#9fe9c2;
+  --brand-300:#63d79e;
+  --brand-400:#2ec27b;
+  --brand-500:#12a563;
+  --brand-600:#0a7a4f;
+  --brand-700:#076140;
+  --brand-800:#084d34;
+  --brand-900:#06301f;
+  --accent-300:#e9fbaa;
+  --accent-400:#d6f56e;
+  --accent-500:#bfec33;
+  --accent-600:#9ac41c;
+  --clay-50:#fdf4ee;
+  --clay-100:#fae3d3;
+  --clay-500:#c2643b;
+  --clay-700:#8f4526;
+  --ink-100:#eff5f1;
+  --ink-200:#dfe8e2;
+  --ink-300:#b9c7bf;
+  --ink-400:#7f8f86;
+  --ink-500:#64766c;
+  --ink-700:#35473f;
+  --ink-800:#1c302a;
+  --ink-900:#0d1f18;
+  --surface:#ffffff;
+  --section:#f1f9f4;
+  --radius-card:24px 6px 24px 6px;
+  --radius-button:18px 4px 18px 4px;
+  --font-heading:"Bai Jamjuree",sans-serif;
+  --font-body:"Anuphan",sans-serif;
+}

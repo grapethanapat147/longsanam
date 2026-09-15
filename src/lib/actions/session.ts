@@ -436,3 +436,56 @@ export async function settleSessionAction(
     unpaidUpdated: result.unpaidUpdated ?? 0,
   };
 }
+
+/* ---------------------------------------------------------------------------
+ * The organizer confirms a court they arranged themselves (LSN-0025).
+ *
+ * Through the organizer's own client, so is_session_organizer() inside the RPC
+ * sees the real caller — the same reason settleSessionAction does it this way.
+ *
+ * The price is not decoration: settle_session_costs() reads it back off the
+ * confirmed booking, so whatever the organizer types here becomes the basis of
+ * everyone's share.
+ * ------------------------------------------------------------------------- */
+
+export type ConfirmCourtResult =
+  | { ok: true; priceThb: number }
+  | { ok: false; error: string };
+
+export async function confirmCourtManuallyAction(
+  sessionId: string,
+  venueName: string,
+  priceThb: number,
+): Promise<ConfirmCourtResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: reasonLabel.not_authenticated };
+
+  const name = venueName.trim();
+  if (name.length === 0) return { ok: false, error: reasonLabel.venue_name_required };
+  const price = Math.round(priceThb);
+  if (!Number.isFinite(price) || price <= 0) {
+    return { ok: false, error: reasonLabel.invalid_amount };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('confirm_court_manually', {
+    p_session_id: sessionId,
+    p_venue_name: name,
+    p_price_thb: price,
+  });
+
+  if (error) {
+    console.error('[confirmCourtManuallyAction] confirm_court_manually failed', error);
+    return { ok: false, error: t.common.unexpectedError };
+  }
+
+  const result = data as { ok?: boolean; reason?: string; priceThb?: number } | null;
+  if (!result?.ok) {
+    const reason = result?.reason;
+    return { ok: false, error: (reason && reasonLabel[reason]) || t.common.unexpectedError };
+  }
+
+  revalidatePath('/organizer', 'layout');
+  revalidatePath('/s', 'layout');
+  return { ok: true, priceThb: result.priceThb ?? price };
+}

@@ -1,0 +1,53 @@
+{
+  "errors": [],
+  "checks": [
+    {
+      "width": 320,
+      "scrollWidth": 320
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390
+    },
+    {
+      "width": 768,
+      "scrollWidth": 768
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1440
+    },
+    {
+      "timeError": "เวลาจบต้องอยู่หลังเวลาเริ่มภายในวันเดียวกัน"
+    },
+    {
+      "bookingBlocked": true
+    },
+    {
+      "dialogClosed": true,
+      "focusRestored": true
+    },
+    {
+      "minTeamsBlocked": true
+    },
+    {
+      "twoTeamsEnabled": true
+    },
+    {
+      "fourTeamsFull": true
+    },
+    {
+      "startBlocked": true
+    },
+    {
+      "ratingFeedback": "บันทึกฝีมือ 3/5 ในตัวอย่างแล้ว · น้ำใจนักกีฬา 5/5 · ส่งคำขอเป็นเพื่อนแล้ว"
+    },
+    {
+      "rematchDate": "2026-09-26",
+      "backOnCreate": true
+    },
+    {
+      "reducedMotion": "0s"
+    }
+  ]
+}

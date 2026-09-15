@@ -34,9 +34,17 @@ describe('session state machine', () => {
     expect(canTransitionSession('ready_to_book', 'open')).toBe(true);
   });
 
-  it('refuses to skip the holding step', () => {
-    expect(canTransitionSession('ready_to_book', 'booked')).toBe(false);
+  it('lets the organizer skip the holding step, but never the money gate', () => {
+    // LSN-0025: the holding step reserves a court in our system while the venue
+    // is asked. A court the organizer booked over the phone has nothing to
+    // reserve, so it is skipped rather than faked.
+    expect(canTransitionSession('ready_to_book', 'booked')).toBe(true);
+    expect(canTransitionSession('booking_failed', 'booked')).toBe(true);
+
+    // `open` means the money is not in yet. This one stays shut whoever is
+    // confirming whatever — it is the promise the product is built on.
     expect(canTransitionSession('open', 'booked')).toBe(false);
+    expect(canTransitionSession('draft', 'booked')).toBe(false);
   });
 
   it('treats cancelled and completed as terminal', () => {

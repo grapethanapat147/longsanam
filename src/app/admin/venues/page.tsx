@@ -23,10 +23,14 @@ export default async function AdminVenuesPage() {
 
   const revenue = new Map<string, number>();
   for (const booking of (bookings ?? []) as {
-    venue_id: string;
+    venue_id: string | null;
     status: string;
     price_thb: number;
   }[]) {
+    // A court the organizer confirmed themselves (LSN-0025) belongs to no venue
+    // we know about, so it is nobody's revenue. Skipped openly rather than left
+    // to land in the map under a null key that nothing ever reads.
+    if (booking.venue_id === null) continue;
     if (booking.status === 'confirmed') {
       revenue.set(booking.venue_id, (revenue.get(booking.venue_id) ?? 0) + booking.price_thb);
     }

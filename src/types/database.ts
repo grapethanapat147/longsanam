@@ -92,7 +92,7 @@ export type Database = {
         Row: {
           attempt_no: number
           confirmed_at: string | null
-          court_id: string
+          court_id: string | null
           created_at: string
           decided_by: string | null
           decision_reason: string | null
@@ -101,18 +101,19 @@ export type Database = {
           hold_id: string | null
           id: string
           idempotency_key: string
+          manual_venue_name: string | null
           price_thb: number
           requested_at: string
           session_id: string
           starts_at: string
           status: Database["public"]["Enums"]["booking_status"]
           updated_at: string
-          venue_id: string
+          venue_id: string | null
         }
         Insert: {
           attempt_no?: number
           confirmed_at?: string | null
-          court_id: string
+          court_id?: string | null
           created_at?: string
           decided_by?: string | null
           decision_reason?: string | null
@@ -121,18 +122,19 @@ export type Database = {
           hold_id?: string | null
           id?: string
           idempotency_key: string
+          manual_venue_name?: string | null
           price_thb: number
           requested_at?: string
           session_id: string
           starts_at: string
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
-          venue_id: string
+          venue_id?: string | null
         }
         Update: {
           attempt_no?: number
           confirmed_at?: string | null
-          court_id?: string
+          court_id?: string | null
           created_at?: string
           decided_by?: string | null
           decision_reason?: string | null
@@ -141,13 +143,14 @@ export type Database = {
           hold_id?: string | null
           id?: string
           idempotency_key?: string
+          manual_venue_name?: string | null
           price_thb?: number
           requested_at?: string
           session_id?: string
           starts_at?: string
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
-          venue_id?: string
+          venue_id?: string | null
         }
         Relationships: [
           {
@@ -1247,6 +1250,14 @@ export type Database = {
         Returns: Json
       }
       complete_finished_sessions: { Args: never; Returns: Json }
+      confirm_court_manually: {
+        Args: {
+          p_price_thb: number
+          p_session_id: string
+          p_venue_name: string
+        }
+        Returns: Json
+      }
       court_availability_report: {
         Args: { p_court_id: string; p_ends_at: string; p_starts_at: string }
         Returns: Json
