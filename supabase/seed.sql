@@ -210,7 +210,25 @@ values
    ((current_date + 6) + time '12:00') at time zone 'Asia/Bangkok',
    120, 8, 6,
    ((current_date + 5) + time '20:00') at time zone 'Asia/Bangkok',
-   'cancelled', default)
+   'cancelled', default),
+
+  -- Completed: played and settled. The only session in the seed that has
+  -- actually happened, which is what the receipt (LSN-0023) and extra charges
+  -- (LSN-0024) both need to be lookable-at without editing the database by hand.
+  --
+  -- Deliberately has a partial check-in: บอส paid and holds a seat but never
+  -- turned up. A seed where everyone checked in, or nobody did, hides the bug
+  -- LSN-0023's review found — the header counting one set of people and the
+  -- list below it showing another.
+  ('dddddddd-0000-4000-8000-000000000006', 'DONE001',
+   '11111111-1111-4111-8111-000000000001', 'aaaaaaaa-0000-4000-8000-000000000001',
+   'แบดเย็นวันจันทร์ (จบแล้ว)', 'ก๊วนประจำ เล่นกันทุกวันจันทร์',
+   'ลาดพร้าว', 'วังทองหลาง',
+   ((current_date - 2) + time '19:00') at time zone 'Asia/Bangkok',
+   ((current_date - 2) + time '21:00') at time zone 'Asia/Bangkok',
+   120, 6, 4,
+   ((current_date - 3) + time '20:00') at time zone 'Asia/Bangkok',
+   'completed', default)
 on conflict (id) do nothing;
 
 update public.sessions
@@ -258,6 +276,11 @@ values
   ('eeeeeeee-0000-4000-8000-000000000013', 'dddddddd-0000-4000-8000-000000000003', '11111111-1111-4111-8111-000000000006', 'paid_confirmed', 220, ((current_date + 2) + time '20:00') at time zone 'Asia/Bangkok', now() - interval '2 hours'),
   ('eeeeeeee-0000-4000-8000-000000000014', 'dddddddd-0000-4000-8000-000000000003', '11111111-1111-4111-8111-000000000007', 'paid_confirmed', 220, ((current_date + 2) + time '20:00') at time zone 'Asia/Bangkok', now() - interval '1 hour'),
 
+  -- Completed session: 3 คนมาจริง · บอสจ่ายแล้วแต่ไม่มา · หนึ่งในนั้นเป็นผู้เล่นรับเชิญ
+  ('eeeeeeee-0000-4000-8000-000000000041', 'dddddddd-0000-4000-8000-000000000006', '11111111-1111-4111-8111-000000000001', 'paid_confirmed', 120, ((current_date - 3) + time '20:00') at time zone 'Asia/Bangkok', now() - interval '5 days'),
+  ('eeeeeeee-0000-4000-8000-000000000042', 'dddddddd-0000-4000-8000-000000000006', '11111111-1111-4111-8111-000000000002', 'paid_confirmed', 120, ((current_date - 3) + time '20:00') at time zone 'Asia/Bangkok', now() - interval '5 days'),
+  ('eeeeeeee-0000-4000-8000-000000000043', 'dddddddd-0000-4000-8000-000000000006', '11111111-1111-4111-8111-000000000003', 'paid_confirmed', 120, ((current_date - 3) + time '20:00') at time zone 'Asia/Bangkok', now() - interval '4 days'),
+
   -- Booked session: 11 paid would need 11 accounts; use the 8 we have plus one cancelled.
   ('eeeeeeee-0000-4000-8000-000000000021', 'dddddddd-0000-4000-8000-000000000004', '11111111-1111-4111-8111-000000000001', 'paid_confirmed', 150, ((current_date + 1) + time '18:00') at time zone 'Asia/Bangkok', now() - interval '4 days'),
   ('eeeeeeee-0000-4000-8000-000000000022', 'dddddddd-0000-4000-8000-000000000004', '11111111-1111-4111-8111-000000000002', 'paid_confirmed', 150, ((current_date + 1) + time '18:00') at time zone 'Asia/Bangkok', now() - interval '4 days'),
@@ -272,6 +295,27 @@ values
   ('eeeeeeee-0000-4000-8000-000000000031', 'dddddddd-0000-4000-8000-000000000005', '11111111-1111-4111-8111-000000000002', 'refunded', 120, ((current_date + 5) + time '20:00') at time zone 'Asia/Bangkok', now() - interval '5 days'),
   ('eeeeeeee-0000-4000-8000-000000000032', 'dddddddd-0000-4000-8000-000000000005', '11111111-1111-4111-8111-000000000003', 'refunded', 120, ((current_date + 5) + time '20:00') at time zone 'Asia/Bangkok', now() - interval '5 days')
 on conflict (id) do nothing;
+
+-- ผู้เล่นรับเชิญของก๊วนที่จบแล้ว จ่ายเงินสดกับผู้จัดโดยตรง (LSN-0022)
+insert into public.session_participants
+  (id, session_id, user_id, guest_name, status, amount_due_thb, payment_due_at, confirmed_at)
+values
+  ('eeeeeeee-0000-4000-8000-000000000044', 'dddddddd-0000-4000-8000-000000000006',
+   null, 'พี่เอก (เพื่อนก้อง)', 'paid_confirmed', 120,
+   ((current_date - 3) + time '20:00') at time zone 'Asia/Bangkok', now() - interval '4 days')
+on conflict (id) do nothing;
+
+-- เช็คอินเฉพาะคนที่มาจริง: ก้อง · แนน · พี่เอก — บอสจ่ายแล้วแต่ไม่มา
+update public.session_participants
+set checked_in_at = ((current_date - 2) + time '19:05') at time zone 'Asia/Bangkok'
+where id in ('eeeeeeee-0000-4000-8000-000000000041',
+             'eeeeeeee-0000-4000-8000-000000000042',
+             'eeeeeeee-0000-4000-8000-000000000044');
+
+-- settle ไปแล้ว: ค่าสนาม ฿600 + ค่าลูก ฿120 = ฿720 หาร 3 คนที่มา = คนละ ฿240
+update public.sessions
+set shuttle_cost_thb = 120, settled_per_person_thb = 240, settled_at = now() - interval '2 days'
+where id = 'dddddddd-0000-4000-8000-000000000006';
 
 update public.session_participants
 set cancelled_at = now() - interval '2 hours'

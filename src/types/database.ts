@@ -536,6 +536,7 @@ export type Database = {
       payments: {
         Row: {
           amount_thb: number
+          charge_share_id: string | null
           created_at: string
           expires_at: string | null
           failure_reason: string | null
@@ -552,6 +553,7 @@ export type Database = {
         }
         Insert: {
           amount_thb: number
+          charge_share_id?: string | null
           created_at?: string
           expires_at?: string | null
           failure_reason?: string | null
@@ -568,6 +570,7 @@ export type Database = {
         }
         Update: {
           amount_thb?: number
+          charge_share_id?: string | null
           created_at?: string
           expires_at?: string | null
           failure_reason?: string | null
@@ -583,6 +586,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "payments_charge_share_id_fkey"
+            columns: ["charge_share_id"]
+            isOneToOne: false
+            referencedRelation: "session_charge_shares"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_participant_id_fkey"
             columns: ["participant_id"]
@@ -760,6 +770,93 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_charge_shares: {
+        Row: {
+          amount_thb: number
+          charge_id: string
+          id: string
+          participant_id: string
+        }
+        Insert: {
+          amount_thb: number
+          charge_id: string
+          id?: string
+          participant_id: string
+        }
+        Update: {
+          amount_thb?: number
+          charge_id?: string
+          id?: string
+          participant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_charge_shares_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "session_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_charge_shares_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "session_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_charges: {
+        Row: {
+          amount_thb: number
+          created_at: string
+          created_by: string
+          id: string
+          label: string
+          notified_at: string | null
+          session_id: string
+          split_mode: Database["public"]["Enums"]["charge_split_mode"]
+          voided_at: string | null
+        }
+        Insert: {
+          amount_thb: number
+          created_at?: string
+          created_by: string
+          id?: string
+          label: string
+          notified_at?: string | null
+          session_id: string
+          split_mode: Database["public"]["Enums"]["charge_split_mode"]
+          voided_at?: string | null
+        }
+        Update: {
+          amount_thb?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          label?: string
+          notified_at?: string | null
+          session_id?: string
+          split_mode?: Database["public"]["Enums"]["charge_split_mode"]
+          voided_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_charges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_charges_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -1280,6 +1377,16 @@ export type Database = {
         Args: { p_court_id: string; p_ends_at: string; p_starts_at: string }
         Returns: number
       }
+      create_session_charge: {
+        Args: {
+          p_amount_thb: number
+          p_label: string
+          p_participant_ids?: string[]
+          p_session_id: string
+          p_split_mode: Database["public"]["Enums"]["charge_split_mode"]
+        }
+        Returns: Json
+      }
       create_venue: {
         Args: {
           p_actor?: string
@@ -1397,6 +1504,37 @@ export type Database = {
         Returns: Json
       }
       revoke_pay_later: { Args: { p_participant_id: string }; Returns: Json }
+      send_session_charges: { Args: { p_session_id: string }; Returns: Json }
+      session_denominator: {
+        Args: { p_session_id: string }
+        Returns: {
+          added_by_organizer: string | null
+          amount_due_thb: number
+          cancelled_at: string | null
+          checked_in_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          games_played: number | null
+          guest_name: string | null
+          id: string
+          joined_at: string
+          last_chased_at: string | null
+          no_show_marked_at: string | null
+          pay_later_granted_at: string | null
+          pay_later_granted_by: string | null
+          payment_due_at: string
+          session_id: string
+          status: Database["public"]["Enums"]["participant_status"]
+          updated_at: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "session_participants"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       session_has_public_booking: {
         Args: { p_session_id: string }
         Returns: boolean
@@ -1471,6 +1609,7 @@ export type Database = {
         }
         Returns: Json
       }
+      void_session_charge: { Args: { p_charge_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "player" | "venue_admin" | "platform_admin"
@@ -1483,6 +1622,7 @@ export type Database = {
         | "expired"
         | "cancelled"
         | "failed"
+      charge_split_mode: "all" | "named"
       hold_status: "active" | "converted" | "released" | "expired"
       notification_channel: "in_app" | "line" | "email"
       participant_status:
@@ -1654,6 +1794,7 @@ export const Constants = {
         "cancelled",
         "failed",
       ],
+      charge_split_mode: ["all", "named"],
       hold_status: ["active", "converted", "released", "expired"],
       notification_channel: ["in_app", "line", "email"],
       participant_status: [

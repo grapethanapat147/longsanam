@@ -343,10 +343,9 @@ export async function loadSessionReceipt(code: string, viewerId: string | null) 
   if (!totalsRaw) return null;
   const totals = totalsRaw as unknown as ReceiptTotals;
 
-  // LSN-0024 fills this in. The page renders the section only when it is
-  // non-empty, so shipping the empty array now costs nothing and saves the
-  // receipt from being restructured when extra charges land.
-  const charges: ReceiptCharge[] = [];
+  // LSN-0024 fills this in below, but only on the named path — see the comment
+  // there. Outsiders and og:image keep the empty array.
+  let charges: ReceiptCharge[] = [];
 
   const isOrganizer = isReceiptOrganizer(viewerId, session.organizer_id);
   let isParticipant = false;
@@ -378,6 +377,36 @@ export async function loadSessionReceipt(code: string, viewerId: string | null) 
         'payments (status, provider)',
     )
     .eq('session_id', session.id);
+
+  // รายการเก็บเงินเพิ่ม (LSN-0024) — เติมที่นี่เท่านั้น ไม่ใช่ใน
+  // session_receipt_public() เพราะ `label` เป็นข้อความที่ผู้จัดพิมพ์เอง และ
+  // พิมพ์ชื่อคนลงไปได้ตรง ๆ ("ค่าไม้ พี่ต้น") ถ้าส่งเข้า RPC สาธารณะ คนนอกก๊วน
+  // จะอ่านชื่อผู้เล่นได้ผ่านช่องที่ LSN-0023 เพิ่งอุดไป
+  //
+  // amountThb คือส่วนแบ่ง *ของคนที่กำลังดู* ไม่ใช่ยอดรวมของบรรทัด เพราะใบสรุป
+  // เป็นของผู้เล่น ไม่ใช่บัญชีของผู้จัด
+  if (viewerId) {
+    const { data: chargeRows } = await admin
+      .from('session_charge_shares')
+      .select(
+        'id, amount_thb, session_charges!inner (id, label, notified_at, voided_at, session_id), ' +
+          'session_participants!inner (user_id)',
+      )
+      .eq('session_participants.user_id', viewerId)
+      .eq('session_charges.session_id', session.id)
+      .is('session_charges.voided_at', null)
+      .not('session_charges.notified_at', 'is', null);
+
+    charges = ((chargeRows ?? []) as unknown as {
+      id: string;
+      amount_thb: number;
+      session_charges: { id: string; label: string };
+    }[]).map((r) => ({
+      id: r.id,
+      label: r.session_charges.label,
+      amountThb: r.amount_thb,
+    }));
+  }
 
   const names: ReceiptName[] = receiptRoster((rows ?? []) as unknown as RosterRow[]).map((r) => ({
     participantId: r.id,
