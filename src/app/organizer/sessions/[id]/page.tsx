@@ -26,6 +26,7 @@ import {
 import { evaluateBookingEligibility } from '@/lib/domain/booking-eligibility';
 import { parseCancellationPolicy } from '@/lib/domain/types';
 import {
+  bookingVenueLabel,
   formatCountdown,
   formatDateLong,
   formatThb,
@@ -122,7 +123,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     admin
       .from('bookings')
       .select(
-        'id, status, price_thb, attempt_no, starts_at, ends_at, decision_reason, venues (name), courts (name)',
+        'id, status, price_thb, attempt_no, starts_at, ends_at, decision_reason, manual_venue_name, venues (name), courts (name)',
       )
       .eq('session_id', session.id)
       .order('attempt_no', { ascending: true }),
@@ -161,6 +162,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     starts_at: string;
     ends_at: string;
     decision_reason: string | null;
+    manual_venue_name: string | null;
     venues: { name: string } | null;
     courts: { name: string } | null;
   }[];
@@ -425,8 +427,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-ink-900">
-                        ครั้งที่ {booking.attempt_no} · {booking.venues?.name} ·{' '}
-                        {booking.courts?.name}
+                        ครั้งที่ {booking.attempt_no} · {bookingVenueLabel(booking)}
                       </p>
                       <p className="text-xs text-ink-500">
                         {formatThb(booking.price_thb)}
