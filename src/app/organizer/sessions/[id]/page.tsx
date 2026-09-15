@@ -8,6 +8,7 @@ import { CheckInControl } from '@/components/check-in-control';
 import { SettleControl } from '@/components/settle-control';
 import { ManualCourtControl } from '@/components/manual-court-control';
 import { ChargeControl, type ChargeRow } from '@/components/charge-control';
+import { receiptRoster } from '@/lib/domain/receipt-roster';
 import { GuestControl, RemoveGuestButton } from '@/components/guest-control';
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
@@ -178,7 +179,11 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     .select(
       'id, label, amount_thb, split_mode, notified_at, ' +
         'session_charge_shares (id, amount_thb, ' +
-        'session_participants (id, guest_name, profiles (display_name)))',
+        // session_participants มี FK ชี้ไป profiles สองเส้น (user_id และ
+        // pay_later_granted_by) embed จึงต้องบอกว่าหมายถึงเส้นไหน ไม่งั้น
+        // PostgREST ตอบ error แล้ว data กลายเป็น null เงียบ ๆ
+        'session_participants (id, guest_name, ' +
+        'profiles!session_participants_user_id_fkey (display_name)))',
     )
     .eq('session_id', session.id)
     .is('voided_at', null)
@@ -351,15 +356,18 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
             <ChargeControl
               sessionId={session.id}
               sportSlug={session.sports?.slug ?? 'custom'}
-              players={participants
-                .filter((p) =>
-                  ['paid_confirmed', 'joined_pay_later', 'payment_overdue'].includes(p.status),
-                )
-                .map((p) => ({
-                  participantId: p.id,
-                  displayName: p.guest_name ?? p.profiles?.display_name ?? 'ผู้เล่น',
-                  isGuest: p.guest_name != null,
-                }))}
+              /*
+                receiptRoster() ไม่ใช่ตัวกรองสถานะเฉย ๆ — มันคือกติกาเดียวกับ
+                session_denominator() ฝั่ง SQL ที่ create_session_charge() ใช้จริง
+                ถ้ากรองเองด้วยสถานะอย่างเดียว พรีวิวจะนับคนที่จ่ายแล้วแต่ไม่ได้มา
+                เข้าไปด้วย แล้วบอกผู้จัดว่า "คนละ ฿25 · 4 คน" ขณะที่ระบบจะเก็บจริง
+                ฿34 หาร 3 คน — กล่องยืนยันที่โกหกแย่กว่าไม่มีกล่องยืนยันเลย
+              */
+              players={receiptRoster(participants).map((p) => ({
+                participantId: p.id,
+                displayName: p.guest_name ?? p.profiles?.display_name ?? 'ผู้เล่น',
+                isGuest: p.guest_name != null,
+              }))}
               charges={charges}
             />
           ) : null}

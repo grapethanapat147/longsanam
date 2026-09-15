@@ -113,6 +113,18 @@ grant select on public.session_charges, public.session_charge_shares to authenti
 revoke insert, update, delete on public.session_charges       from anon, authenticated;
 revoke insert, update, delete on public.session_charge_shares from anon, authenticated;
 
+-- service_role ต้อง grant ให้ตรง ๆ ทุกตารางใหม่
+--
+-- 20260901000300_rls.sql มี `grant all privileges on all tables in schema public
+-- to service_role` อยู่จริง แต่นั่นเป็นคำสั่งที่ทำงาน **ครั้งเดียวตอนนั้น**
+-- ตารางที่สร้างทีหลังไม่ได้สิทธิ์ตามไปด้วย — กับดักคลาสเดียวกับ v_public
+-- ใน LSN-0023 ที่การเพิ่มชื่อเข้า array ทีหลังเป็น no-op
+--
+-- อาการเวลาลืม: PostgREST ตอบ 42501 permission denied ส่วนฝั่ง TS ได้ data
+-- เป็น null เงียบ ๆ แล้วหน้าจอขึ้นว่า "ยังไม่มีรายการ" ทั้งที่ในฐานข้อมูลมี
+grant all privileges on public.session_charges       to service_role;
+grant all privileges on public.session_charge_shares to service_role;
+
 -- ---------------------------------------------------------------------------
 -- สร้างรายการ — ฉบับร่าง ยังไม่มีหนี้ ยังไม่แจ้งใคร
 -- ---------------------------------------------------------------------------
