@@ -3,7 +3,7 @@ import { BookingStatusChip, PaymentStatusChip, RefundStatusChip } from '@/compon
 import { ManualRefundForm } from '@/components/admin-controls';
 import { Card } from '@/components/ui/primitives';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { formatDate, formatDateTime, formatThb } from '@/lib/format';
+import { bookingVenueLabel, formatDate, formatDateTime, formatThb } from '@/lib/format';
 import { t } from '@/i18n';
 import type { BookingStatus, PaymentStatus, RefundStatus } from '@/lib/domain/types';
 
@@ -14,7 +14,7 @@ export default async function AdminBookingsPage() {
     admin
       .from('bookings')
       .select(
-        'id, status, price_thb, starts_at, attempt_no, venues (name), courts (name), sessions!bookings_session_id_fkey (title, public_code)',
+        'id, status, price_thb, starts_at, attempt_no, manual_venue_name, venues (name), courts (name), sessions!bookings_session_id_fkey (title, public_code)',
       )
       .order('requested_at', { ascending: false })
       .limit(50),
@@ -38,6 +38,7 @@ export default async function AdminBookingsPage() {
     price_thb: number;
     starts_at: string;
     attempt_no: number;
+    manual_venue_name: string | null;
     venues: { name: string } | null;
     courts: { name: string } | null;
     sessions: { title: string; public_code: string } | null;
@@ -111,7 +112,7 @@ export default async function AdminBookingsPage() {
                   <span className="block text-xs text-ink-500">ครั้งที่ {booking.attempt_no}</span>
                 </td>
                 <td className="px-4 py-3 text-ink-600">
-                  {booking.venues?.name} · {booking.courts?.name}
+                  {bookingVenueLabel(booking)}
                 </td>
                 <td className="px-4 py-3 text-ink-600">{formatDate(booking.starts_at)}</td>
                 <td className="px-4 py-3 text-right tabular-nums text-ink-900">

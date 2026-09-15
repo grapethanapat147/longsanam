@@ -77,3 +77,20 @@ export function sessionShareUrl(publicCode: string): string {
   const base = (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3210').replace(/\/+$/, '');
   return `${base}/s/${publicCode}`;
 }
+
+/**
+ * ชื่อสนามของการจองหนึ่งแถว
+ *
+ * การจองที่ผู้จัดยืนยันเอง (LSN-0025) ไม่ผูกกับสนามในระบบ `venues`/`courts`
+ * จึงว่างทั้งคู่ และชื่อที่ผู้จัดพิมพ์อยู่ใน `manual_venue_name` แทน
+ * ถ้าไม่มีทางกลับนี้ หน้าจอจะขึ้น "ครั้งที่ 1 ·  · " คือคั่นลอย ๆ สองอัน
+ * แล้วชื่อสนามที่ผู้จัดเพิ่งพิมพ์เองก็ไม่โผล่ที่ไหนเลย
+ */
+export function bookingVenueLabel(booking: {
+  venues: { name: string } | null;
+  courts: { name: string } | null;
+  manual_venue_name: string | null;
+}): string {
+  if (booking.manual_venue_name) return `${booking.manual_venue_name} · ผู้จัดหาเอง`;
+  return [booking.venues?.name, booking.courts?.name].filter(Boolean).join(' · ');
+}
