@@ -489,3 +489,88 @@ export async function confirmCourtManuallyAction(
   revalidatePath('/s', 'layout');
   return { ok: true, priceThb: result.priceThb ?? price };
 }
+
+/* ---------------------------------------------------------------------------
+ * รายการเก็บเงินเพิ่มหลังจบก๊วน (LSN-0024)
+ *
+ * ทั้งสามตัวเรียกผ่าน client ของผู้จัดเอง ไม่ใช่ admin client เพื่อให้
+ * is_session_organizer() ข้างใน RPC เห็นผู้เรียกจริง — เหตุผลเดียวกับ
+ * settleSessionAction
+ *
+ * ลำดับสำคัญ: สร้างแล้วยังไม่มีหนี้ กดส่งถึงมี หนี้จึงไม่โผล่ในหน้าจอผู้เล่น
+ * ก่อนที่ผู้จัดจะตั้งใจเรียกเก็บ
+ * ------------------------------------------------------------------------- */
+
+export type ChargeResult<T> = ({ ok: true } & T) | { ok: false; error: string };
+
+async function callChargeRpc<T extends Record<string, unknown>>(
+  fn: 'create_session_charge' | 'send_session_charges' | 'void_session_charge',
+  args: Record<string, unknown>,
+  pick: (row: Record<string, unknown>) => T,
+): Promise<ChargeResult<T>> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: reasonLabel.not_authenticated };
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)(fn, args);
+
+  if (error) {
+    console.error(`[${fn}] failed`, error);
+    return { ok: false, error: t.common.unexpectedError };
+  }
+
+  const result = (data ?? null) as { ok?: boolean; reason?: string } | null;
+  if (!result?.ok) {
+    const reason = result?.reason;
+    return { ok: false, error: (reason && reasonLabel[reason]) || t.common.unexpectedError };
+  }
+
+  revalidatePath('/organizer', 'layout');
+  revalidatePath('/s', 'layout');
+  return { ok: true, ...pick(result as Record<string, unknown>) };
+}
+
+export async function createSessionChargeAction(
+  sessionId: string,
+  label: string,
+  amountThb: number,
+  splitMode: 'all' | 'named',
+  participantIds: string[],
+): Promise<ChargeResult<{ people: number; perHeadThb: number }>> {
+  const name = label.trim();
+  if (name.length === 0) return { ok: false, error: t.charges.labelRequired };
+  const amount = Math.round(amountThb);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return { ok: false, error: reasonLabel.invalid_amount };
+  }
+
+  return callChargeRpc(
+    'create_session_charge',
+    {
+      p_session_id: sessionId,
+      p_label: name,
+      p_amount_thb: amount,
+      p_split_mode: splitMode,
+      p_participant_ids: splitMode === 'named' ? participantIds : null,
+    },
+    (r) => ({ people: Number(r.people ?? 0), perHeadThb: Number(r.perHeadThb ?? 0) }),
+  );
+}
+
+export async function sendSessionChargesAction(
+  sessionId: string,
+): Promise<ChargeResult<{ charges: number; peopleNotified: number }>> {
+  return callChargeRpc('send_session_charges', { p_session_id: sessionId }, (r) => ({
+    charges: Number(r.charges ?? 0),
+    peopleNotified: Number(r.peopleNotified ?? 0),
+  }));
+}
+
+export async function voidSessionChargeAction(
+  chargeId: string,
+): Promise<ChargeResult<{ paymentsExpired: number }>> {
+  return callChargeRpc('void_session_charge', { p_charge_id: chargeId }, (r) => ({
+    paymentsExpired: Number(r.paymentsExpired ?? 0),
+  }));
+}

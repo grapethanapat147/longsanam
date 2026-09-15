@@ -7,6 +7,7 @@ import { PayLaterControl } from '@/components/pay-later-control';
 import { CheckInControl } from '@/components/check-in-control';
 import { SettleControl } from '@/components/settle-control';
 import { ManualCourtControl } from '@/components/manual-court-control';
+import { ChargeControl, type ChargeRow } from '@/components/charge-control';
 import { GuestControl, RemoveGuestButton } from '@/components/guest-control';
 import { ShareLink } from '@/components/share-link';
 import { OrganizerControls } from '@/components/organizer-controls';
@@ -56,7 +57,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
        budget_per_person_thb, target_players, min_players, payment_deadline, organizer_id,
        cancellation_policy, failure_reason, cancelled_reason,
        shuttle_cost_thb, split_mode, settled_per_person_thb,
-       sports (name_th, emoji)`,
+       sports (slug, name_th, emoji)`,
     )
     .eq('id', id)
     .maybeSingle();
@@ -84,7 +85,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
     shuttle_cost_thb: number;
     split_mode: 'equal' | 'by_games';
     settled_per_person_thb: number | null;
-    sports: { name_th: string; emoji: string } | null;
+    sports: { slug: string; name_th: string; emoji: string } | null;
   };
 
   const isOwner = session.organizer_id === user.id;
@@ -171,6 +172,50 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
 
   // The price for this session's actual window, including peak and weekend
   // rules — the same figure the orchestrator gates the booking on.
+  // รายการเก็บเงินเพิ่ม (LSN-0024) — ผู้จัดเห็นทั้งฉบับร่างและที่ส่งแล้ว
+  const { data: chargeRows } = await admin
+    .from('session_charges')
+    .select(
+      'id, label, amount_thb, split_mode, notified_at, ' +
+        'session_charge_shares (id, amount_thb, ' +
+        'session_participants (id, guest_name, profiles (display_name)))',
+    )
+    .eq('session_id', session.id)
+    .is('voided_at', null)
+    .order('created_at', { ascending: true });
+
+  const charges: ChargeRow[] = ((chargeRows ?? []) as unknown as {
+    id: string;
+    label: string;
+    amount_thb: number;
+    split_mode: 'all' | 'named';
+    notified_at: string | null;
+    session_charge_shares: {
+      id: string;
+      amount_thb: number;
+      session_participants: {
+        id: string;
+        guest_name: string | null;
+        profiles: { display_name: string } | null;
+      } | null;
+    }[];
+  }[]).map((c) => ({
+    id: c.id,
+    label: c.label,
+    amountThb: c.amount_thb,
+    splitMode: c.split_mode,
+    sent: c.notified_at !== null,
+    shares: c.session_charge_shares.map((sh) => ({
+      participantId: sh.session_participants?.id ?? '',
+      displayName:
+        sh.session_participants?.guest_name ??
+        sh.session_participants?.profiles?.display_name ??
+        'ผู้เล่น',
+      amountThb: sh.amount_thb,
+      isGuest: sh.session_participants?.guest_name != null,
+    })),
+  }));
+
   const { byCourt: courtPrices, cheapest: requiredTotalThb } = await loadApprovedCourtPrices(
     approved.map((p) => p.court_id),
     session.starts_at,
@@ -295,6 +340,27 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
             <ManualCourtControl
               sessionId={session.id}
               estimatedCourtCostThb={requiredTotalThb}
+            />
+          ) : null}
+
+          {/*
+            ขึ้นเฉพาะก๊วนที่เกิดขึ้นจริงแล้ว ตรงกับ allowlist ของ RPC
+            ไม่ใช่ขึ้นตลอดแล้ว disabled
+          */}
+          {session.status === 'booked' || session.status === 'completed' ? (
+            <ChargeControl
+              sessionId={session.id}
+              sportSlug={session.sports?.slug ?? 'custom'}
+              players={participants
+                .filter((p) =>
+                  ['paid_confirmed', 'joined_pay_later', 'payment_overdue'].includes(p.status),
+                )
+                .map((p) => ({
+                  participantId: p.id,
+                  displayName: p.guest_name ?? p.profiles?.display_name ?? 'ผู้เล่น',
+                  isGuest: p.guest_name != null,
+                }))}
+              charges={charges}
             />
           ) : null}
 
