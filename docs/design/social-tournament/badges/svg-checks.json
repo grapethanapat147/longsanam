@@ -1,0 +1,138 @@
+[
+  {
+    "file": "badge-sheet-icons.svg",
+    "colors": [
+      "#0a7a4f",
+      "#0d1f18",
+      "#12a563",
+      "#bfec33",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "badge-sheet-th.svg",
+    "colors": [
+      "#0a7a4f",
+      "#0d1f18",
+      "#12a563",
+      "#bfec33",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "labeled/06-three-squads.svg",
+    "colors": [
+      "#0a7a4f",
+      "#0d1f18",
+      "#12a563",
+      "#bfec33",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "labeled/05-fair-play.svg",
+    "colors": [
+      "#0a7a4f",
+      "#0d1f18",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "labeled/04-champion.svg",
+    "colors": [
+      "#0a7a4f",
+      "#0d1f18",
+      "#bfec33",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "labeled/03-five-tournaments.svg",
+    "colors": [
+      "#0a7a4f",
+      "#0d1f18",
+      "#12a563",
+      "#bfec33",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "labeled/02-new-opponents.svg",
+    "colors": [
+      "#0a7a4f",
+      "#0d1f18",
+      "#bfec33",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "labeled/01-first-tournament.svg",
+    "colors": [
+      "#0a7a4f",
+      "#0d1f18",
+      "#12a563",
+      "#bfec33",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "icons/06-three-squads.svg",
+    "colors": [
+      "#0d1f18",
+      "#12a563",
+      "#bfec33"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "icons/05-fair-play.svg",
+    "colors": [
+      "#0a7a4f",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "icons/04-champion.svg",
+    "colors": [
+      "#0d1f18",
+      "#bfec33"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "icons/03-five-tournaments.svg",
+    "colors": [
+      "#0d1f18",
+      "#12a563",
+      "#bfec33"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "icons/02-new-opponents.svg",
+    "colors": [
+      "#0a7a4f",
+      "#bfec33",
+      "#ffffff"
+    ],
+    "native_vector": true
+  },
+  {
+    "file": "icons/01-first-tournament.svg",
+    "colors": [
+      "#0d1f18",
+      "#12a563",
+      "#bfec33"
+    ],
+    "native_vector": true
+  }
+]
