@@ -6,7 +6,7 @@
 --   OPEN001 = open มี 3 ที่นั่งที่นับ
 
 begin;
-select plan(19);
+select plan(23);
 
 -- fixture: seed ไม่มีผู้เล่นรับเชิญเลย เพิ่มเข้า BOOKED1 หนึ่งคน
 -- เพื่อทดสอบว่ามีส่วนแบ่งแต่ไม่มีหนี้
@@ -175,6 +175,76 @@ select is(
   (public.void_session_charge(
     (select id from public.session_charges where label = 'ค่าไม้ที่ยืม')) ->> 'paymentsExpired')::integer,
   2, 'ลบรายการที่ส่งแล้ว payment ที่ pending กลายเป็น expired');
+
+-- ---------------------------------------------------------------------------
+-- เพดานยอดชั้นที่สอง — ฐานข้อมูลปฏิเสธเอง ไม่ได้พึ่ง UI
+--
+-- ชั้นแรกคือกล่องยืนยันฝั่ง TS (CHARGE_CONFIRM_THRESHOLD_THB) ซึ่งผู้ใช้กดผ่านได้
+-- ชั้นนี้คือ CHECK บนตาราง ซึ่งกดผ่านไม่ได้ และดักคนที่ยิง RPC ตรง ๆ ด้วย
+-- ต้องเป็น throws_ok ไม่ใช่ is() เพราะ create_session_charge ไม่ได้เช็คเอง
+-- แต่ปล่อยให้ constraint ยิง 23514 ขึ้นมา
+-- ---------------------------------------------------------------------------
+
+-- ปักถึง **ชื่อ constraint** ไม่ใช่แค่ SQLSTATE เพราะยอด 0 ไปตกที่
+-- session_charge_shares.amount_thb > 0 ได้ด้วย ซึ่งเป็น 23514 เหมือนกัน
+-- ถ้าเช็คแค่ errcode เทสข้อนี้จะเขียวต่อไปแม้ constraint บน session_charges
+-- จะถูกถอดออก — เคยพลาดแบบนี้มาแล้วตอนตรวจ ไม่ใช่การเดา
+select throws_ok(
+  $$ select public.create_session_charge(
+       (select id from public.sessions where public_code = 'BOOKED1'),
+       'ยอดศูนย์', 0, 'all') $$,
+  '23514',
+  'new row for relation "session_charges" violates check constraint "session_charges_amount_thb_check"',
+  'amount_thb = 0 ถูกปฏิเสธด้วย constraint ของ session_charges เอง');
+
+select throws_ok(
+  $$ select public.create_session_charge(
+       (select id from public.sessions where public_code = 'BOOKED1'),
+       'เผลอใส่ศูนย์เกิน', 100001, 'all') $$,
+  '23514',
+  'new row for relation "session_charges" violates check constraint "session_charges_amount_thb_check"',
+  'amount_thb เกิน 100,000 ถูกปฏิเสธด้วย constraint ของ session_charges เอง');
+
+-- ---------------------------------------------------------------------------
+-- ส่วนแบ่งถูกปักตอนสร้าง — สมาชิกที่เข้ามาทีหลังไม่ทำให้ของเดิมขยับ
+--
+-- นี่คือเหตุผลที่ session_charge_shares เก็บเป็นแถว แทนที่จะคำนวณสดตอนอ่าน
+-- ถ้าคำนวณสด คนที่เข้าก๊วนมาทีหลังจะทำให้ยอดของคนที่ถูกเรียกเก็บไปแล้วเปลี่ยน
+-- ซึ่งแปลว่าหนี้ที่ตกลงกันไปแล้วขยับได้เอง
+-- ---------------------------------------------------------------------------
+
+select is(
+  public.create_session_charge(
+    (select id from public.sessions where public_code = 'BOOKED1'),
+    'ค่าคอร์ตต่อเวลา', 90, 'all') ->> 'ok',
+  'true', 'สร้างรายการไว้ก่อนจะมีคนเข้าก๊วนใหม่');
+
+set local role postgres;
+
+create temporary table frozen_before on commit drop as
+select participant_id, amount_thb from public.session_charge_shares
+where charge_id = (select id from public.session_charges where label = 'ค่าคอร์ตต่อเวลา');
+
+insert into public.session_participants
+  (session_id, user_id, guest_name, status, amount_due_thb, payment_due_at)
+select s.id, null, 'คนมาทีหลัง', 'paid_confirmed', 150, s.starts_at
+from public.sessions s where s.public_code = 'BOOKED1';
+
+-- symmetric difference = 0 แปลว่าไม่มีแถวไหนเพิ่ม หาย หรือยอดเปลี่ยน
+-- เขียนแบบนี้เพื่อไม่ต้อง hardcode จำนวนคน ซึ่งจะพังเงียบ ๆ ถ้า seed เปลี่ยน
+select is(
+  (select count(*)::integer from (
+     (select participant_id, amount_thb from public.session_charge_shares
+      where charge_id = (select id from public.session_charges where label = 'ค่าคอร์ตต่อเวลา')
+      except
+      select participant_id, amount_thb from frozen_before)
+     union all
+     (select participant_id, amount_thb from frozen_before
+      except
+      select participant_id, amount_thb from public.session_charge_shares
+      where charge_id = (select id from public.session_charges where label = 'ค่าคอร์ตต่อเวลา'))
+   ) diff),
+  0, 'คนเข้าก๊วนทีหลัง ส่วนแบ่งที่ปักไว้แล้วไม่ขยับสักแถว');
 
 set local role postgres;
 select * from finish();

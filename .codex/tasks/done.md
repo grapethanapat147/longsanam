@@ -26,7 +26,8 @@
 | LSN-0022 | Guests: sign a friend up without an account | 8 |
 | LSN-0023 | ใบสรุปก๊วน ที่ส่งกลับเข้า LINE ได้ | 9 |
 | LSN-0025 | ผู้จัดยืนยันคอร์ตเอง | 9 |
+| LSN-0024 | รายการเก็บเงินเพิ่มหลังจบก๊วน | 9 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,
-LSN-0016, LSN-0017, LSN-0018, LSN-0023 and LSN-0025.
+LSN-0016, LSN-0017, LSN-0018, LSN-0023, LSN-0024 and LSN-0025.

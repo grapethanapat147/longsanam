@@ -27,3 +27,8 @@ Ticket-first workflow, mirroring the convention used in the ICW and Famai projec
 - `npm run lint`, `npx tsc --noEmit`, and `npm test` all pass.
 - No non-functional UI: every rendered control either works or is explicitly disabled with a reason.
 - Any new status transition is written to `audit_logs`.
+- Relaxing a constraint or unique index means auditing every reader of the old
+  invariant, not just the constraint. Readers built on the old guarantee do not
+  error — they silently pick the wrong row — and the existing tests stay green
+  because no fixture yet produces the newly possible state. Say in the review
+  notes how many call sites were found and how they were located. (LSN-0024)
