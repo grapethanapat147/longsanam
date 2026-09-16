@@ -579,4 +579,6 @@ courts / revenue **แต่สนามพันธมิตรจริงย�
 | เก็บเงินเพิ่มหลังจบ | `src/lib/domain/charge-split.ts` |
 | สถานะและข้อความที่ผู้ใช้เห็น | `src/i18n/th.ts` |
 | **สเปกทัวร์นาเมนต์ฉบับเต็ม** | `.codex/specs/tournaments.md` |
+| สเปก badge หลังจบทัวร์นาเมนต์ | `.codex/specs/badges.md` |
+| artwork badge หกใบ | `docs/design/social-tournament/badges/` |
 | ภาพรวมสถาปัตยกรรม | `README.md` |
