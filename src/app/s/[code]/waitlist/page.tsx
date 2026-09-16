@@ -28,9 +28,9 @@ export default async function WaitlistPage({ params }: { params: Promise<{ code:
       <AppShell>
         <EmptyState
           icon="📋"
-          title="คุณยังไม่ได้อยู่ในคิวสำรองของก๊วนนี้"
-          description="ถ้าก๊วนเต็ม คุณสามารถเข้าคิวสำรองได้จากหน้ารายละเอียดก๊วน"
-          action={<ButtonLink href={`/s/${code}`}>ไปหน้าก๊วน</ButtonLink>}
+          title="คุณยังไม่ได้อยู่ในคิวสำรองของนัดนี้"
+          description="ถ้านัดเต็ม คุณสามารถเข้าคิวสำรองได้จากหน้ารายละเอียดนัด"
+          action={<ButtonLink href={`/s/${code}`}>ไปหน้านัด</ButtonLink>}
         />
       </AppShell>
     );
@@ -63,7 +63,7 @@ export default async function WaitlistPage({ params }: { params: Promise<{ code:
           </Card>
 
           <Card className="px-5 py-4">
-            <h2 className="font-semibold text-ink-900">รายละเอียดก๊วน</h2>
+            <h2 className="font-semibold text-ink-900">รายละเอียดนัด</h2>
             <dl className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between gap-4">
                 <dt className="text-ink-500">เวลา</dt>

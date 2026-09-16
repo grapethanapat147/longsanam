@@ -49,7 +49,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
           <Card className="px-5 py-4">
             <h2 className="font-semibold text-ink-900">สรุปรายการ</h2>
             <dl className="mt-3 space-y-2 text-sm">
-              <Row label="ก๊วน" value={session.title} />
+              <Row label="นัด" value={session.title} />
               <Row label="สถานที่" value={session.area_text} />
               <Row
                 label="เวลา"
@@ -81,7 +81,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
             href={`/s/${code}`}
             className="inline-block text-sm font-semibold text-brand-700 hover:underline"
           >
-            ← กลับไปหน้ารายละเอียดก๊วน
+            ← กลับไปหน้ารายละเอียดนัด
           </Link>
         </div>
 

@@ -62,7 +62,7 @@ export default async function VenueInboxPage({ params }: { params: Promise<{ ven
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-semibold text-ink-900">
-                    {request.sessions?.title ?? 'ก๊วน'}
+                    {request.sessions?.title ?? 'นัด'}
                   </h2>
                   <BookingStatusChip status={request.status} />
                 </div>

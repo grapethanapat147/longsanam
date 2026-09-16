@@ -100,7 +100,7 @@ export default async function VenueOverviewPage({
               <li key={booking.id} className="flex items-center justify-between gap-3 py-2">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-ink-900">
-                    {booking.sessions?.title ?? 'ก๊วน'} · {booking.courts?.name}
+                    {booking.sessions?.title ?? 'นัด'} · {booking.courts?.name}
                   </p>
                   <p className="text-xs text-ink-500">
                     {formatDate(booking.starts_at)} ·{' '}

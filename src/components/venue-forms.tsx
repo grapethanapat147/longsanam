@@ -421,7 +421,7 @@ export function BookingDecisionButtons({ bookingId }: { bookingId: string }) {
           <Input
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            placeholder="เหตุผลที่ปฏิเสธ (แจ้งผู้จัดก๊วน)"
+            placeholder="เหตุผลที่ปฏิเสธ (แจ้งผู้จัด)"
             maxLength={200}
           />
           <div className="flex gap-2">
@@ -464,7 +464,7 @@ export function AutoConfirmToggle({ venueId, enabled }: { venueId: string; enabl
           <h3 className="font-semibold text-ink-900">{t.venue.autoConfirm}</h3>
           <p className="mt-1 text-sm text-ink-600">
             {enabled
-              ? 'คำขอจองจะถูกยืนยันทันทีเมื่อคอร์ตว่าง ก๊วนจะได้สนามโดยไม่ต้องรอคุณ'
+              ? 'คำขอจองจะถูกยืนยันทันทีเมื่อคอร์ตว่าง นัดจะได้สนามโดยไม่ต้องรอคุณ'
               : 'คำขอจองจะเข้ามารอในกล่องคำขอ และคอร์ตจะถูกกันไว้จนกว่าคุณจะตอบ'}
           </p>
         </div>

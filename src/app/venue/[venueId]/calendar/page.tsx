@@ -109,7 +109,7 @@ export default async function VenueCalendarPage({
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-ink-900">
-              {booking.sessions?.title ?? 'ก๊วน'}
+              {booking.sessions?.title ?? 'นัด'}
             </p>
             <p className="text-xs text-ink-500">
               {booking.courts?.name} · {formatTimeRange(booking.starts_at, booking.ends_at)} ·{' '}
@@ -170,7 +170,7 @@ export default async function VenueCalendarPage({
           <EmptyState
             icon="📅"
             title="ยังไม่มีรายการในช่วง 30 วันข้างหน้า"
-            description="เมื่อมีก๊วนจองคอร์ต หรือคุณปิดคอร์ตเอง รายการจะแสดงที่นี่"
+            description="เมื่อมีนัดจองคอร์ต หรือคุณปิดคอร์ตเอง รายการจะแสดงที่นี่"
           />
         ) : (
           days.map((day) => (

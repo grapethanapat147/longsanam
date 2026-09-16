@@ -28,7 +28,7 @@ export default async function ProfilePage() {
 
   return (
     <AppShell>
-      <PageHeader title={t.nav.profile} description="ข้อมูลที่แสดงให้เพื่อนร่วมก๊วนเห็น" />
+      <PageHeader title={t.nav.profile} description="ข้อมูลที่แสดงให้เพื่อนร่วมนัดเห็น" />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="space-y-6 px-5 py-5">
@@ -49,7 +49,7 @@ export default async function ProfilePage() {
               <Chip tone="brand">{ROLE_LABEL[user.role] ?? user.role}</Chip>
             </p>
             <p className="mt-3 text-sm text-ink-600">
-              ทุกบัญชีสามารถเป็นผู้จัดก๊วนได้เอง
+              ทุกบัญชีสามารถเป็นผู้จัดได้เอง
               สิทธิ์เจ้าของสนามจะได้รับอัตโนมัติเมื่อคุณลงทะเบียนสนาม
             </p>
           </Card>

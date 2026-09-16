@@ -145,7 +145,7 @@ export function JoinPanel(props: Props) {
         default:
           return {
             tone: 'success',
-            text: 'ยกเลิกแล้ว ตามเงื่อนไขของก๊วนนี้ไม่มีการคืนเงิน',
+            text: 'ยกเลิกแล้ว ตามเงื่อนไขของนัดนี้ไม่มีการคืนเงิน',
           };
       }
     });
@@ -192,16 +192,16 @@ export function JoinPanel(props: Props) {
     }
 
     if (props.status === 'cancelled') {
-      return <DisabledAction label={t.session.join} reason="ก๊วนนี้ถูกยกเลิกแล้ว" />;
+      return <DisabledAction label={t.session.join} reason="นัดนี้ถูกยกเลิกแล้ว" />;
     }
     if (props.status === 'completed') {
-      return <DisabledAction label={t.session.join} reason="ก๊วนนี้จบไปแล้ว" />;
+      return <DisabledAction label={t.session.join} reason="นัดนี้จบไปแล้ว" />;
     }
     if (props.status === 'draft') {
-      return <DisabledAction label={t.session.join} reason="ผู้จัดยังไม่ได้เผยแพร่ก๊วนนี้" />;
+      return <DisabledAction label={t.session.join} reason="ผู้จัดยังไม่ได้เผยแพร่นัดนี้" />;
     }
     if (started) {
-      return <DisabledAction label={t.session.join} reason="ก๊วนนี้เริ่มไปแล้ว" />;
+      return <DisabledAction label={t.session.join} reason="นัดนี้เริ่มไปแล้ว" />;
     }
 
     const participant = props.participant;
@@ -216,7 +216,7 @@ export function JoinPanel(props: Props) {
           {confirmingCancel ? (
             <div className="space-y-2 rounded-xl border border-red-300 bg-red-50 p-3">
               <p className="text-sm text-red-900">
-                ยืนยันการสละสิทธิ์? จำนวนเงินคืนจะคำนวณตามเงื่อนไขของก๊วนนี้
+                ยืนยันการสละสิทธิ์? จำนวนเงินคืนจะคำนวณตามเงื่อนไขของนัดนี้
                 และที่นั่งจะถูกส่งต่อให้คิวสำรอง
               </p>
               <div className="flex gap-2">
@@ -265,8 +265,8 @@ export function JoinPanel(props: Props) {
           </Button>
           <p className="text-xs leading-relaxed text-ink-500">
             {overdue
-              ? 'ก๊วนจบแล้วและยังค้างชำระ ระบบจะเตือนทุกวันและเครดิตของคุณจะลดลงจนกว่าจะชำระ'
-              : 'ผู้จัดให้คุณจ่ายทีหลังได้ ระบบจะเตือนหลังก๊วนจบ'}{' '}
+              ? 'นัดจบแล้วและยังค้างชำระ ระบบจะเตือนทุกวันและเครดิตของคุณจะลดลงจนกว่าจะชำระ'
+              : 'ผู้จัดให้คุณจ่ายทีหลังได้ ระบบจะเตือนหลังนัดจบ'}{' '}
             · {t.mock.short}
           </p>
         </div>
@@ -343,7 +343,7 @@ export function JoinPanel(props: Props) {
     }
 
     if (!JOINABLE.includes(props.status)) {
-      return <DisabledAction label={t.session.join} reason="ก๊วนนี้ไม่เปิดรับผู้เล่นแล้ว" />;
+      return <DisabledAction label={t.session.join} reason="นัดนี้ไม่เปิดรับผู้เล่นแล้ว" />;
     }
     if (deadlinePassed) {
       return <DisabledAction label={t.session.join} reason="เลยกำหนดชำระเงินแล้ว" />;

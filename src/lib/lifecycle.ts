@@ -31,7 +31,7 @@ export type SweepResult = {
 };
 
 const STRANDED_REASON =
-  'ระบบไม่สามารถจองสนามได้ทันเวลาเริ่มก๊วน จึงยกเลิกและคืนเงินให้ผู้เล่นทุกคนเต็มจำนวน';
+  'ระบบไม่สามารถจองสนามได้ทันเวลาเริ่มนัด จึงยกเลิกและคืนเงินให้ผู้เล่นทุกคนเต็มจำนวน';
 
 export async function runLifecycleSweeps(): Promise<SweepResult> {
   const admin = createAdminClient();

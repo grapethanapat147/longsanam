@@ -182,9 +182,9 @@ export async function runMaintenanceAction(): Promise<AdminActionState> {
     message:
       `หมดอายุ: การกันคอร์ต ${result.expiredHolds} · การจอง ${result.expiredBookings} · ` +
       `การชำระเงิน ${result.expiredPayments} · สิทธิ์คิวสำรอง ${result.expiredPromotions} — ` +
-      `จบก๊วน ${result.completedSessions} รายการ` +
+      `จบนัด ${result.completedSessions} รายการ` +
       (result.strandedSessions > 0
-        ? ` · ยกเลิกก๊วนที่จองสนามไม่ทัน ${result.strandedSessions} รายการ ` +
+        ? ` · ยกเลิกนัดที่จองสนามไม่ทัน ${result.strandedSessions} รายการ ` +
           `คืนเงินผู้เล่น ${result.refundedPlayers} คน รวม ${result.refundedThb} บาท`
         : ''),
   };

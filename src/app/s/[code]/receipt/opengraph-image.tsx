@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
 import { loadSessionReceipt } from '@/lib/queries';
 
-export const alt = 'ใบเสร็จก๊วน';
+export const alt = 'ใบเสร็จนัด';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -73,7 +73,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
             marginTop: 12,
           }}
         >
-          {t?.title ?? 'ใบเสร็จก๊วน'}
+          {t?.title ?? 'ใบเสร็จนัด'}
         </div>
 
         <div style={{ display: 'flex', gap: 56, marginTop: 48, fontSize: 34, color: '#35473f' }}>

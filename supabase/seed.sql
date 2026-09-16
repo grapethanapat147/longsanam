@@ -14,7 +14,7 @@ do $$
 declare
   v_user   record;
   v_users  constant jsonb := '[
-    {"id": "11111111-1111-4111-8111-000000000001", "email": "organizer@longsanam.test", "name": "ก้อง ผู้จัดก๊วน",   "role": "player"},
+    {"id": "11111111-1111-4111-8111-000000000001", "email": "organizer@longsanam.test", "name": "ก้อง ผู้จัด",   "role": "player"},
     {"id": "11111111-1111-4111-8111-000000000002", "email": "player1@longsanam.test",   "name": "แนน",             "role": "player"},
     {"id": "11111111-1111-4111-8111-000000000003", "email": "player2@longsanam.test",   "name": "บอส",             "role": "player"},
     {"id": "11111111-1111-4111-8111-000000000004", "email": "player3@longsanam.test",   "name": "มีน",             "role": "player"},
@@ -171,7 +171,7 @@ values
   -- Open: taking players, not yet at minimum.
   ('dddddddd-0000-4000-8000-000000000002', 'OPEN001',
    '11111111-1111-4111-8111-000000000001', 'aaaaaaaa-0000-4000-8000-000000000001',
-   'ก๊วนแบดเย็นวันพุธ', 'เล่นสนุก ๆ ไม่ซีเรียส มือใหม่ยินดีต้อนรับ',
+   'แบดเย็นวันพุธ', 'เล่นสนุก ๆ ไม่ซีเรียส มือใหม่ยินดีต้อนรับ',
    'ลาดพร้าว', 'วังทองหลาง',
    ((current_date + 4) + time '19:00') at time zone 'Asia/Bangkok',
    ((current_date + 4) + time '21:00') at time zone 'Asia/Bangkok',
@@ -222,7 +222,7 @@ values
   -- list below it showing another.
   ('dddddddd-0000-4000-8000-000000000006', 'DONE001',
    '11111111-1111-4111-8111-000000000001', 'aaaaaaaa-0000-4000-8000-000000000001',
-   'แบดเย็นวันจันทร์ (จบแล้ว)', 'ก๊วนประจำ เล่นกันทุกวันจันทร์',
+   'แบดเย็นวันจันทร์ (จบแล้ว)', 'นัดประจำ เล่นกันทุกวันจันทร์',
    'ลาดพร้าว', 'วังทองหลาง',
    ((current_date - 2) + time '19:00') at time zone 'Asia/Bangkok',
    ((current_date - 2) + time '21:00') at time zone 'Asia/Bangkok',
@@ -296,7 +296,7 @@ values
   ('eeeeeeee-0000-4000-8000-000000000032', 'dddddddd-0000-4000-8000-000000000005', '11111111-1111-4111-8111-000000000003', 'refunded', 120, ((current_date + 5) + time '20:00') at time zone 'Asia/Bangkok', now() - interval '5 days')
 on conflict (id) do nothing;
 
--- ผู้เล่นรับเชิญของก๊วนที่จบแล้ว จ่ายเงินสดกับผู้จัดโดยตรง (LSN-0022)
+-- ผู้เล่นรับเชิญของนัดที่จบแล้ว จ่ายเงินสดกับผู้จัดโดยตรง (LSN-0022)
 insert into public.session_participants
   (id, session_id, user_id, guest_name, status, amount_due_thb, payment_due_at, confirmed_at)
 values
@@ -431,7 +431,7 @@ insert into public.refunds
    idempotency_key, processed_at, policy_snapshot)
 select
   p.id, p.session_id, p.user_id, p.amount_thb, 'completed',
-  'ผู้จัดยกเลิกก๊วน คืนเงินเต็มจำนวน',
+  'ผู้จัดยกเลิกนัด คืนเงินเต็มจำนวน',
   'mock_refund_' || replace(p.id::text, '-', ''),
   'seed_refund_' || p.id::text,
   now() - interval '1 hour',
@@ -462,7 +462,7 @@ values
 insert into public.notifications (user_id, session_id, kind, title, body, action_url, sent_at)
 values
   ('11111111-1111-4111-8111-000000000001', 'dddddddd-0000-4000-8000-000000000004', 'session_booked',
-   'จองสนามสำเร็จแล้ว', 'ก๊วนฟุตบอล 7 คน ทองหล่อ ได้สนาม A เรียบร้อยแล้ว',
+   'จองสนามสำเร็จแล้ว', 'นัดฟุตบอล 7 คน ทองหล่อ ได้สนาม A เรียบร้อยแล้ว',
    '/organizer/sessions/dddddddd-0000-4000-8000-000000000004', now() - interval '22 hours'),
   ('11111111-1111-4111-8111-000000000002', 'dddddddd-0000-4000-8000-000000000005', 'refund_completed',
    'คืนเงินเรียบร้อยแล้ว', 'เราคืนเงินจำนวน 120 บาท ให้คุณแล้ว',

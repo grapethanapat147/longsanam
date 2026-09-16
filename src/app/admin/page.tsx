@@ -61,12 +61,12 @@ export default async function AdminDashboardPage() {
           tone={(pendingBookings ?? 0) > 0 ? 'negative' : 'default'}
         />
         <Stat label="การกันคอร์ตที่ยังทำงาน" value={`${activeHolds ?? 0}`} />
-        <Stat label="ก๊วนทั้งหมด" value={`${sessions?.length ?? 0}`} />
+        <Stat label="นัดทั้งหมด" value={`${sessions?.length ?? 0}`} />
         <Stat label="รายได้สุทธิ" value={formatThb(paidTotal - refundedTotal)} tone="positive" />
       </div>
 
       <Card className="px-5 py-4">
-        <h2 className="font-semibold text-ink-900">ก๊วนแยกตามสถานะ</h2>
+        <h2 className="font-semibold text-ink-900">นัดแยกตามสถานะ</h2>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {(Object.keys(sessionStatusLabel) as SessionStatus[]).map((status) => (
             <li

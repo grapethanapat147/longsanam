@@ -23,7 +23,7 @@ export function GuestControl({ sessionId, closed }: Props) {
     return (
       <Card className="px-5 py-4">
         <h2 className="font-semibold text-ink-900">เพิ่มผู้เล่นรับเชิญ</h2>
-        <p className="mt-1 text-sm text-ink-500">ก๊วนนี้ปิดแล้ว เพิ่มคนไม่ได้</p>
+        <p className="mt-1 text-sm text-ink-500">นัดนี้ปิดแล้ว เพิ่มคนไม่ได้</p>
       </Card>
     );
   }
@@ -74,7 +74,7 @@ export function GuestControl({ sessionId, closed }: Props) {
       </div>
 
       <p className="mt-2 text-xs leading-relaxed text-clay-700">
-        เงินสดที่รับไว้เองไม่ได้ผ่านระบบ ถ้าก๊วนถูกยกเลิก ระบบคืนให้ไม่ได้ ต้องคืนเองกับมือ
+        เงินสดที่รับไว้เองไม่ได้ผ่านระบบ ถ้านัดถูกยกเลิก ระบบคืนให้ไม่ได้ ต้องคืนเองกับมือ
       </p>
 
       {message ? <p className="mt-2 text-xs text-brand-700">{message}</p> : null}

@@ -49,7 +49,7 @@ export function ProfileForm({
       <Field
         label="เบอร์โทรศัพท์"
         htmlFor="phone"
-        hint="เห็นได้เฉพาะคุณและผู้ดูแลระบบ ไม่แสดงให้เพื่อนร่วมก๊วน"
+        hint="เห็นได้เฉพาะคุณและผู้ดูแลระบบ ไม่แสดงให้เพื่อนร่วมนัด"
       >
         <Input id="phone" name="phone" defaultValue={phone} inputMode="tel" maxLength={20} />
       </Field>

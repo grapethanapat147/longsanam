@@ -119,7 +119,7 @@ export function describePolicy(policy: CancellationPolicy): string[] {
     `ยกเลิกก่อนเริ่ม ${policy.partialRefundHoursBefore}–${policy.fullRefundHoursBefore} ชั่วโมง คืนเงิน ${policy.partialRefundPercent}%`,
     `ยกเลิกภายใน ${policy.noRefundWithinHours} ชั่วโมงก่อนเริ่ม ไม่คืนเงิน`,
     policy.organizerCancelAlwaysFullRefund
-      ? 'หากผู้จัดยกเลิกก๊วน หรือระบบจองสนามไม่สำเร็จ คืนเงินเต็มจำนวนทุกกรณี'
-      : 'หากผู้จัดยกเลิกก๊วน คืนเงินตามเงื่อนไขเวลาข้างต้น',
+      ? 'หากผู้จัดยกเลิกนัด หรือระบบจองสนามไม่สำเร็จ คืนเงินเต็มจำนวนทุกกรณี'
+      : 'หากผู้จัดยกเลิกนัด คืนเงินตามเงื่อนไขเวลาข้างต้น',
   ];
 }
