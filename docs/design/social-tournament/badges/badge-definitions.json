@@ -1,0 +1,59 @@
+{
+  "status": "Proposed names and award rules; not implemented application rules",
+  "badges": [
+    {
+      "id": "01-first-tournament",
+      "rarity": "rare",
+      "name_th": "ทัวร์นาเมนต์แรก",
+      "description_th": "ลงแข่งจนจบทัวร์นาเมนต์แรกของคุณ",
+      "proposed_award_rule": "ให้เมื่อสถานะทัวร์นาเมนต์แรกเป็น completed และผู้เล่นอยู่ในรายชื่อที่เข้าร่วมจริง ไม่ได้ให้เมื่อสมัครอย่างเดียว",
+      "icon": "icons/01-first-tournament.svg",
+      "labeled": "labeled/01-first-tournament.svg"
+    },
+    {
+      "id": "02-new-opponents",
+      "rarity": "common",
+      "name_th": "คู่แข่งใหม่",
+      "description_th": "จบแมตช์กับก๊วนที่ไม่เคยแข่งด้วยกัน",
+      "proposed_award_rule": "ให้เมื่อจบแมตช์ที่ยืนยันผลแล้วกับก๊วนใหม่เป็นครั้งแรก",
+      "icon": "icons/02-new-opponents.svg",
+      "labeled": "labeled/02-new-opponents.svg"
+    },
+    {
+      "id": "03-five-tournaments",
+      "rarity": "rare",
+      "name_th": "ขยับอีกขั้น",
+      "description_th": "ลงแข่งครบ 5 ทัวร์นาเมนต์",
+      "proposed_award_rule": "นับรายการที่แข่งจบ 5 รายการที่ไม่ซ้ำกัน สื่อการมีส่วนร่วม ไม่ใช่การรับรองว่าฝีมือดีขึ้น",
+      "icon": "icons/03-five-tournaments.svg",
+      "labeled": "labeled/03-five-tournaments.svg"
+    },
+    {
+      "id": "04-champion",
+      "rarity": "elite",
+      "name_th": "แชมป์ประจำรายการ",
+      "description_th": "คว้าอันดับหนึ่งในทัวร์นาเมนต์",
+      "proposed_award_rule": "ให้หลังผู้จัดยืนยันอันดับสุดท้ายว่าเป็นแชมป์ หากแข่งแบบทีมให้เฉพาะผู้เล่นในรายชื่อที่มีสิทธิ์ของทีมชนะ",
+      "icon": "icons/04-champion.svg",
+      "labeled": "labeled/04-champion.svg"
+    },
+    {
+      "id": "05-fair-play",
+      "rarity": "common",
+      "name_th": "น้ำใจนักกีฬา",
+      "description_th": "ได้รับคำชื่นชมเรื่องน้ำใจนักกีฬาหลังแข่ง",
+      "proposed_award_rule": "ให้เมื่อได้รับการชื่นชมจากคู่แข่งหลังแมตช์ที่ยืนยันผลแล้ว ข้อเสนอ MVP: อย่างน้อย 1 คนที่ไม่ได้อยู่ก๊วนเดียวกัน ไม่ประเมินตนเอง ไม่เกี่ยวกับคะแนนฝีมือ",
+      "icon": "icons/05-fair-play.svg",
+      "labeled": "labeled/05-fair-play.svg"
+    },
+    {
+      "id": "06-three-squads",
+      "rarity": "rare",
+      "name_th": "เพื่อนร่วมสนาม",
+      "description_th": "แข่งกับก๊วนต่างกันครบ 3 ก๊วน",
+      "proposed_award_rule": "นับก๊วนคู่แข่งที่ไม่ซ้ำกันสะสมครบ 3 ก๊วนจากแมตช์ที่ยืนยันผล ไม่เท่ากับการส่งหรือรับคำขอเป็นเพื่อน",
+      "icon": "icons/06-three-squads.svg",
+      "labeled": "labeled/06-three-squads.svg"
+    }
+  ]
+}
