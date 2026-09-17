@@ -97,7 +97,7 @@ Every account uses the password `password123`.
 
 ### A five-minute tour
 
-1. Sign in as `organizer@longsanam.test`, open **จัดการก๊วน → พิคเคิลบอลมือใหม่**
+1. Sign in as `organizer@longsanam.test`, open **จัดการนัด → พิคเคิลบอลมือใหม่**
    (ReadyToBook) and press **สั่งจองสนามตอนนี้**. The session holds a court,
    books it, and flips to **ได้สนามแล้ว**.
 2. Sign in as `player7@longsanam.test`, open `/s/OPEN001`, join and pay. The
