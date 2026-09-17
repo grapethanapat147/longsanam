@@ -10,7 +10,22 @@ import { t } from '@/i18n';
  * first-class element rather than a hidden menu item. The LINE share endpoint
  * needs no channel configuration, so this works from day one.
  */
-export function ShareLink({ url }: { url: string }) {
+/**
+ * ข้อความตั้งต้นเป็นของ "นัด" เพราะเป็นที่แรกที่ใช้ แต่ก๊วน (LSN-0026) ก็ต้อง
+ * แชร์ลิงก์เหมือนกัน จึงเปิดให้ทับข้อความได้ แทนที่จะห่อทับด้วยการ์ดอีกชั้น
+ * ซึ่งจะได้หัวข้อสองอันซ้อนกันและอันในผิดบริบท
+ */
+export function ShareLink({
+  url,
+  title = 'แชร์นัดนี้',
+  hint = 'ส่งลิงก์เดียวเข้ากลุ่ม เพื่อนกดเข้าร่วมได้ทันที',
+  inputLabel = 'ลิงก์นัด',
+}: {
+  url: string;
+  title?: string;
+  hint?: string;
+  inputLabel?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -27,13 +42,13 @@ export function ShareLink({ url }: { url: string }) {
 
   return (
     <Card className="px-4 py-4">
-      <p className="text-sm font-semibold text-ink-900">แชร์นัดนี้</p>
-      <p className="mt-0.5 text-xs text-ink-500">ส่งลิงก์เดียวเข้ากลุ่ม เพื่อนกดเข้าร่วมได้ทันที</p>
+      <p className="text-sm font-semibold text-ink-900">{title}</p>
+      <p className="mt-0.5 text-xs text-ink-500">{hint}</p>
 
       <input
         readOnly
         value={url}
-        aria-label="ลิงก์นัด"
+        aria-label={inputLabel}
         onFocus={(event) => event.currentTarget.select()}
         className="mt-3 w-full rounded-lg border border-ink-200 bg-ink-50 px-2 py-1.5 font-mono text-xs text-ink-700"
       />

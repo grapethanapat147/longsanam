@@ -63,6 +63,7 @@ export async function SiteHeader() {
           {user ? (
             <>
               <NavLink href="/app">{t.nav.mySessions}</NavLink>
+              <NavLink href="/app/groups">{t.nav.myGroups}</NavLink>
               <NavLink href="/organizer">{t.organizer.dashboard}</NavLink>
               {(user.role === 'venue_admin' || user.role === 'platform_admin') && (
                 <NavLink href="/venue">{t.nav.venue}</NavLink>
@@ -115,6 +116,7 @@ export async function SiteHeader() {
         <nav className="flex gap-1 overflow-x-auto border-t border-ink-200/70 px-3 py-1.5 [&>a]:shrink-0 sm:hidden">
           <NavLink href="/discover">{t.nav.discover}</NavLink>
           <NavLink href="/app">{t.nav.mySessions}</NavLink>
+          <NavLink href="/app/groups">{t.nav.myGroups}</NavLink>
           <NavLink href="/organizer">{t.organizer.dashboard}</NavLink>
           {(user.role === 'venue_admin' || user.role === 'platform_admin') && (
             <NavLink href="/venue">{t.nav.venue}</NavLink>

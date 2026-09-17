@@ -9,7 +9,12 @@ import { t } from '@/i18n';
 
 export const metadata: Metadata = { title: t.organizer.createTitle };
 
-export default async function NewSessionPage() {
+export default async function NewSessionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ groupId?: string }>;
+}) {
+  const { groupId } = await searchParams;
   await requireUser('/organizer/new');
   const supabase = await createClient();
 
@@ -50,7 +55,7 @@ export default async function NewSessionPage() {
         title={t.organizer.createTitle}
         description="ตั้งค่านัดให้ครบ แล้วเผยแพร่เพื่อรับลิงก์สำหรับแชร์เข้า LINE"
       />
-      <CreateSessionWizard sports={sports} courts={courts} />
+      <CreateSessionWizard sports={sports} courts={courts} groupId={groupId} />
     </AppShell>
   );
 }

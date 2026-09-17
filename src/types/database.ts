@@ -476,6 +476,93 @@ export type Database = {
           },
         ]
       }
+      group_members: {
+        Row: {
+          group_id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string
+          home_district: string | null
+          id: string
+          name: string
+          public_code: string | null
+          sport_id: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by: string
+          home_district?: string | null
+          id?: string
+          name: string
+          public_code?: string | null
+          sport_id: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string
+          home_district?: string | null
+          id?: string
+          name?: string
+          public_code?: string | null
+          sport_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "groups_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "sports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -1021,6 +1108,7 @@ export type Database = {
           district: string | null
           ends_at: string
           failure_reason: string | null
+          group_id: string | null
           id: string
           min_players: number
           organizer_id: string
@@ -1049,6 +1137,7 @@ export type Database = {
           district?: string | null
           ends_at: string
           failure_reason?: string | null
+          group_id?: string | null
           id?: string
           min_players: number
           organizer_id: string
@@ -1077,6 +1166,7 @@ export type Database = {
           district?: string | null
           ends_at?: string
           failure_reason?: string | null
+          group_id?: string | null
           id?: string
           min_players?: number
           organizer_id?: string
@@ -1099,6 +1189,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
           {
@@ -1331,6 +1428,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      archive_group: { Args: { p_group_id: string }; Returns: Json }
       cancel_participation: {
         Args: {
           p_actor?: string
@@ -1377,6 +1475,10 @@ export type Database = {
         Args: { p_court_id: string; p_ends_at: string; p_starts_at: string }
         Returns: number
       }
+      create_group: {
+        Args: { p_home_district?: string; p_name: string; p_sport_id: string }
+        Returns: Json
+      }
       create_session_charge: {
         Args: {
           p_amount_thb: number
@@ -1407,13 +1509,17 @@ export type Database = {
         Args: { p_actor?: string; p_reason: string; p_session_id: string }
         Returns: Json
       }
+      generate_group_code: { Args: never; Returns: string }
       generate_session_code: { Args: never; Returns: string }
       grant_pay_later: { Args: { p_participant_id: string }; Returns: Json }
+      group_invite_public: { Args: { p_code: string }; Returns: Json }
       is_booking_venue_member: {
         Args: { p_session_id: string }
         Returns: boolean
       }
       is_court_venue_member: { Args: { p_court_id: string }; Returns: boolean }
+      is_group_member: { Args: { p_group_id: string }; Returns: boolean }
+      is_group_owner: { Args: { p_group_id: string }; Returns: boolean }
       is_platform_admin: { Args: never; Returns: boolean }
       is_session_organizer: { Args: { p_session_id: string }; Returns: boolean }
       is_session_participant: {
@@ -1421,10 +1527,12 @@ export type Database = {
         Returns: boolean
       }
       is_venue_member: { Args: { p_venue_id: string }; Returns: boolean }
+      join_group: { Args: { p_code: string }; Returns: Json }
       join_session: {
         Args: { p_actor?: string; p_session_id: string }
         Returns: Json
       }
+      leave_group: { Args: { p_group_id: string }; Returns: Json }
       list_chaseable_participants: {
         Args: never
         Returns: {
@@ -1451,6 +1559,10 @@ export type Database = {
       mark_no_shows: { Args: never; Returns: Json }
       mark_session_holding: {
         Args: { p_actor?: string; p_session_id: string }
+        Returns: Json
+      }
+      notify_group_new_session: {
+        Args: { p_session_id: string }
         Returns: Json
       }
       notify_user: {
