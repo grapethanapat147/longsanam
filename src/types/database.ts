@@ -563,6 +563,128 @@ export type Database = {
           },
         ]
       }
+      matches: {
+        Row: {
+          confirmed_at: string | null
+          confirmed_by: string | null
+          court_label: string | null
+          created_at: string
+          dispute_note: string | null
+          disputed_at: string | null
+          disputed_by: string | null
+          id: string
+          played_at: string
+          recorded_by: string
+          score_a: number
+          score_b: number
+          side_a_group_id: string
+          side_a_players: string[]
+          side_b_group_id: string
+          side_b_players: string[]
+          status: Database["public"]["Enums"]["match_status"]
+          tournament_id: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          court_label?: string | null
+          created_at?: string
+          dispute_note?: string | null
+          disputed_at?: string | null
+          disputed_by?: string | null
+          id?: string
+          played_at?: string
+          recorded_by: string
+          score_a: number
+          score_b: number
+          side_a_group_id: string
+          side_a_players: string[]
+          side_b_group_id: string
+          side_b_players: string[]
+          status?: Database["public"]["Enums"]["match_status"]
+          tournament_id: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          court_label?: string | null
+          created_at?: string
+          dispute_note?: string | null
+          disputed_at?: string | null
+          disputed_by?: string | null
+          id?: string
+          played_at?: string
+          recorded_by?: string
+          score_a?: number
+          score_b?: number
+          side_a_group_id?: string
+          side_a_players?: string[]
+          side_b_group_id?: string
+          side_b_players?: string[]
+          status?: Database["public"]["Enums"]["match_status"]
+          tournament_id?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_disputed_by_fkey"
+            columns: ["disputed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_side_a_group_id_fkey"
+            columns: ["side_a_group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_side_b_group_id_fkey"
+            columns: ["side_b_group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -1625,9 +1747,42 @@ export type Database = {
         }
         Returns: Json
       }
+      confirm_match: { Args: { p_match_id: string }; Returns: Json }
       confirm_tournament_court: {
         Args: { p_tournament_id: string; p_venue_note: string }
         Returns: Json
+      }
+      confirmed_matches: {
+        Args: { p_tournament_id: string }
+        Returns: {
+          confirmed_at: string | null
+          confirmed_by: string | null
+          court_label: string | null
+          created_at: string
+          dispute_note: string | null
+          disputed_at: string | null
+          disputed_by: string | null
+          id: string
+          played_at: string
+          recorded_by: string
+          score_a: number
+          score_b: number
+          side_a_group_id: string
+          side_a_players: string[]
+          side_b_group_id: string
+          side_b_players: string[]
+          status: Database["public"]["Enums"]["match_status"]
+          tournament_id: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "matches"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       court_availability_report: {
         Args: { p_court_id: string; p_ends_at: string; p_starts_at: string }
@@ -1690,6 +1845,10 @@ export type Database = {
           p_province?: string
           p_slug: string
         }
+        Returns: Json
+      }
+      dispute_match: {
+        Args: { p_match_id: string; p_note: string }
         Returns: Json
       }
       evaluate_tournament_gates: {
@@ -1819,6 +1978,19 @@ export type Database = {
         }
         Returns: Json
       }
+      record_match: {
+        Args: {
+          p_court_label?: string
+          p_score_a: number
+          p_score_b: number
+          p_side_a_group: string
+          p_side_a_players: string[]
+          p_side_b_group: string
+          p_side_b_players: string[]
+          p_tournament_id: string
+        }
+        Returns: Json
+      }
       release_hold: {
         Args: { p_actor?: string; p_hold_id: string; p_reason?: string }
         Returns: Json
@@ -1906,6 +2078,10 @@ export type Database = {
         Returns: Json
       }
       shares_session_with: { Args: { p_user_id: string }; Returns: boolean }
+      shares_tournament_with_group: {
+        Args: { p_group_id: string }
+        Returns: boolean
+      }
       start_payment: {
         Args: {
           p_actor?: string
@@ -1938,6 +2114,10 @@ export type Database = {
         }
         Returns: Json
       }
+      void_match: {
+        Args: { p_match_id: string; p_reason: string }
+        Returns: Json
+      }
       void_session_charge: { Args: { p_charge_id: string }; Returns: Json }
     }
     Enums: {
@@ -1953,6 +2133,7 @@ export type Database = {
         | "failed"
       charge_split_mode: "all" | "named"
       hold_status: "active" | "converted" | "released" | "expired"
+      match_status: "recorded" | "confirmed" | "disputed" | "voided"
       notification_channel: "in_app" | "line" | "email"
       participant_status:
         | "joined_pending_payment"
@@ -2133,6 +2314,7 @@ export const Constants = {
       ],
       charge_split_mode: ["all", "named"],
       hold_status: ["active", "converted", "released", "expired"],
+      match_status: ["recorded", "confirmed", "disputed", "voided"],
       notification_channel: ["in_app", "line", "email"],
       participant_status: [
         "joined_pending_payment",

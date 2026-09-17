@@ -526,3 +526,37 @@ insert into public.tournament_team_payments
 values
   ('aaaaaaaa-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000001',
    '11111111-1111-4111-8111-000000000001', 800, 'seed:tourn01:host', 'paid', now());
+
+-- ---------------------------------------------------------------------------
+-- แมตช์ (LSN-0030)
+--
+-- สองแถว หนึ่งรอยืนยัน หนึ่งยืนยันแล้ว เพื่อให้เห็นทั้งสองสถานะบนหน้าจอ
+-- ทัวร์นาเมนต์ต้องอยู่ในสถานะที่แข่งได้ก่อน จึงดัน TOURN01 เป็น ready
+-- ---------------------------------------------------------------------------
+
+update public.tournaments set status = 'ready', court_confirmed_at = now(),
+       venue_note = 'ลาดพร้าว แบดมินตัน เซ็นเตอร์ 6 คอร์ต'
+where public_code = 'TOURN01';
+
+insert into public.tournament_team_payments
+  (tournament_id, group_id, paid_by, amount_thb, idempotency_key, status, paid_at)
+values
+  ('aaaaaaaa-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000002',
+   '11111111-1111-4111-8111-000000000002', 800, 'seed:tourn01:team2', 'paid', now());
+
+insert into public.matches
+  (id, tournament_id, side_a_group_id, side_b_group_id, side_a_players, side_b_players,
+   score_a, score_b, court_label, status, recorded_by, confirmed_by, confirmed_at)
+values
+  ('bbbbbbbb-0000-4000-8000-000000000001', 'aaaaaaaa-0000-4000-8000-000000000001',
+   'eeeeeeee-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000002',
+   array['11111111-1111-4111-8111-000000000001']::uuid[],
+   array['11111111-1111-4111-8111-000000000004']::uuid[],
+   21, 17, 'คอร์ต 1', 'confirmed',
+   '11111111-1111-4111-8111-000000000001', '11111111-1111-4111-8111-000000000004', now()),
+  ('bbbbbbbb-0000-4000-8000-000000000002', 'aaaaaaaa-0000-4000-8000-000000000001',
+   'eeeeeeee-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000002',
+   array['11111111-1111-4111-8111-000000000003']::uuid[],
+   array['11111111-1111-4111-8111-000000000004']::uuid[],
+   19, 21, 'คอร์ต 2', 'recorded',
+   '11111111-1111-4111-8111-000000000001', null, null);

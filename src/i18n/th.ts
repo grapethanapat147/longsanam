@@ -80,6 +80,14 @@ export const waitlistStatusLabel: Record<WaitlistStatus, string> = {
 
 /** Machine reasons returned by RPCs, turned into something a person can act on. */
 export const reasonLabel: Record<string, string> = {
+  match_not_found: 'ไม่พบแมตช์นี้',
+  match_voided: 'ผลแมตช์นี้ถูกยกเลิกไปแล้ว',
+  not_in_match: 'คุณไม่ได้อยู่ในแมตช์นี้',
+  same_side_cannot_confirm: 'ต้องให้ฝั่งตรงข้ามเป็นคนยืนยัน คนฝั่งเดียวกับผู้บันทึกยืนยันแทนไม่ได้',
+  in_both_sides_cannot_confirm: 'คุณอยู่ทั้งสองก๊วนในแมตช์นี้ จึงยืนยันแทนไม่ได้',
+  recorder_cannot_confirm: 'คนที่บันทึกผลยืนยันเองไม่ได้',
+  tournament_not_playable: 'ทัวร์นาเมนต์นี้ยังไม่พร้อมแข่ง หรือปิดไปแล้ว',
+  player_not_in_group: 'มีผู้เล่นที่ไม่ได้อยู่ในก๊วนฝั่งนั้น',
   not_host: 'เฉพาะเจ้าภาพเท่านั้นที่ทำรายการนี้ได้',
   not_participant: 'คุณไม่ได้เกี่ยวข้องกับงานนี้',
   tournament_not_found: 'ไม่พบทัวร์นาเมนต์จากลิงก์นี้',
@@ -271,6 +279,29 @@ export const t = {
     notFoundOrNotMember: 'ไม่พบทัวร์นาเมนต์นี้ หรือคุณไม่ได้เกี่ยวข้องกับงานนี้',
     tournamentClosedNote: 'ทัวร์นาเมนต์นี้ไม่ได้เปิดรับสมัครอยู่',
     cancelledNote: 'ทัวร์นาเมนต์นี้ถูกยกเลิก ทุกก๊วนได้เงินคืนเต็มแล้ว',
+  },
+
+  matches: {
+    title: 'ผลการแข่ง',
+    empty: 'ยังไม่มีผลแมตช์',
+    record: 'บันทึกผล',
+    recordTitle: 'บันทึกผลแมตช์',
+    courtField: 'คอร์ต',
+    scoreField: 'สกอร์',
+    pickPlayers: 'ต้องเลือกผู้เล่นอย่างน้อยฝั่งละหนึ่งคน',
+    scoreTie: 'สกอร์เท่ากันไม่ได้ ต้องมีฝั่งที่ชนะ',
+    statusRecorded: 'รอฝั่งตรงข้ามยืนยัน',
+    statusConfirmed: 'ยืนยันแล้ว',
+    statusDisputed: 'มีข้อโต้แย้ง',
+    statusVoided: 'ยกเลิกผลแล้ว',
+    confirm: 'ยืนยันผล',
+    dispute: 'โต้แย้งผล',
+    disputeNote: 'บอกหน่อยว่าไม่ตรงตรงไหน',
+    void: 'ยกเลิกผล',
+    voidReason: 'เหตุผลที่ยกเลิก',
+    voidHint: 'ผลที่ยืนยันแล้วแก้ตัวเลขไม่ได้ ถ้าผิดให้ยกเลิกแล้วบันทึกใหม่',
+    onlyConfirmedCounts: 'นับเฉพาะแมตช์ที่ยืนยันแล้วเท่านั้น',
+    waitingForOtherSide: 'รอฝั่งตรงข้ามยืนยัน — คุณยืนยันผลที่ฝั่งตัวเองบันทึกไม่ได้',
   },
 
   nav: {
