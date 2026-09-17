@@ -4,7 +4,7 @@
 -- สร้างก๊วนเพิ่มอีกสองก๊วนให้แนนกับบอสเป็นเจ้าของ เพื่อให้มีทีมมาสมัครจริง
 
 begin;
-select plan(28);
+select plan(31);
 
 create or replace function pg_temp.act_as(p_id uuid) returns void
 language plpgsql as $$
@@ -270,6 +270,51 @@ select ok(
   (select count(distinct action) from public.audit_logs
    where entity_type = 'tournament' and entity_id = (select tid from tcode)) >= 4,
   'สร้าง เผยแพร่ สมัคร และจ่าย เขียน audit ครบ');
+
+-- ---------------------------------------------------------------------------
+-- เงินเข้าได้เฉพาะงานที่ยังเปิดรับจริง
+--
+-- เจอตอน review ว่า pay_tournament_team ไม่ตรวจสถานะและกำหนดปิดรับเลย
+-- จ่ายเข้างานที่ยกเลิกแล้วได้ ซึ่งเป็นเงินที่ **ค้างถาวร** เพราะตัวกวาด
+-- ดูแค่งานสถานะ open การคืนอัตโนมัติจึงไม่มีทางแตะมันได้
+--
+-- ใช้ allowlist ไม่ใช่ denylist ด้วยเหตุผลเดียวกับ LSN-0020
+-- ---------------------------------------------------------------------------
+
+set local role postgres;
+update public.tournaments set status = 'cancelled' where id = (select tid from tcode);
+
+select pg_temp.act_as('11111111-1111-4111-8111-000000000004');
+set local role authenticated;
+select is(
+  public.pay_tournament_team((select tid from tcode),
+    'eeeeeeee-0000-4000-8000-00000000000c', 'late:cancelled') ->> 'reason',
+  'tournament_closed', 'จ่ายเข้างานที่ยกเลิกแล้วไม่ได้');
+
+set local role postgres;
+update public.tournaments
+set status = 'open', registration_deadline = now() - interval '1 day'
+where id = (select tid from tcode);
+
+set local role authenticated;
+select is(
+  public.pay_tournament_team((select tid from tcode),
+    'eeeeeeee-0000-4000-8000-00000000000c', 'late:deadline') ->> 'reason',
+  'registration_closed', 'จ่ายหลังเลยกำหนดปิดรับไม่ได้');
+
+-- ---------------------------------------------------------------------------
+-- evaluate_tournament_gates ต้องไม่บอกคนนอกว่ามีกี่ทีมและจ่ายแล้วกี่ทีม
+--
+-- หน้ารับสมัครตั้งใจไม่บอกจำนวนที่จ่ายแล้ว การให้ RPC อีกตัวบอกได้
+-- ก็เท่ากับเปิดประตูหลัง
+-- ---------------------------------------------------------------------------
+
+select pg_temp.act_as('11111111-1111-4111-8111-000000000006');
+select is(
+  public.evaluate_tournament_gates((select tid from tcode)) ->> 'reason',
+  'not_participant', 'คนนอกงานเรียก evaluate_tournament_gates ไม่ได้');
+
+set local role postgres;
 
 select is(
   (select count(*)::integer from public.player_credit c

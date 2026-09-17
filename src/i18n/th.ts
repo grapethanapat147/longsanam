@@ -81,6 +81,7 @@ export const waitlistStatusLabel: Record<WaitlistStatus, string> = {
 /** Machine reasons returned by RPCs, turned into something a person can act on. */
 export const reasonLabel: Record<string, string> = {
   not_host: 'เฉพาะเจ้าภาพเท่านั้นที่ทำรายการนี้ได้',
+  not_participant: 'คุณไม่ได้เกี่ยวข้องกับงานนี้',
   tournament_not_found: 'ไม่พบทัวร์นาเมนต์จากลิงก์นี้',
   tournament_not_published: 'ทัวร์นาเมนต์นี้ยังไม่เปิดรับสมัคร',
   tournament_closed: 'ทัวร์นาเมนต์นี้ปิดรับสมัครแล้ว',

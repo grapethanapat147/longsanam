@@ -390,6 +390,20 @@ begin
 
   select * into v_t from public.tournaments where id = p_tournament_id;
 
+  -- allowlist ไม่ใช่ denylist — บทเรียนจาก LSN-0020
+  --
+  -- เงินต้องเข้าได้เฉพาะงานที่ยังเปิดรับจริงเท่านั้น ถ้าปล่อยให้จ่ายเข้างานที่
+  -- ยกเลิกแล้ว เงินก้อนนั้นจะ **ค้างถาวร** เพราะ close_unfilled_tournaments()
+  -- กวาดเฉพาะงานสถานะ open การคืนอัตโนมัติจึงไม่มีทางแตะมันได้เลย
+  if v_t.status <> 'open' then
+    return jsonb_build_object('ok', false, 'reason',
+      case when v_t.status = 'draft' then 'tournament_not_published'
+           else 'tournament_closed' end);
+  end if;
+  if now() > v_t.registration_deadline then
+    return jsonb_build_object('ok', false, 'reason', 'registration_closed');
+  end if;
+
   select * into v_existing from public.tournament_team_payments
   where tournament_id = p_tournament_id and group_id = p_group_id
     and status in ('pending', 'paid');
@@ -470,6 +484,15 @@ begin
   select * into v_t from public.tournaments where id = p_tournament_id;
   if v_t.id is null then
     return jsonb_build_object('ok', false, 'reason', 'tournament_not_found');
+  end if;
+
+  -- ฟังก์ชันนี้คืนจำนวนทีมและจำนวนที่จ่ายแล้ว ซึ่งเป็นตัวเลขที่
+  -- tournament_invite_public ตั้งใจไม่บอกคนนอก ถ้าไม่กั้นตรงนี้ก็เท่ากับ
+  -- เปิดประตูหลังให้ใครก็ได้ถามข้อมูลเดียวกัน
+  if not (public.is_tournament_host(p_tournament_id)
+          or public.is_tournament_team_member(p_tournament_id)
+          or public.is_platform_admin()) then
+    return jsonb_build_object('ok', false, 'reason', 'not_participant');
   end if;
 
   select count(*) into v_teams from public.tournament_teams where tournament_id = p_tournament_id;
