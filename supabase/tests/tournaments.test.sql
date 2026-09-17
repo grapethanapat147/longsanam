@@ -4,7 +4,7 @@
 -- สร้างก๊วนเพิ่มอีกสองก๊วนให้แนนกับบอสเป็นเจ้าของ เพื่อให้มีทีมมาสมัครจริง
 
 begin;
-select plan(22);
+select plan(28);
 
 create or replace function pg_temp.act_as(p_id uuid) returns void
 language plpgsql as $$
@@ -15,6 +15,11 @@ end;
 $$;
 
 set local role postgres;
+
+-- เครดิตเป็นคนละเรื่องกับทัวร์นาเมนต์โดยสิ้นเชิง สเปกเน้นข้อนี้ไว้ชัดเจน
+-- จับภาพไว้ตั้งแต่ต้นแล้วเทียบตอนท้ายว่าไม่มีอะไรในตั๋วนี้ไปขยับมัน
+create temporary table credit_before on commit drop as
+select user_id, score from public.player_credit;
 
 -- ก๊วนเพิ่มอีกสองก๊วน เจ้าของคนละคน
 insert into public.groups (id, public_code, name, sport_id, created_by)
@@ -211,6 +216,66 @@ update public.tournaments set status = 'open' where public_code = 'TRNFAIL';
 select is(
   (public.close_unfilled_tournaments() ->> 'refundedPayments')::integer,
   0, 'แถวที่คืนไปแล้วไม่ถูกคืนซ้ำ แม้งานกลับมาเข้าเงื่อนไขอีกครั้ง (กันด้วย status)');
+
+-- ---------------------------------------------------------------------------
+-- AC ที่เหลือ — เจอตอนไล่รายการก่อนย้าย Review ว่ายังไม่มีอะไรเฝ้า
+-- ---------------------------------------------------------------------------
+
+set local role postgres;
+
+-- เต็ม max_teams แล้วปฏิเสธ · งานนี้ max_teams = 4 มีแล้วสามทีม เติมอีกหนึ่ง
+insert into public.groups (id, public_code, name, sport_id, created_by)
+select 'eeeeeeee-0000-4000-8000-00000000000c', 'GRPCCC1', 'ก๊วนมีน', id,
+       '11111111-1111-4111-8111-000000000004' from public.sports where slug='badminton';
+insert into public.groups (id, public_code, name, sport_id, created_by)
+select 'eeeeeeee-0000-4000-8000-00000000000d', 'GRPDDD1', 'ก๊วนปอนด์', id,
+       '11111111-1111-4111-8111-000000000005' from public.sports where slug='badminton';
+insert into public.group_members (group_id, user_id, role) values
+  ('eeeeeeee-0000-4000-8000-00000000000c', '11111111-1111-4111-8111-000000000004', 'owner'),
+  ('eeeeeeee-0000-4000-8000-00000000000d', '11111111-1111-4111-8111-000000000005', 'owner');
+
+-- งานถูกดันเป็น ready ไปแล้วจากเทสก่อนหน้า ดันกลับเป็น open เพื่อทดสอบการรับทีม
+update public.tournaments set status = 'open' where id = (select tid from tcode);
+
+select pg_temp.act_as('11111111-1111-4111-8111-000000000004');
+set local role authenticated;
+select is(
+  (public.join_tournament((select public_code from tcode),
+    'eeeeeeee-0000-4000-8000-00000000000c') ->> 'joined')::boolean,
+  true, 'ทีมที่สี่สมัครได้ เพราะยังไม่เต็ม');
+
+select pg_temp.act_as('11111111-1111-4111-8111-000000000005');
+select is(
+  public.join_tournament((select public_code from tcode),
+    'eeeeeeee-0000-4000-8000-00000000000d') ->> 'reason',
+  'tournament_full', 'ทีมที่ห้าถูกปฏิเสธเพราะเต็ม max_teams');
+
+-- คนนอกงานอ่านตารางทีมตรง ๆ ไม่ได้
+select pg_temp.act_as('11111111-1111-4111-8111-000000000006');
+select is(
+  (select count(*)::integer from public.tournament_teams
+   where tournament_id = (select tid from tcode)),
+  0, 'คนนอกงานอ่าน tournament_teams ไม่ได้เลย');
+
+-- แต่หน้ารับสมัครบอกจำนวนทีมได้ โดยไม่บอกว่าก๊วนไหน
+select ok(
+  not (public.tournament_invite_public((select public_code from tcode)) ? 'teams')
+  and (public.tournament_invite_public((select public_code from tcode)) ? 'teamCount'),
+  'หน้ารับสมัครคืนแค่จำนวนทีม ไม่คืนรายชื่อก๊วนที่สมัครแล้ว');
+
+set local role postgres;
+
+-- ทุกการเปลี่ยนสถานะเขียน audit ผ่าน app_log
+select ok(
+  (select count(distinct action) from public.audit_logs
+   where entity_type = 'tournament' and entity_id = (select tid from tcode)) >= 4,
+  'สร้าง เผยแพร่ สมัคร และจ่าย เขียน audit ครบ');
+
+select is(
+  (select count(*)::integer from public.player_credit c
+   full join credit_before b on b.user_id = c.user_id
+   where c.score is distinct from b.score),
+  0, 'player_credit ไม่ขยับเลยสักแถวจากอะไรก็ตามในตั๋วนี้');
 
 select * from finish();
 rollback;
