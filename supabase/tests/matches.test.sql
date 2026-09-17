@@ -5,7 +5,7 @@
 -- ถ้าสามข้อนี้พัง คะแนนฝีมือใน LSN-0031 ก็ไร้ความหมายตั้งแต่วันแรก
 
 begin;
-select plan(22);
+select plan(24);
 
 create or replace function pg_temp.act_as(p_id uuid) returns void
 language plpgsql as $$
@@ -122,6 +122,27 @@ select is(
   1, 'ยืนยันแล้วจึงนับเป็นผล');
 
 -- ---------------------------------------------------------------------------
+-- สกอร์ของแถวที่ยืนยันแล้วแก้ไม่ได้
+--
+-- ด่านจริงไม่ใช่ check constraint แต่เป็น "ไม่มีสิทธิ์ update เลย" —
+-- revoke update ... from authenticated บวกกับที่ตาราง matches มีแต่ policy
+-- ของ select ทางเดียวที่แก้ผลได้จึงเป็น void แล้วบันทึกใหม่ ตามที่ตั๋วตัดสิน
+-- ปักเป็น errcode 42501 ไม่ใช่ "update แล้วได้ 0 แถว" เพราะถ้าวันหนึ่งมีคน
+-- เพิ่ม policy ของ update เข้ามา เทสแบบนับแถวจะยังเขียว
+-- ---------------------------------------------------------------------------
+
+select pg_temp.act_as('11111111-1111-4111-8111-000000000001');   -- ก้อง คนบันทึกเอง
+set local role authenticated;
+select throws_ok(
+  $$ update public.matches set score_a = 30
+     where id = (select mid from mm) $$,
+  '42501',
+  'permission denied for table matches',
+  'สกอร์ของแมตช์ที่ยืนยันแล้วแก้ในแถวเดิมไม่ได้');
+
+set local role postgres;
+
+-- ---------------------------------------------------------------------------
 -- ฐานข้อมูลเองก็ต้องปฏิเสธ ไม่ใช่พึ่ง RPC อย่างเดียว
 --
 -- ปักถึง **ชื่อ constraint** เพราะถ้าเช็คแค่ SQLSTATE เทสจะเขียวต่อไปแม้
@@ -170,6 +191,12 @@ set local role authenticated;
 select is(
   public.dispute_match((select mid from m2), 'สกอร์ไม่ตรงกับที่จำได้') ->> 'status',
   'disputed', 'ฝั่งตรงข้ามโต้แย้งผลได้');
+
+-- โต้แย้งซ้ำต้องไม่เลื่อน disputed_at เพราะถ้าเลื่อนได้ ทีมที่เสียเปรียบก็กด
+-- ซ้ำเพื่อดันแมตช์ขึ้นหัวคิวข้อพิพาทได้เรื่อย ๆ
+select is(
+  (public.dispute_match((select mid from m2), 'กดซ้ำ') ->> 'replayed')::boolean,
+  true, 'โต้แย้งซ้ำได้ผลเท่าเดิม');
 
 set local role postgres;
 select is(
