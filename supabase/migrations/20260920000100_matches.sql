@@ -34,8 +34,18 @@ create table public.matches (
   void_reason     text,
   created_at      timestamptz not null default now(),
   constraint matches_two_sides check (side_a_group_id <> side_b_group_id),
-  constraint matches_side_a_size check (array_length(side_a_players, 1) between 1 and 2),
-  constraint matches_side_b_size check (array_length(side_b_players, 1) between 1 and 2),
+  -- coalesce จำเป็น ไม่ใช่ของประดับ: array_length('{}', 1) คืน NULL ไม่ใช่ 0
+  -- และ CHECK ที่ได้ NULL คือ CHECK ที่ "ผ่าน" แถวที่ไม่มีผู้เล่นสักคนจึงลอด
+  -- ด่านที่หน้าตาเหมือนบังคับ 1 ถึง 2 ไปได้เงียบ ๆ
+  constraint matches_side_a_size
+    check (coalesce(array_length(side_a_players, 1), 0) between 1 and 2),
+  constraint matches_side_b_size
+    check (coalesce(array_length(side_b_players, 1), 0) between 1 and 2),
+  -- คนหนึ่งอยู่ได้หลายก๊วน (LSN-0026) จึงใส่ชื่อคนเดียวกันทั้งสองฝั่งได้
+  -- ซึ่งแปลว่าเขาแข่งกับตัวเอง และ LSN-0031 จะบวกและลบคะแนนคนเดียวกัน
+  -- จากแมตช์เดียว
+  constraint matches_no_player_on_both_sides
+    check (not (side_a_players && side_b_players)),
   -- ⚠️ ด่านนี้คือทั้งหมดของความน่าเชื่อถือของคะแนนใน LSN-0031
   --
   -- อยู่ที่ระดับตาราง **ไม่ใช่แค่ใน RPC** เพราะด่านที่อยู่ในโค้ดอย่างเดียว
@@ -156,6 +166,25 @@ begin
     return jsonb_build_object('ok', false, 'reason', 'not_in_match');
   end if;
 
+  -- จำนวนผู้เล่นต้องถูกต้อง ตรวจที่ RPC ด้วยเพื่อให้ได้เหตุผลที่คนอ่านรู้เรื่อง
+  -- แทนที่จะปล่อยให้ constraint ดังเป็น error ดิบ
+  if coalesce(array_length(p_side_a_players, 1), 0) not between 1 and 2
+     or coalesce(array_length(p_side_b_players, 1), 0) not between 1 and 2 then
+    return jsonb_build_object('ok', false, 'reason', 'bad_player_count');
+  end if;
+
+  -- คนเดียวกันอยู่สองฝั่งไม่ได้ และอยู่ซ้ำในฝั่งเดียวกันก็ไม่ได้
+  -- ข้อหลังเขียนที่นี่ ไม่ใช่ที่ constraint เพราะ CHECK มี subquery ไม่ได้
+  if p_side_a_players && p_side_b_players then
+    return jsonb_build_object('ok', false, 'reason', 'player_on_both_sides');
+  end if;
+  if cardinality(p_side_a_players)
+       <> (select count(distinct u) from unnest(p_side_a_players) u)
+     or cardinality(p_side_b_players)
+       <> (select count(distinct u) from unnest(p_side_b_players) u) then
+    return jsonb_build_object('ok', false, 'reason', 'duplicate_player');
+  end if;
+
   -- ผู้เล่นที่ระบุต้องเป็นสมาชิกของก๊วนฝั่งนั้นจริง
   -- ไม่งั้นใครก็ยัดชื่อคนนอกเข้าไปแล้วทำให้คะแนนเขาขยับได้ใน LSN-0031
   if exists (select 1 from unnest(p_side_a_players) u
@@ -215,6 +244,13 @@ begin
     return jsonb_build_object('ok', false, 'reason', 'match_voided');
   end if;
 
+  -- ตรวจ "คนบันทึกเอง" ก่อนคำนวณฝั่ง ไม่งั้นสาขานี้ไม่มีวันถูกเรียกถึง เพราะ
+  -- ฝั่งของคนบันทึกย่อมเท่ากับฝั่งของตัวเองเสมอ แล้ว same_side_cannot_confirm
+  -- จะตอบไปก่อน — เหตุผลที่ผู้ใช้เห็นจึงเคยเป็นคนละเรื่องกับสิ่งที่เกิดขึ้นจริง
+  if v_user = v_m.recorded_by then
+    return jsonb_build_object('ok', false, 'reason', 'recorder_cannot_confirm');
+  end if;
+
   -- ผู้บันทึกอยู่ฝั่งไหน
   v_recorder_side := case
     when exists (select 1 from public.group_members
@@ -249,10 +285,6 @@ begin
   if v_user_side = v_recorder_side then
     return jsonb_build_object('ok', false, 'reason', 'same_side_cannot_confirm');
   end if;
-  if v_user = v_m.recorded_by then
-    return jsonb_build_object('ok', false, 'reason', 'recorder_cannot_confirm');
-  end if;
-
   update public.matches
   set status = 'confirmed', confirmed_by = v_user, confirmed_at = now()
   where id = p_match_id;

@@ -5,7 +5,7 @@
 -- ถ้าสามข้อนี้พัง คะแนนฝีมือใน LSN-0031 ก็ไร้ความหมายตั้งแต่วันแรก
 
 begin;
-select plan(24);
+select plan(29);
 
 create or replace function pg_temp.act_as(p_id uuid) returns void
 language plpgsql as $$
@@ -57,6 +57,72 @@ select is(
     array['11111111-1111-4111-8111-000000000002']::uuid[], 21, 15) ->> 'reason',
   'player_not_in_group', 'ใส่ผู้เล่นที่ไม่ได้อยู่ก๊วนฝั่งนั้นไม่ได้');
 
+-- ---------------------------------------------------------------------------
+-- รูปร่างของรายชื่อผู้เล่น
+--
+-- สามข้อนี้เจอตอน review ไม่ใช่ตอนเขียน — constraint เดิมเขียนว่า
+-- `array_length(side_a_players, 1) between 1 and 2` ซึ่ง **ไม่กันอาเรย์ว่าง**
+-- เพราะ array_length ของ '{}' คือ NULL และ CHECK ที่ได้ NULL คือ CHECK ที่ผ่าน
+-- ---------------------------------------------------------------------------
+
+select is(
+  public.record_match((select tid from tt),
+    'eeeeeeee-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000002',
+    '{}'::uuid[],
+    array['11111111-1111-4111-8111-000000000004']::uuid[], 21, 9) ->> 'reason',
+  'bad_player_count', 'บันทึกแมตช์โดยไม่ใส่ผู้เล่นฝั่งหนึ่งเลยไม่ได้');
+
+-- แนนอยู่ทั้ง GROUP01 และ GROUP02 จึงใส่ชื่อเธอทั้งสองฝั่งได้ถ้าไม่มีด่าน
+-- ผลคือเธอแข่งกับตัวเอง และ LSN-0031 จะบวกและลบคะแนนคนเดียวกันจากแมตช์เดียว
+select is(
+  public.record_match((select tid from tt),
+    'eeeeeeee-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000002',
+    array['11111111-1111-4111-8111-000000000002']::uuid[],
+    array['11111111-1111-4111-8111-000000000002']::uuid[], 21, 9) ->> 'reason',
+  'player_on_both_sides', 'ใส่ชื่อคนเดียวกันทั้งสองฝั่งไม่ได้');
+
+select is(
+  public.record_match((select tid from tt),
+    'eeeeeeee-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000002',
+    array['11111111-1111-4111-8111-000000000001',
+          '11111111-1111-4111-8111-000000000001']::uuid[],
+    array['11111111-1111-4111-8111-000000000004']::uuid[], 21, 9) ->> 'reason',
+  'duplicate_player', 'ใส่ชื่อซ้ำในฝั่งเดียวกันไม่ได้');
+
+-- ด่านต้องอยู่ที่ตารางด้วย ไม่ใช่แค่ใน RPC — เหตุผลเดียวกับ
+-- matches_confirmer_is_not_recorder คือ RPC ตัวที่สองหรือ service_role
+-- เขียนตรงเข้าตารางได้
+set local role postgres;
+select throws_ok(
+  $$ insert into public.matches
+       (tournament_id, side_a_group_id, side_b_group_id, side_a_players, side_b_players,
+        score_a, score_b, recorded_by)
+     select tid, 'eeeeeeee-0000-4000-8000-000000000001',
+            'eeeeeeee-0000-4000-8000-000000000002',
+            '{}'::uuid[], array['11111111-1111-4111-8111-000000000004']::uuid[],
+            21, 9, '11111111-1111-4111-8111-000000000001'
+     from tt $$,
+  '23514',
+  'new row for relation "matches" violates check constraint "matches_side_a_size"',
+  'ฐานข้อมูลปฏิเสธฝั่งที่ไม่มีผู้เล่น แม้ insert ตรง ๆ');
+
+select throws_ok(
+  $$ insert into public.matches
+       (tournament_id, side_a_group_id, side_b_group_id, side_a_players, side_b_players,
+        score_a, score_b, recorded_by)
+     select tid, 'eeeeeeee-0000-4000-8000-000000000001',
+            'eeeeeeee-0000-4000-8000-000000000002',
+            array['11111111-1111-4111-8111-000000000002']::uuid[],
+            array['11111111-1111-4111-8111-000000000002']::uuid[],
+            21, 9, '11111111-1111-4111-8111-000000000001'
+     from tt $$,
+  '23514',
+  'new row for relation "matches" violates check constraint "matches_no_player_on_both_sides"',
+  'ฐานข้อมูลปฏิเสธคนที่อยู่ทั้งสองฝั่ง แม้ insert ตรง ๆ');
+
+select pg_temp.act_as('11111111-1111-4111-8111-000000000001');
+set local role authenticated;
+
 select is(
   public.record_match((select tid from tt),
     'eeeeeeee-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000002',
@@ -86,7 +152,7 @@ select pg_temp.act_as('11111111-1111-4111-8111-000000000001');   -- คนบั
 set local role authenticated;
 select is(
   public.confirm_match((select mid from mm)) ->> 'reason',
-  'same_side_cannot_confirm', 'คนที่บันทึกยืนยันเองไม่ได้');
+  'recorder_cannot_confirm', 'คนที่บันทึกยืนยันเองไม่ได้');
 
 -- ⚠️ ข้อที่พลาดง่ายที่สุด — เช็คแค่ auth.uid() <> recorded_by จะปล่อยข้อนี้ผ่าน
 select pg_temp.act_as('11111111-1111-4111-8111-000000000005');   -- จูน อยู่ก๊วนเดียวกับก้อง
