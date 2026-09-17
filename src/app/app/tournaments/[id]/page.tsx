@@ -3,6 +3,7 @@ import { AppShell } from '@/components/shell';
 import { Alert, Card, Chip, EmptyState, PageHeader } from '@/components/ui/primitives';
 import { ShareLink } from '@/components/share-link';
 import { TournamentControls } from '@/components/tournament-forms';
+import { MatchList, RecordMatchForm, type MatchRow } from '@/components/match-controls';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
 import { formatDate, formatThb, tournamentShareUrl } from '@/lib/format';
@@ -59,6 +60,60 @@ export default async function TournamentPage({ params }: Params) {
   const ownedIds = new Set((myOwned ?? []).map((m) => m.group_id));
   const isHost = ownedIds.has(x.host_group_id);
   const myTeam = (teams ?? []).find((team) => ownedIds.has(team.group_id));
+
+  // แมตช์ · RLS คืนเฉพาะงานที่ผู้ใช้เกี่ยวข้องอยู่แล้ว
+  const { data: matchRows } = await supabase
+    .from('matches')
+    .select('id, court_label, score_a, score_b, status, side_a_group_id, side_b_group_id, recorded_by')
+    .eq('tournament_id', id)
+    .order('played_at', { ascending: false });
+
+  // สมาชิกของทุกก๊วนในงาน ใช้ตัดสินว่าผู้ใช้ยืนยันแมตช์ไหนได้
+  const { data: allMembers } = await supabase
+    .from('group_members')
+    .select('group_id, user_id, profiles (display_name)')
+    .in('group_id', (teams ?? []).map((team) => team.group_id));
+
+  const membersByGroup = new Map<string, { id: string; name: string }[]>();
+  for (const m of allMembers ?? []) {
+    const list = membersByGroup.get(m.group_id) ?? [];
+    list.push({ id: m.user_id, name: m.profiles?.display_name ?? 'ผู้เล่น' });
+    membersByGroup.set(m.group_id, list);
+  }
+  const groupName = new Map((teams ?? []).map((team) => [team.group_id, team.groups?.name ?? 'ก๊วน']));
+  const inGroup = (gid: string) => (membersByGroup.get(gid) ?? []).some((p) => p.id === user.id);
+
+  /*
+    ตัดสินที่เซิร์ฟเวอร์ว่าใครยืนยันแมตช์ไหนได้ ด้วยกติกาเดียวกับ RPC
+    คือต้องอยู่ฝั่งตรงข้ามกับผู้บันทึก และไม่อยู่ทั้งสองฝั่ง
+
+    ตรงนี้เป็นแค่การซ่อนปุ่มให้หน้าจอไม่หลอกคน **ด่านจริงอยู่ที่ RPC และ
+    ที่ constraint ระดับตาราง** ถ้าตรงนี้คำนวณผิดก็แค่ปุ่มโผล่ผิด กดแล้วยังถูกปฏิเสธ
+  */
+  const matches: MatchRow[] = (matchRows ?? []).map((m) => {
+    const meInA = inGroup(m.side_a_group_id);
+    const meInB = inGroup(m.side_b_group_id);
+    const recorderInA = (membersByGroup.get(m.side_a_group_id) ?? []).some(
+      (p) => p.id === m.recorded_by,
+    );
+    const canConfirm =
+      m.status === 'recorded' &&
+      !(meInA && meInB) &&
+      (meInA || meInB) &&
+      (recorderInA ? meInB : meInA);
+
+    return {
+      id: m.id,
+      courtLabel: m.court_label,
+      scoreA: m.score_a,
+      scoreB: m.score_b,
+      status: m.status as MatchRow['status'],
+      sideAName: groupName.get(m.side_a_group_id) ?? 'ก๊วน',
+      sideBName: groupName.get(m.side_b_group_id) ?? 'ก๊วน',
+      canConfirm,
+      canVoid: isHost,
+    };
+  });
 
   const teamCount = (teams ?? []).length;
   const gateTeams = teamCount >= x.min_teams;
@@ -127,6 +182,26 @@ export default async function TournamentPage({ params }: Params) {
             inputLabel={t.tournaments.joinTitle}
           />
         </div>
+      ) : null}
+
+      <div className="mt-4">
+        <MatchList matches={matches} />
+      </div>
+
+      {myTeam && x.status === 'ready' ? (
+        <RecordMatchForm
+          tournamentId={x.id}
+          sideAGroupId={myTeam.group_id}
+          sideBGroupId={
+            (teams ?? []).find((team) => team.group_id !== myTeam.group_id)?.group_id ?? ''
+          }
+          sideAPlayers={membersByGroup.get(myTeam.group_id) ?? []}
+          sideBPlayers={
+            membersByGroup.get(
+              (teams ?? []).find((team) => team.group_id !== myTeam.group_id)?.group_id ?? '',
+            ) ?? []
+          }
+        />
       ) : null}
 
       <div className="mt-4">
