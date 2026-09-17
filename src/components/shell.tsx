@@ -64,6 +64,7 @@ export async function SiteHeader() {
             <>
               <NavLink href="/app">{t.nav.mySessions}</NavLink>
               <NavLink href="/app/groups">{t.nav.myGroups}</NavLink>
+              <NavLink href="/app/tournaments">{t.nav.tournaments}</NavLink>
               <NavLink href="/organizer">{t.organizer.dashboard}</NavLink>
               {(user.role === 'venue_admin' || user.role === 'platform_admin') && (
                 <NavLink href="/venue">{t.nav.venue}</NavLink>
@@ -117,6 +118,7 @@ export async function SiteHeader() {
           <NavLink href="/discover">{t.nav.discover}</NavLink>
           <NavLink href="/app">{t.nav.mySessions}</NavLink>
           <NavLink href="/app/groups">{t.nav.myGroups}</NavLink>
+          <NavLink href="/app/tournaments">{t.nav.tournaments}</NavLink>
           <NavLink href="/organizer">{t.organizer.dashboard}</NavLink>
           {(user.role === 'venue_admin' || user.role === 'platform_admin') && (
             <NavLink href="/venue">{t.nav.venue}</NavLink>
