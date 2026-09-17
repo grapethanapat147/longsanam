@@ -489,3 +489,40 @@ insert into public.group_members (group_id, user_id, role) values
 -- นัดที่จองสนามแล้วผูกกับก๊วนนี้ เพื่อให้หน้าก๊วนมีประวัติให้ดู
 update public.sessions set group_id = 'eeeeeeee-0000-4000-8000-000000000001'
 where public_code in ('OPEN001', 'DONE001');
+
+-- ---------------------------------------------------------------------------
+-- ทัวร์นาเมนต์ (LSN-0029)
+--
+-- งานหนึ่งงานที่เปิดรับอยู่ มีเจ้าภาพจ่ายแล้วและอีกหนึ่งทีมสมัครแล้วแต่ยังไม่จ่าย
+-- เพื่อให้เห็นประตูที่ยังไม่ครบบนหน้าจอโดยไม่ต้องกดเอง
+-- ---------------------------------------------------------------------------
+
+insert into public.groups (id, public_code, name, sport_id, home_district, created_by)
+select 'eeeeeeee-0000-4000-8000-000000000002', 'GROUP02', 'แบดเช้าพระราม 9',
+       id, 'พระราม 9', '11111111-1111-4111-8111-000000000002'
+from public.sports where slug = 'badminton';
+
+insert into public.group_members (group_id, user_id, role) values
+  ('eeeeeeee-0000-4000-8000-000000000002', '11111111-1111-4111-8111-000000000002', 'owner'),
+  ('eeeeeeee-0000-4000-8000-000000000002', '11111111-1111-4111-8111-000000000004', 'member');
+
+insert into public.tournaments
+  (id, public_code, host_group_id, title, starts_at, ends_at, registration_deadline,
+   min_teams, max_teams, entry_fee_thb, tier, status, created_by)
+values
+  ('aaaaaaaa-0000-4000-8000-000000000001', 'TOURN01', 'eeeeeeee-0000-4000-8000-000000000001',
+   'ศึกแบดลาดพร้าว ครั้งที่ 1',
+   now() + interval '21 days', now() + interval '21 days 6 hours',
+   now() + interval '14 days', 4, 8, 800, 'P', 'open',
+   '11111111-1111-4111-8111-000000000001');
+
+insert into public.tournament_teams (tournament_id, group_id, is_host) values
+  ('aaaaaaaa-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000001', true),
+  ('aaaaaaaa-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000002', false);
+
+-- เจ้าภาพจ่ายแล้ว ทีมที่สองยังไม่จ่าย — ประตู "เงินครบ" จึงยังไม่เปิด
+insert into public.tournament_team_payments
+  (tournament_id, group_id, paid_by, amount_thb, idempotency_key, status, paid_at)
+values
+  ('aaaaaaaa-0000-4000-8000-000000000001', 'eeeeeeee-0000-4000-8000-000000000001',
+   '11111111-1111-4111-8111-000000000001', 800, 'seed:tourn01:host', 'paid', now());

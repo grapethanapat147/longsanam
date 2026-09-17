@@ -1247,6 +1247,177 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_team_payments: {
+        Row: {
+          amount_thb: number
+          created_at: string
+          group_id: string
+          id: string
+          idempotency_key: string
+          paid_at: string | null
+          paid_by: string
+          provider: string
+          provider_ref: string | null
+          refunded_at: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          tournament_id: string
+        }
+        Insert: {
+          amount_thb: number
+          created_at?: string
+          group_id: string
+          id?: string
+          idempotency_key: string
+          paid_at?: string | null
+          paid_by: string
+          provider?: string
+          provider_ref?: string | null
+          refunded_at?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          tournament_id: string
+        }
+        Update: {
+          amount_thb?: number
+          created_at?: string
+          group_id?: string
+          id?: string
+          idempotency_key?: string
+          paid_at?: string | null
+          paid_by?: string
+          provider?: string
+          provider_ref?: string | null
+          refunded_at?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_team_payments_paid_by_fkey"
+            columns: ["paid_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_team_payments_tournament_id_group_id_fkey"
+            columns: ["tournament_id", "group_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_teams"
+            referencedColumns: ["tournament_id", "group_id"]
+          },
+        ]
+      }
+      tournament_teams: {
+        Row: {
+          group_id: string
+          is_host: boolean
+          joined_at: string
+          tournament_id: string
+        }
+        Insert: {
+          group_id: string
+          is_host?: boolean
+          joined_at?: string
+          tournament_id: string
+        }
+        Update: {
+          group_id?: string
+          is_host?: boolean
+          joined_at?: string
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_teams_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_teams_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          court_confirmed_at: string | null
+          created_at: string
+          created_by: string
+          ends_at: string
+          entry_fee_thb: number
+          host_group_id: string
+          id: string
+          max_teams: number | null
+          min_teams: number
+          public_code: string | null
+          registration_deadline: string
+          starts_at: string
+          status: Database["public"]["Enums"]["tournament_status"]
+          tier: Database["public"]["Enums"]["tournament_tier"]
+          title: string
+          updated_at: string
+          venue_note: string | null
+        }
+        Insert: {
+          court_confirmed_at?: string | null
+          created_at?: string
+          created_by: string
+          ends_at: string
+          entry_fee_thb: number
+          host_group_id: string
+          id?: string
+          max_teams?: number | null
+          min_teams: number
+          public_code?: string | null
+          registration_deadline: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["tournament_status"]
+          tier: Database["public"]["Enums"]["tournament_tier"]
+          title: string
+          updated_at?: string
+          venue_note?: string | null
+        }
+        Update: {
+          court_confirmed_at?: string | null
+          created_at?: string
+          created_by?: string
+          ends_at?: string
+          entry_fee_thb?: number
+          host_group_id?: string
+          id?: string
+          max_teams?: number | null
+          min_teams?: number
+          public_code?: string | null
+          registration_deadline?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["tournament_status"]
+          tier?: Database["public"]["Enums"]["tournament_tier"]
+          title?: string
+          updated_at?: string
+          venue_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournaments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournaments_host_group_id_fkey"
+            columns: ["host_group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venue_members: {
         Row: {
           created_at: string
@@ -1444,6 +1615,7 @@ export type Database = {
         Args: { p_actor?: string; p_reason: string; p_session_id: string }
         Returns: Json
       }
+      close_unfilled_tournaments: { Args: never; Returns: Json }
       complete_finished_sessions: { Args: never; Returns: Json }
       confirm_court_manually: {
         Args: {
@@ -1451,6 +1623,10 @@ export type Database = {
           p_session_id: string
           p_venue_name: string
         }
+        Returns: Json
+      }
+      confirm_tournament_court: {
+        Args: { p_tournament_id: string; p_venue_note: string }
         Returns: Json
       }
       court_availability_report: {
@@ -1489,6 +1665,20 @@ export type Database = {
         }
         Returns: Json
       }
+      create_tournament: {
+        Args: {
+          p_deadline: string
+          p_ends_at: string
+          p_entry_fee_thb: number
+          p_host_group_id: string
+          p_max_teams: number
+          p_min_teams: number
+          p_starts_at: string
+          p_tier: Database["public"]["Enums"]["tournament_tier"]
+          p_title: string
+        }
+        Returns: Json
+      }
       create_venue: {
         Args: {
           p_actor?: string
@@ -1502,6 +1692,10 @@ export type Database = {
         }
         Returns: Json
       }
+      evaluate_tournament_gates: {
+        Args: { p_tournament_id: string }
+        Returns: Json
+      }
       expire_overdue_payments: { Args: never; Returns: Json }
       expire_stale_holds: { Args: never; Returns: Json }
       expire_waitlist_promotions: { Args: never; Returns: Json }
@@ -1511,6 +1705,7 @@ export type Database = {
       }
       generate_group_code: { Args: never; Returns: string }
       generate_session_code: { Args: never; Returns: string }
+      generate_tournament_code: { Args: never; Returns: string }
       grant_pay_later: { Args: { p_participant_id: string }; Returns: Json }
       group_invite_public: { Args: { p_code: string }; Returns: Json }
       is_booking_venue_member: {
@@ -1526,10 +1721,22 @@ export type Database = {
         Args: { p_session_id: string }
         Returns: boolean
       }
+      is_tournament_host: {
+        Args: { p_tournament_id: string }
+        Returns: boolean
+      }
+      is_tournament_team_member: {
+        Args: { p_tournament_id: string }
+        Returns: boolean
+      }
       is_venue_member: { Args: { p_venue_id: string }; Returns: boolean }
       join_group: { Args: { p_code: string }; Returns: Json }
       join_session: {
         Args: { p_actor?: string; p_session_id: string }
+        Returns: Json
+      }
+      join_tournament: {
+        Args: { p_code: string; p_group_id: string }
         Returns: Json
       }
       leave_group: { Args: { p_group_id: string }; Returns: Json }
@@ -1585,6 +1792,14 @@ export type Database = {
         Returns: Json
       }
       organizes_session_with: { Args: { p_user_id: string }; Returns: boolean }
+      pay_tournament_team: {
+        Args: {
+          p_group_id: string
+          p_idempotency_key: string
+          p_tournament_id: string
+        }
+        Returns: Json
+      }
       promote_waitlist: {
         Args: {
           p_actor?: string
@@ -1593,6 +1808,7 @@ export type Database = {
         }
         Returns: Json
       }
+      publish_tournament: { Args: { p_tournament_id: string }; Returns: Json }
       record_chase: {
         Args: {
           p_body: string
@@ -1700,6 +1916,7 @@ export type Database = {
         Returns: Json
       }
       storage_owner_id: { Args: { p_name: string }; Returns: string }
+      tournament_invite_public: { Args: { p_code: string }; Returns: Json }
       try_hold_court: {
         Args: {
           p_actor?: string
@@ -1758,6 +1975,14 @@ export type Database = {
         | "cancelled"
         | "completed"
       split_mode: "equal" | "by_games"
+      tournament_status:
+        | "draft"
+        | "open"
+        | "ready"
+        | "booked"
+        | "cancelled"
+        | "completed"
+      tournament_tier: "N" | "S" | "P" | "C" | "B" | "A"
       venue_member_role: "owner" | "manager" | "staff"
       waitlist_status:
         | "waiting"
@@ -1932,6 +2157,15 @@ export const Constants = {
         "completed",
       ],
       split_mode: ["equal", "by_games"],
+      tournament_status: [
+        "draft",
+        "open",
+        "ready",
+        "booked",
+        "cancelled",
+        "completed",
+      ],
+      tournament_tier: ["N", "S", "P", "C", "B", "A"],
       venue_member_role: ["owner", "manager", "staff"],
       waitlist_status: [
         "waiting",
