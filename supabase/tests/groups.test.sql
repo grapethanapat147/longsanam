@@ -4,7 +4,7 @@
 --   ก้อง 1111…0001 (ผู้จัด) · แนน 1111…0002 · บอส 1111…0003 · มีน 1111…0004
 
 begin;
-select plan(19);
+select plan(20);
 
 create or replace function pg_temp.act_as(p_id uuid) returns void
 language plpgsql as $$
@@ -205,6 +205,14 @@ set local role postgres;
 select is(
   (select count(*)::integer from public.sessions where public_code = 'BOOKED1'),
   1, 'archive ก๊วนแล้วนัดเก่ายังอยู่');
+
+-- ตรวจ audit ของ archive แยกต่างหาก เพราะ assertion ข้างบนรันก่อน archive
+-- จึงนับได้แค่สามเหตุการณ์ ถ้าไม่มีข้อนี้ AC "archive เขียน audit" จะไม่มีอะไรเฝ้า
+select is(
+  (select count(*)::integer from public.audit_logs
+   where entity_type = 'group' and entity_id = (select group_id from gcode)
+     and action = 'group.archived'),
+  1, 'archive เขียน audit ด้วย');
 
 select * from finish();
 rollback;
