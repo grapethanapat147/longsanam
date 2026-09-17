@@ -32,7 +32,7 @@ type Params = { params: Promise<{ code: string }> };
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { code } = await params;
   const result = await loadSessionByCode(code);
-  if (!result) return { title: 'ไม่พบก๊วน' };
+  if (!result) return { title: 'ไม่พบนัด' };
   return {
     title: result.session.title,
     description: `${result.session.area_text} · ${formatDateLong(result.session.starts_at)}`,
@@ -90,7 +90,7 @@ export default async function SessionDetailPage({ params }: Params) {
         <div className="grid gap-5 lg:grid-cols-[1fr_20rem]">
           <div className="order-2 space-y-5 lg:order-none">
             {session.status === 'cancelled' && session.cancelled_reason ? (
-              <Alert tone="danger" title="ก๊วนนี้ถูกยกเลิก">
+              <Alert tone="danger" title="นัดนี้ถูกยกเลิก">
                 {session.cancelled_reason}
               </Alert>
             ) : null}
@@ -98,7 +98,7 @@ export default async function SessionDetailPage({ params }: Params) {
             {session.status === 'booking_failed' ? (
               <Alert tone="danger" title="จองสนามไม่สำเร็จ">
                 ระบบลองสนามที่อนุมัติไว้ครบทุกแห่งแล้วแต่ไม่ได้คอร์ต ผู้จัดกำลังหาสนามเพิ่ม
-                หากยกเลิกก๊วน ผู้เล่นที่ชำระเงินแล้วจะได้รับเงินคืนเต็มจำนวน
+                หากยกเลิกนัด ผู้เล่นที่ชำระเงินแล้วจะได้รับเงินคืนเต็มจำนวน
               </Alert>
             ) : null}
 
@@ -235,12 +235,12 @@ export default async function SessionDetailPage({ params }: Params) {
 
             {isOrganizer ? (
               <Card className="px-4 py-3 text-sm">
-                <p className="font-medium text-ink-800">คุณเป็นผู้จัดก๊วนนี้</p>
+                <p className="font-medium text-ink-800">คุณเป็นผู้จัดนี้</p>
                 <Link
                   href={`/organizer/sessions/${session.id}`}
                   className="mt-1 inline-block font-semibold text-brand-700 hover:underline"
                 >
-                  ไปหน้าจัดการก๊วน →
+                  ไปหน้าจัดการนัด →
                 </Link>
               </Card>
             ) : null}

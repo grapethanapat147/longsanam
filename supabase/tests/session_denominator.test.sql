@@ -46,7 +46,7 @@ select is(
 select is(
   (select count(*)::integer from public.session_denominator(
      '00000000-0000-4000-8000-000000000000'::uuid)),
-  0, 'ก๊วนที่ไม่มีอยู่ ได้ศูนย์แถว ไม่ใช่ error');
+  0, 'นัดที่ไม่มีอยู่ ได้ศูนย์แถว ไม่ใช่ error');
 
 select * from finish();
 rollback;

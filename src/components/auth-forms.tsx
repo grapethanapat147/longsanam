@@ -39,7 +39,7 @@ function LineSignInPlaceholder() {
 }
 
 const DEMO_ACCOUNTS = [
-  { email: 'organizer@longsanam.test', role: 'ผู้จัดก๊วน' },
+  { email: 'organizer@longsanam.test', role: 'ผู้จัด' },
   { email: 'player1@longsanam.test', role: 'ผู้เล่น' },
   { email: 'venue@longsanam.test', role: 'เจ้าของสนาม' },
   { email: 'admin@longsanam.test', role: 'ผู้ดูแลระบบ' },
@@ -113,7 +113,7 @@ export function SignUpForm() {
         label={t.auth.displayName}
         htmlFor="displayName"
         required
-        hint="ชื่อที่เพื่อนในก๊วนจะเห็น"
+        hint="ชื่อที่เพื่อนร่วมนัดจะเห็น"
       >
         <Input
           id="displayName"

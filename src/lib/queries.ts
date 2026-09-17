@@ -276,7 +276,7 @@ export async function loadApprovedCourtPrices(
 }
 
 /**
- * ใบสรุปก๊วน (LSN-0023).
+ * ใบสรุปนัด (LSN-0023).
  *
  * Two views, one call. `names` is null for anyone outside the session — not an
  * empty array, and not a list the page is trusted to mask. The masked branch
@@ -380,7 +380,7 @@ export async function loadSessionReceipt(code: string, viewerId: string | null) 
 
   // รายการเก็บเงินเพิ่ม (LSN-0024) — เติมที่นี่เท่านั้น ไม่ใช่ใน
   // session_receipt_public() เพราะ `label` เป็นข้อความที่ผู้จัดพิมพ์เอง และ
-  // พิมพ์ชื่อคนลงไปได้ตรง ๆ ("ค่าไม้ พี่ต้น") ถ้าส่งเข้า RPC สาธารณะ คนนอกก๊วน
+  // พิมพ์ชื่อคนลงไปได้ตรง ๆ ("ค่าไม้ พี่ต้น") ถ้าส่งเข้า RPC สาธารณะ คนนอกนัด
   // จะอ่านชื่อผู้เล่นได้ผ่านช่องที่ LSN-0023 เพิ่งอุดไป
   //
   // amountThb คือส่วนแบ่ง *ของคนที่กำลังดู* ไม่ใช่ยอดรวมของบรรทัด เพราะใบสรุป

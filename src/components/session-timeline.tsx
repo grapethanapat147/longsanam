@@ -16,12 +16,12 @@ type Entry = {
  * a separate, prettier story told by the UI.
  */
 const ACTION_LABEL: Record<string, string> = {
-  'session.published': 'เผยแพร่ก๊วน',
+  'session.published': 'เผยแพร่นัด',
   'session.ready_to_book': 'ครบเงื่อนไข พร้อมจองสนาม',
   'session.holding_court': 'เริ่มกันคอร์ต',
   'session.booked': 'ได้สนามแล้ว',
   'session.booking_failed': 'จองสนามไม่สำเร็จ',
-  'session.cancelled': 'ยกเลิกก๊วน',
+  'session.cancelled': 'ยกเลิกนัด',
   'participant.joined': 'ผู้เล่นเข้าร่วม',
   'participant.confirmed': 'ผู้เล่นชำระเงินแล้ว',
   'participant.cancelled': 'ผู้เล่นยกเลิก',

@@ -1,7 +1,7 @@
--- รายการเก็บเงินเพิ่มหลังจบก๊วน (LSN-0024). รันด้วย `npm run test:db`
+-- รายการเก็บเงินเพิ่มหลังจบนัด (LSN-0024). รันด้วย `npm run test:db`
 --
 -- Actors จาก supabase/seed.sql:
---   organizer 1111…0001 จัดทุกก๊วน · แนน 1111…0002 เป็นผู้เล่น ไม่ใช่ผู้จัด
+--   organizer 1111…0001 จัดทุกนัด · แนน 1111…0002 เป็นผู้เล่น ไม่ใช่ผู้จัด
 --   BOOKED1 = booked มี 8 ที่นั่ง paid_confirmed ทั้งหมด
 --   OPEN001 = open มี 3 ที่นั่งที่นับ
 
@@ -38,13 +38,13 @@ select is(
   public.create_session_charge(
     (select id from public.sessions where public_code = 'OPEN001'),
     'ค่าลูกแบด', 300, 'all') ->> 'reason',
-  'session_not_played', 'ก๊วนที่ยังไม่ได้เล่น สร้างรายการไม่ได้');
+  'session_not_played', 'นัดที่ยังไม่ได้เล่น สร้างรายการไม่ได้');
 
 select is(
   public.create_session_charge(
     (select id from public.sessions where public_code = 'CANCEL1'),
     'ค่าลูกแบด', 300, 'all') ->> 'reason',
-  'session_not_played', 'ก๊วนที่ยกเลิกแล้ว สร้างรายการไม่ได้');
+  'session_not_played', 'นัดที่ยกเลิกแล้ว สร้างรายการไม่ได้');
 
 -- ---------------------------------------------------------------------------
 -- สร้างรายการ: split all / named และการปัดเศษ
@@ -88,7 +88,7 @@ select is(
   0, 'ยังไม่กดส่ง payments ไม่เพิ่มขึ้นเลย');
 
 -- นับนอก RLS: notifications_read ให้เห็นเฉพาะแถวของตัวเอง
--- ถ้านับในฐานะผู้จัด จะได้เลขของผู้จัดคนเดียว ไม่ใช่ของทั้งก๊วน
+-- ถ้านับในฐานะผู้จัด จะได้เลขของผู้จัดคนเดียว ไม่ใช่ของทั้งนัด
 set local role postgres;
 select is(
   (select count(*)::integer from public.notifications where kind = 'extra_charge'),
@@ -209,7 +209,7 @@ select throws_ok(
 -- ส่วนแบ่งถูกปักตอนสร้าง — สมาชิกที่เข้ามาทีหลังไม่ทำให้ของเดิมขยับ
 --
 -- นี่คือเหตุผลที่ session_charge_shares เก็บเป็นแถว แทนที่จะคำนวณสดตอนอ่าน
--- ถ้าคำนวณสด คนที่เข้าก๊วนมาทีหลังจะทำให้ยอดของคนที่ถูกเรียกเก็บไปแล้วเปลี่ยน
+-- ถ้าคำนวณสด คนที่เข้านัดมาทีหลังจะทำให้ยอดของคนที่ถูกเรียกเก็บไปแล้วเปลี่ยน
 -- ซึ่งแปลว่าหนี้ที่ตกลงกันไปแล้วขยับได้เอง
 -- ---------------------------------------------------------------------------
 
@@ -217,7 +217,7 @@ select is(
   public.create_session_charge(
     (select id from public.sessions where public_code = 'BOOKED1'),
     'ค่าคอร์ตต่อเวลา', 90, 'all') ->> 'ok',
-  'true', 'สร้างรายการไว้ก่อนจะมีคนเข้าก๊วนใหม่');
+  'true', 'สร้างรายการไว้ก่อนจะมีคนเข้านัดใหม่');
 
 set local role postgres;
 
@@ -244,7 +244,7 @@ select is(
       select participant_id, amount_thb from public.session_charge_shares
       where charge_id = (select id from public.session_charges where label = 'ค่าคอร์ตต่อเวลา'))
    ) diff),
-  0, 'คนเข้าก๊วนทีหลัง ส่วนแบ่งที่ปักไว้แล้วไม่ขยับสักแถว');
+  0, 'คนเข้านัดทีหลัง ส่วนแบ่งที่ปักไว้แล้วไม่ขยับสักแถว');
 
 set local role postgres;
 select * from finish();

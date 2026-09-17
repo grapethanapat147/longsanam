@@ -19,7 +19,7 @@ function bangkokInstant(date: string, time: string): string {
 const createSessionSchema = z
   .object({
     sportId: z.string().uuid('กรุณาเลือกกีฬา'),
-    title: z.string().trim().min(3, 'ตั้งชื่อก๊วนอย่างน้อย 3 ตัวอักษร').max(120),
+    title: z.string().trim().min(3, 'ตั้งชื่อนัดอย่างน้อย 3 ตัวอักษร').max(120),
     description: z.string().trim().max(500).optional(),
     areaText: z.string().trim().min(1, 'กรุณาระบุย่านหรือพื้นที่'),
     district: z.string().trim().max(80).optional(),
@@ -491,7 +491,7 @@ export async function confirmCourtManuallyAction(
 }
 
 /* ---------------------------------------------------------------------------
- * รายการเก็บเงินเพิ่มหลังจบก๊วน (LSN-0024)
+ * รายการเก็บเงินเพิ่มหลังจบนัด (LSN-0024)
  *
  * ทั้งสามตัวเรียกผ่าน client ของผู้จัดเอง ไม่ใช่ admin client เพื่อให้
  * is_session_organizer() ข้างใน RPC เห็นผู้เรียกจริง — เหตุผลเดียวกับ

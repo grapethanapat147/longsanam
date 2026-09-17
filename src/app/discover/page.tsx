@@ -24,7 +24,7 @@ export default async function DiscoverPage({
     <AppShell>
       <PageHeader
         title={t.nav.discover}
-        description="ก๊วนที่กำลังเปิดรับผู้เล่นในช่วงนี้"
+        description="นัดที่กำลังเปิดรับผู้เล่นในช่วงนี้"
         action={<ButtonLink href="/organizer/new">{t.nav.create}</ButtonLink>}
       />
 
@@ -44,7 +44,7 @@ export default async function DiscoverPage({
         <EmptyState
           icon="🔍"
           title={t.session.noSessions}
-          description="ลองเปลี่ยนกีฬาที่กรอง หรือเริ่มตั้งก๊วนของคุณเอง แล้วชวนเพื่อนเข้ามา"
+          description="ลองเปลี่ยนกีฬาที่กรอง หรือเริ่มตั้งนัดของคุณเอง แล้วชวนเพื่อนเข้ามา"
           action={<ButtonLink href="/organizer/new">{t.nav.create}</ButtonLink>}
         />
       ) : (

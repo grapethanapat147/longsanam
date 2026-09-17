@@ -43,7 +43,7 @@ export default async function VenueHistoryPage({
         <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
           <tr>
             <th className="px-4 py-3 font-medium">วันที่</th>
-            <th className="px-4 py-3 font-medium">ก๊วน</th>
+            <th className="px-4 py-3 font-medium">นัด</th>
             <th className="px-4 py-3 font-medium">คอร์ต</th>
             <th className="px-4 py-3 text-right font-medium">ราคา</th>
             <th className="px-4 py-3 font-medium">สถานะ</th>

@@ -95,8 +95,8 @@ export async function refundAllPaidParticipants(
       p_user_id: participant.user_id as string,
       p_session_id: input.sessionId,
       p_kind: 'session_cancelled',
-      p_title: 'ก๊วนถูกยกเลิก',
-      p_body: `ก๊วนนี้ถูกยกเลิก: ${input.reason}`,
+      p_title: 'นัดถูกยกเลิก',
+      p_body: `นัดนี้ถูกยกเลิก: ${input.reason}`,
       p_action_url: '/app/payments',
     });
   }

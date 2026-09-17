@@ -44,15 +44,15 @@ export default async function OrganizerPage() {
     <AppShell>
       <PageHeader
         title={t.organizer.dashboard}
-        description="ก๊วนทั้งหมดที่คุณเป็นผู้จัด"
+        description="นัดทั้งหมดที่คุณเป็นผู้จัด"
         action={<ButtonLink href="/organizer/new">{t.organizer.createTitle}</ButtonLink>}
       />
 
       {sessions.length === 0 ? (
         <EmptyState
           icon="📋"
-          title="คุณยังไม่ได้สร้างก๊วน"
-          description="สร้างก๊วนแรกของคุณ แล้วแชร์ลิงก์เข้ากลุ่ม LINE ได้เลย"
+          title="คุณยังไม่ได้สร้างนัด"
+          description="สร้างนัดแรกของคุณ แล้วแชร์ลิงก์เข้ากลุ่ม LINE ได้เลย"
           action={<ButtonLink href="/organizer/new">{t.organizer.createTitle}</ButtonLink>}
         />
       ) : (

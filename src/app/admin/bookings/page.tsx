@@ -69,7 +69,7 @@ export default async function AdminBookingsPage() {
     .map((payment) => ({
       id: payment.id,
       amountThb: payment.amount_thb,
-      label: `${payment.profiles?.display_name ?? 'ผู้เล่น'} · ${payment.sessions?.title ?? 'ก๊วน'} · ${formatThb(payment.amount_thb)}`,
+      label: `${payment.profiles?.display_name ?? 'ผู้เล่น'} · ${payment.sessions?.title ?? 'นัด'} · ${formatThb(payment.amount_thb)}`,
     }));
 
   return (
@@ -88,7 +88,7 @@ export default async function AdminBookingsPage() {
         <table className="mt-3 w-full min-w-[46rem] text-sm">
           <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
             <tr>
-              <th className="px-4 py-3 font-medium">ก๊วน</th>
+              <th className="px-4 py-3 font-medium">นัด</th>
               <th className="px-4 py-3 font-medium">สนาม / คอร์ต</th>
               <th className="px-4 py-3 font-medium">วันที่เล่น</th>
               <th className="px-4 py-3 text-right font-medium">ราคา</th>
@@ -140,7 +140,7 @@ export default async function AdminBookingsPage() {
           <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
             <tr>
               <th className="px-4 py-3 font-medium">ผู้เล่น</th>
-              <th className="px-4 py-3 font-medium">ก๊วน</th>
+              <th className="px-4 py-3 font-medium">นัด</th>
               <th className="px-4 py-3 font-medium">เวลา</th>
               <th className="px-4 py-3 text-right font-medium">จำนวน</th>
               <th className="px-4 py-3 font-medium">สถานะ</th>
@@ -174,7 +174,7 @@ export default async function AdminBookingsPage() {
         <table className="mt-3 w-full min-w-[38rem] text-sm">
           <thead className="border-b border-ink-200 text-left text-xs text-ink-500">
             <tr>
-              <th className="px-4 py-3 font-medium">ก๊วน</th>
+              <th className="px-4 py-3 font-medium">นัด</th>
               <th className="px-4 py-3 font-medium">เหตุผล</th>
               <th className="px-4 py-3 text-right font-medium">จำนวน</th>
               <th className="px-4 py-3 font-medium">สถานะ</th>

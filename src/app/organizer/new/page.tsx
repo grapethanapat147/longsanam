@@ -48,7 +48,7 @@ export default async function NewSessionPage() {
     <AppShell>
       <PageHeader
         title={t.organizer.createTitle}
-        description="ตั้งค่าก๊วนให้ครบ แล้วเผยแพร่เพื่อรับลิงก์สำหรับแชร์เข้า LINE"
+        description="ตั้งค่านัดให้ครบ แล้วเผยแพร่เพื่อรับลิงก์สำหรับแชร์เข้า LINE"
       />
       <CreateSessionWizard sports={sports} courts={courts} />
     </AppShell>

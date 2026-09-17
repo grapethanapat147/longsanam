@@ -99,8 +99,8 @@ export function OrganizerControls(props: Props) {
         tone: 'success',
         text:
           result.refundedPlayers > 0
-            ? `ยกเลิกก๊วนแล้ว คืนเงินผู้เล่น ${result.refundedPlayers} คน รวม ${formatThb(result.refundedThb)}`
-            : 'ยกเลิกก๊วนแล้ว ไม่มีผู้เล่นที่ต้องคืนเงิน',
+            ? `ยกเลิกนัดแล้ว คืนเงินผู้เล่น ${result.refundedPlayers} คน รวม ${formatThb(result.refundedThb)}`
+            : 'ยกเลิกนัดแล้ว ไม่มีผู้เล่นที่ต้องคืนเงิน',
       };
     });
 
@@ -109,7 +109,7 @@ export function OrganizerControls(props: Props) {
 
   return (
     <Card className="space-y-4 px-5 py-5">
-      <h2 className="font-semibold text-ink-900">การจัดการก๊วน</h2>
+      <h2 className="font-semibold text-ink-900">การจัดการนัด</h2>
 
       {feedback ? <Alert tone={feedback.tone}>{feedback.text}</Alert> : null}
 
@@ -244,7 +244,7 @@ export function OrganizerControls(props: Props) {
                   disabled={pending || cancelReason.trim().length < 3}
                   onClick={cancel}
                 >
-                  {pending ? t.common.loading : 'ยืนยันยกเลิกก๊วน'}
+                  {pending ? t.common.loading : 'ยืนยันยกเลิกนัด'}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setShowCancel(false)}>
                   {t.common.back}

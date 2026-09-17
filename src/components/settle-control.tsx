@@ -50,7 +50,7 @@ export function SettleControl({
     return (
       <Card className="px-5 py-4">
         <p className="font-medium text-ink-800">สรุปยอด</p>
-        <p className="mt-1 text-sm text-ink-500">ก๊วนนี้ปิดแล้ว สรุปยอดไม่ได้</p>
+        <p className="mt-1 text-sm text-ink-500">นัดนี้ปิดแล้ว สรุปยอดไม่ได้</p>
       </Card>
     );
   }
@@ -124,7 +124,7 @@ export function SettleControl({
           {pending ? 'กำลังสรุป…' : 'สรุปยอด'}
         </Button>
         {players.length === 0 ? (
-          <p className="mt-2 text-xs text-ink-500">ยังไม่มีผู้เล่นที่นับได้ในก๊วนนี้</p>
+          <p className="mt-2 text-xs text-ink-500">ยังไม่มีผู้เล่นที่นับได้ในนัดนี้</p>
         ) : null}
       </div>
 

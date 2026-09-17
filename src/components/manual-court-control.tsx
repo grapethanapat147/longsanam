@@ -46,7 +46,7 @@ export function ManualCourtControl({ sessionId, estimatedCourtCostThb }: Props) 
     <Card className="px-5 py-4">
       <p className="font-medium text-ink-800">ได้คอร์ตมาเองแล้ว</p>
       <p className="mt-1 text-sm text-ink-500">
-        ถ้าคุณจองคอร์ตกับสนามเองแล้ว บันทึกไว้ที่นี่เพื่อยืนยันก๊วนให้ผู้เล่น
+        ถ้าคุณจองคอร์ตกับสนามเองแล้ว บันทึกไว้ที่นี่เพื่อยืนยันนัดให้ผู้เล่น
       </p>
 
       <label className="mt-4 block text-sm font-medium text-ink-800">
@@ -74,7 +74,7 @@ export function ManualCourtControl({ sessionId, estimatedCourtCostThb }: Props) 
       </label>
 
       <p className="mt-2 text-xs leading-relaxed text-ink-500">
-        ยอดนี้จะถูกใช้เป็นฐานหารค่าใช้จ่ายของทั้งก๊วนตอนสรุปยอด
+        ยอดนี้จะถูกใช้เป็นฐานหารค่าใช้จ่ายของทั้งนัดตอนสรุปยอด
         {estimatedCourtCostThb > 0
           ? ` · ค่าสนามโดยประมาณที่ระบบเคยแสดงคือ ${formatThb(estimatedCourtCostThb)}`
           : null}

@@ -95,7 +95,7 @@ export default async function MySessionsPage({
 
       {needsPayment.length > 0 ? (
         <div className="mb-5">
-          <Alert tone="warning" title={`มี ${needsPayment.length} ก๊วนที่รอการชำระเงิน`}>
+          <Alert tone="warning" title={`มี ${needsPayment.length} นัดที่รอการชำระเงิน`}>
             ที่นั่งจะยังไม่ถูกยืนยันจนกว่าจะชำระเงิน และจะถูกปล่อยเมื่อหมดเวลา
           </Alert>
         </div>
@@ -132,12 +132,12 @@ export default async function MySessionsPage({
       ) : null}
 
       <section>
-        <h2 className="mb-2 font-semibold text-ink-900">ก๊วนที่กำลังจะถึง</h2>
+        <h2 className="mb-2 font-semibold text-ink-900">นัดที่กำลังจะถึง</h2>
         {upcoming.length === 0 ? (
           <EmptyState
             icon="🏸"
-            title="ยังไม่มีก๊วนที่กำลังจะถึง"
-            description="ลองหาก๊วนที่เปิดรับอยู่ หรือสร้างก๊วนของคุณเอง"
+            title="ยังไม่มีนัดที่กำลังจะถึง"
+            description="ลองหานัดที่เปิดรับอยู่ หรือสร้างนัดของคุณเอง"
             action={<ButtonLink href="/discover">{t.nav.discover}</ButtonLink>}
           />
         ) : (
@@ -151,7 +151,7 @@ export default async function MySessionsPage({
 
       {past.length > 0 ? (
         <section className="mt-6">
-          <h2 className="mb-2 font-semibold text-ink-900">ก๊วนที่ผ่านมา</h2>
+          <h2 className="mb-2 font-semibold text-ink-900">นัดที่ผ่านมา</h2>
           <div className="space-y-2">
             {past.map((row) => (
               <ParticipationRow key={row.id} row={row} muted />

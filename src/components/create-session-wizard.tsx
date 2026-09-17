@@ -184,13 +184,13 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
       <Card className={cn('space-y-4 px-5 py-5', step !== 1 && 'hidden')}>
         <h2 className="font-semibold text-ink-900">{t.organizer.stepWhen}</h2>
 
-        <Field label="ชื่อก๊วน" htmlFor="title" required error={fieldError('title')}>
+        <Field label="ชื่อนัด" htmlFor="title" required error={fieldError('title')}>
           <Input
             id="title"
             name="title"
             required
             maxLength={120}
-            placeholder="เช่น ก๊วนแบดเย็นวันพุธ"
+            placeholder="เช่น นัดแบดเย็นวันพุธ"
           />
         </Field>
 
@@ -436,7 +436,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
             className="mt-1 h-4 w-4 accent-brand-600"
           />
           <span>
-            ถ้าผู้จัดยกเลิกก๊วน หรือระบบจองสนามไม่สำเร็จ คืนเงินผู้เล่นเต็มจำนวนทุกกรณี
+            ถ้าผู้จัดยกเลิกนัด หรือระบบจองสนามไม่สำเร็จ คืนเงินผู้เล่นเต็มจำนวนทุกกรณี
             <span className="block text-xs text-ink-500">
               แนะนำให้เปิดไว้ เพราะผู้เล่นไม่ได้เป็นฝ่ายผิดในกรณีนี้
             </span>
@@ -450,11 +450,11 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
           <SubmitButton disabled={selectedCourtIds.length === 0} />
           {selectedCourtIds.length === 0 ? (
             <p className="text-xs text-ink-500">
-              ต้องเลือกสนามอย่างน้อย 1 แห่งในขั้นตอนที่ 4 ก่อนจึงจะสร้างก๊วนได้
+              ต้องเลือกสนามอย่างน้อย 1 แห่งในขั้นตอนที่ 4 ก่อนจึงจะสร้างนัดได้
             </p>
           ) : (
             <p className="text-xs text-ink-500">
-              ก๊วนจะถูกสร้างเป็นฉบับร่าง คุณจะกดเผยแพร่เองในหน้าถัดไป
+              นัดจะถูกสร้างเป็นฉบับร่าง คุณจะกดเผยแพร่เองในหน้าถัดไป
             </p>
           )}
         </div>

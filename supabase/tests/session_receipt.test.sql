@@ -1,4 +1,4 @@
--- ใบสรุปก๊วน (LSN-0023). รันด้วย `npm run test:db`
+-- ใบสรุปนัด (LSN-0023). รันด้วย `npm run test:db`
 --
 -- Actors จาก supabase/seed.sql:
 --   organizer 1111…0001 จัด OPEN001
@@ -12,16 +12,16 @@ select plan(9);
 select is(
   public.session_receipt_public(
     (select id from public.sessions where public_code = 'OPEN001')),
-  null, 'ก๊วนที่ยังเปิดรับอยู่ ไม่มีใบสรุป');
+  null, 'นัดที่ยังเปิดรับอยู่ ไม่มีใบสรุป');
 
 -- booked ก็ยังไม่พอ แม้ settle ไปแล้วก็ตาม
--- settle_session_costs() ยอมให้ settle ก๊วนที่ยัง booked ได้ ใบสรุปจึงต้องปฏิเสธเอง
+-- settle_session_costs() ยอมให้ settle นัดที่ยัง booked ได้ ใบสรุปจึงต้องปฏิเสธเอง
 update public.sessions set status = 'booked', settled_per_person_thb = 250
 where public_code = 'OPEN001';
 select is(
   public.session_receipt_public(
     (select id from public.sessions where public_code = 'OPEN001')),
-  null, 'ก๊วนที่จองแล้วแต่ยังไม่เล่น ก็ยังไม่มีใบสรุป');
+  null, 'นัดที่จองแล้วแต่ยังไม่เล่น ก็ยังไม่มีใบสรุป');
 
 update public.sessions set status = 'completed' where public_code = 'OPEN001';
 
@@ -30,7 +30,7 @@ select is(
      (select id from public.sessions where public_code = 'OPEN001')) ->> 'perHeadThb')::integer,
   250, 'ยอดต่อหัวมาจาก settled_per_person_thb เมื่อมี');
 
--- fallback: ถ้ายังไม่ settle ต้องใช้ยอดที่ผู้จัดตั้งไว้ตอนสร้างก๊วน
+-- fallback: ถ้ายังไม่ settle ต้องใช้ยอดที่ผู้จัดตั้งไว้ตอนสร้างนัด
 update public.sessions set settled_per_person_thb = null where public_code = 'OPEN001';
 select is(
   (public.session_receipt_public(

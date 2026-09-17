@@ -20,18 +20,18 @@ export const sessionStatusLabel: Record<SessionStatus, string> = {
   booked: 'ได้สนามแล้ว',
   booking_failed: 'จองสนามไม่สำเร็จ',
   cancelled: 'ยกเลิกแล้ว',
-  completed: 'จบก๊วนแล้ว',
+  completed: 'จบนัดแล้ว',
 };
 
 export const sessionStatusHint: Record<SessionStatus, string> = {
-  draft: 'ยังไม่เผยแพร่ มีเพียงคุณที่เห็นก๊วนนี้',
+  draft: 'ยังไม่เผยแพร่ มีเพียงคุณที่เห็นนัดนี้',
   open: 'กำลังรอผู้เล่นเข้าร่วมและชำระเงินให้ครบขั้นต่ำ',
   ready_to_book: 'ผู้เล่นและยอดเงินครบแล้ว ระบบกำลังจะจองสนามให้',
   holding_court: 'ระบบกำลังกันคอร์ตและรอสนามยืนยัน',
   booked: 'ยืนยันสนามเรียบร้อย เจอกันในวันนัด',
   booking_failed: 'ลองสนามที่อนุมัติไว้ครบแล้วแต่ยังไม่ได้คอร์ต',
-  cancelled: 'ก๊วนนี้ถูกยกเลิก และมีการคืนเงินตามเงื่อนไข',
-  completed: 'ก๊วนนี้จบแล้ว',
+  cancelled: 'นัดนี้ถูกยกเลิก และมีการคืนเงินตามเงื่อนไข',
+  completed: 'นัดนี้จบแล้ว',
 };
 
 export const participantStatusLabel: Record<ParticipantStatus, string> = {
@@ -83,28 +83,28 @@ export const reasonLabel: Record<string, string> = {
   not_authenticated: 'กรุณาเข้าสู่ระบบก่อน',
   forbidden: 'คุณไม่มีสิทธิ์ทำรายการนี้',
   not_found: 'ไม่พบรายการนี้',
-  not_organizer: 'เฉพาะผู้จัดก๊วนเท่านั้นที่ทำรายการนี้ได้',
-  session_not_played: 'สร้างรายการเก็บเงินเพิ่มได้เฉพาะก๊วนที่ได้สนามแล้วหรือเล่นจบแล้ว',
+  not_organizer: 'เฉพาะผู้จัดเท่านั้นที่ทำรายการนี้ได้',
+  session_not_played: 'สร้างรายการเก็บเงินเพิ่มได้เฉพาะนัดที่ได้สนามแล้วหรือเล่นจบแล้ว',
   no_participants: 'ยังไม่ได้เลือกผู้เล่นที่จะเรียกเก็บ',
   charge_not_found: 'ไม่พบรายการนี้',
   already_voided: 'รายการนี้ถูกลบไปแล้ว',
   court_confirm_not_allowed:
-    'ยืนยันคอร์ตเองได้เฉพาะก๊วนที่ผู้เล่นและยอดเงินครบแล้ว หรือก๊วนที่ระบบจองไม่สำเร็จ',
+    'ยืนยันคอร์ตเองได้เฉพาะนัดที่ผู้เล่นและยอดเงินครบแล้ว หรือนัดที่ระบบจองไม่สำเร็จ',
   venue_name_required: 'กรุณาระบุชื่อสนาม',
-  already_confirmed: 'ก๊วนนี้ยืนยันคอร์ตไปแล้ว',
+  already_confirmed: 'นัดนี้ยืนยันคอร์ตไปแล้ว',
   wrong_state: 'สถานะของผู้เล่นไม่รองรับการทำรายการนี้',
   credit_too_low: 'เครดิตของผู้เล่นต่ำกว่าเกณฑ์ที่ให้จ่ายทีหลังได้',
   outside_check_in_window: 'อยู่นอกช่วงเวลาเช็คอิน (30 นาทีก่อนเริ่ม ถึง 2 ชั่วโมงหลังจบ)',
-  no_players: 'ยังไม่มีผู้เล่นที่นับได้ในก๊วนนี้',
+  no_players: 'ยังไม่มีผู้เล่นที่นับได้ในนัดนี้',
   invalid_amount: 'จำนวนเงินไม่ถูกต้อง',
   guest_has_no_account: 'ผู้เล่นรับเชิญไม่มีบัญชี ทำรายการนี้ไม่ได้',
   guest_name_required: 'กรุณาใส่ชื่อผู้เล่นรับเชิญ',
-  session_full: 'ก๊วนนี้เต็มแล้ว',
+  session_full: 'นัดนี้เต็มแล้ว',
   not_a_guest: 'รายการนี้ไม่ใช่ผู้เล่นรับเชิญ',
-  session_not_found: 'ไม่พบก๊วนนี้',
-  session_not_open: 'ก๊วนนี้ไม่เปิดรับผู้เล่นแล้ว',
-  session_closed: 'ก๊วนนี้ปิดรับแล้ว',
-  session_started: 'ก๊วนนี้เริ่มไปแล้ว',
+  session_not_found: 'ไม่พบนัดนี้',
+  session_not_open: 'นัดนี้ไม่เปิดรับผู้เล่นแล้ว',
+  session_closed: 'นัดนี้ปิดรับแล้ว',
+  session_started: 'นัดนี้เริ่มไปแล้ว',
   deadline_passed: 'เลยกำหนดชำระเงินแล้ว',
   participant_not_found: 'ไม่พบรายชื่อผู้เล่น',
   participant_not_awaiting_payment: 'รายการนี้ไม่ได้อยู่ในสถานะรอชำระเงิน',
@@ -126,9 +126,9 @@ export const reasonLabel: Record<string, string> = {
   slug_taken: 'ชื่อย่อนี้ถูกใช้แล้ว',
   invalid_slug: 'ชื่อย่อใช้ได้เฉพาะ a-z, 0-9 และ -',
   name_required: 'กรุณากรอกชื่อ',
-  session_not_ready: 'ก๊วนยังไม่พร้อมจองสนาม',
-  session_terminal: 'ก๊วนนี้ปิดไปแล้ว',
-  already_booked: 'ก๊วนนี้ได้สนามแล้ว',
+  session_not_ready: 'นัดยังไม่พร้อมจองสนาม',
+  session_terminal: 'นัดนี้ปิดไปแล้ว',
+  already_booked: 'นัดนี้ได้สนามแล้ว',
   no_approved_venue: 'ยังไม่ได้เลือกสนามที่อนุมัติให้จอง',
   below_min_players: 'ผู้เล่นที่ชำระเงินยังไม่ถึงขั้นต่ำ',
   below_required_total: 'ยอดเงินที่เก็บได้ยังไม่พอค่าสนาม',
@@ -137,7 +137,7 @@ export const reasonLabel: Record<string, string> = {
 export const t = {
   brand: {
     name: 'ลงสนาม',
-    tagline: 'รวมก๊วน จ่ายเงิน ได้สนาม จบในลิงก์เดียว',
+    tagline: 'รวมคน จ่ายเงิน ได้สนาม จบในลิงก์เดียว',
   },
   charges: {
     title: 'รายการเก็บเงินเพิ่ม',
@@ -159,7 +159,7 @@ export const t = {
   },
 
   /**
-   * ชิปกดเติมชื่อรายการ ตามกีฬาของก๊วนนั้น
+   * ชิปกดเติมชื่อรายการ ตามกีฬาของนัดนั้น
    *
    * ฮาร์ดโค้ดโดยตั้งใจ ไม่มีตารางใหม่ ไม่มี migration ไม่มี API — non-goal ของ
    * LSN-0024 เขียนไว้เองว่า "ไม่ทำระบบสต็อกอุปกรณ์" และตารางรายการสำเร็จรูป
@@ -176,7 +176,7 @@ export const t = {
     custom: ['ค่าน้ำ', 'ค่าอุปกรณ์'],
   } as Record<string, string[]>,
   receipt: {
-    title: 'ใบเสร็จก๊วน',
+    title: 'ใบเสร็จนัด',
     players: 'ผู้เล่น',
     paid: 'จ่ายแล้ว',
     owing: 'ค้าง',
@@ -184,15 +184,15 @@ export const t = {
     total: 'ยอดรวม',
     guestChip: 'ผู้เล่นรับเชิญ',
     extras: 'ค่าใช้จ่ายเพิ่มเติม',
-    masked: 'ดูรายชื่อได้เฉพาะคนในก๊วน',
+    masked: 'ดูรายชื่อได้เฉพาะคนที่ร่วมนัดนี้',
     guestCash: 'ผู้เล่นรับเชิญจ่ายเงินสดกับผู้จัดโดยตรง ระบบคืนเงินให้ไม่ได้',
     shareTitle: 'ส่งใบเสร็จเข้า LINE',
-    shareHint: 'คนนอกก๊วนเห็นแค่ยอดรวม ไม่เห็นรายชื่อ',
+    shareHint: 'คนนอกเห็นแค่ยอดรวม ไม่เห็นรายชื่อ',
   },
   nav: {
-    discover: 'หาก๊วน',
-    create: 'สร้างก๊วน',
-    mySessions: 'ก๊วนของฉัน',
+    discover: 'หานัด',
+    create: 'สร้างนัด',
+    mySessions: 'นัดของฉัน',
     payments: 'การชำระเงิน',
     profile: 'โปรไฟล์',
     venue: 'สำหรับเจ้าของสนาม',
@@ -269,7 +269,7 @@ export const t = {
     venuePreferences: 'สนามที่เลือกไว้',
     fallbackNote: 'ระบบจะไล่จองตามลำดับนี้ และจะไม่จองสนามที่ไม่ได้อนุมัติ',
     policy: 'เงื่อนไขการยกเลิกและคืนเงิน',
-    join: 'เข้าร่วมก๊วน',
+    join: 'เข้าร่วมนัด',
     joinAndPay: 'เข้าร่วมและชำระเงิน',
     joinWaitlist: 'เข้าคิวสำรอง',
     full: 'ผู้เล่นเต็มแล้ว',
@@ -277,7 +277,7 @@ export const t = {
     participants: 'ผู้เล่น',
     waitlist: 'คิวสำรอง',
     timeline: 'ไทม์ไลน์',
-    noSessions: 'ยังไม่มีก๊วนที่ตรงกับเงื่อนไข',
+    noSessions: 'ยังไม่มีนัดที่ตรงกับเงื่อนไข',
   },
   payment: {
     title: 'ชำระเงิน',
@@ -298,14 +298,14 @@ export const t = {
     leave: 'ออกจากคิว',
   },
   organizer: {
-    createTitle: 'สร้างก๊วนใหม่',
-    dashboard: 'จัดการก๊วน',
+    createTitle: 'สร้างนัดใหม่',
+    dashboard: 'จัดการนัด',
     stepSport: 'เลือกกีฬา',
     stepWhen: 'วันเวลาและสถานที่',
     stepNumbers: 'จำนวนคนและงบ',
     stepVenues: 'เลือกสนาม',
     stepPolicy: 'เงื่อนไขการยกเลิก',
-    publish: 'เผยแพร่ก๊วน',
+    publish: 'เผยแพร่นัด',
     published: 'เผยแพร่แล้ว แชร์ลิงก์นี้เข้ากลุ่ม LINE ได้เลย',
     paymentSummary: 'สรุปการเงิน',
     collected: 'เก็บได้แล้ว',
@@ -313,7 +313,7 @@ export const t = {
     refunded: 'คืนเงินแล้ว',
     courtCost: 'ค่าสนามโดยประมาณ',
     bookNow: 'สั่งจองสนามตอนนี้',
-    cancelSession: 'ยกเลิกก๊วน',
+    cancelSession: 'ยกเลิกนัด',
   },
   venue: {
     portal: 'ระบบจัดการสนาม',

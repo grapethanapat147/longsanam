@@ -59,13 +59,13 @@ export async function runPaymentChase(): Promise<ChaseResult> {
           timeZone: 'Asia/Bangkok',
         })} · `
       : '';
-    const body = `${attended}ก๊วน "${row.session_title}" จบแล้ว ยอดค้างชำระ ฿${row.amount_due_thb}`;
+    const body = `${attended}นัด "${row.session_title}" จบแล้ว ยอดค้างชำระ ฿${row.amount_due_thb}`;
 
     const { error: chaseError } = await admin.rpc('record_chase', {
       p_participant_id: row.participant_id,
       p_delta: decision.creditDelta,
       p_reason: `overdue_day_${decision.dayIndex}`,
-      p_title: 'ยังค้างชำระค่าก๊วน',
+      p_title: 'ยังค้างชำระค่านัด',
       p_body: body,
     });
 

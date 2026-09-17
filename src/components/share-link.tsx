@@ -27,13 +27,13 @@ export function ShareLink({ url }: { url: string }) {
 
   return (
     <Card className="px-4 py-4">
-      <p className="text-sm font-semibold text-ink-900">แชร์ก๊วนนี้</p>
+      <p className="text-sm font-semibold text-ink-900">แชร์นัดนี้</p>
       <p className="mt-0.5 text-xs text-ink-500">ส่งลิงก์เดียวเข้ากลุ่ม เพื่อนกดเข้าร่วมได้ทันที</p>
 
       <input
         readOnly
         value={url}
-        aria-label="ลิงก์ก๊วน"
+        aria-label="ลิงก์นัด"
         onFocus={(event) => event.currentTarget.select()}
         className="mt-3 w-full rounded-lg border border-ink-200 bg-ink-50 px-2 py-1.5 font-mono text-xs text-ink-700"
       />

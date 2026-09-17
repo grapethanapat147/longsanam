@@ -259,7 +259,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
 
       {created ? (
         <div className="mb-4">
-          <Alert tone="success" title="สร้างก๊วนเป็นฉบับร่างแล้ว">
+          <Alert tone="success" title="สร้างนัดเป็นฉบับร่างแล้ว">
             ตรวจสอบรายละเอียดให้เรียบร้อย แล้วกดเผยแพร่เพื่อรับลิงก์สำหรับแชร์
           </Alert>
         </div>
@@ -270,14 +270,14 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
           <Alert tone="danger" title="จองสนามไม่สำเร็จ">
             {session.failure_reason === 'no_approved_venue'
               ? 'ยังไม่มีสนามที่อนุมัติให้จอง กรุณาอนุมัติสนามสำรองด้านล่างแล้วสั่งจองอีกครั้ง'
-              : 'ระบบลองสนามที่อนุมัติไว้ครบทุกแห่งแล้ว ลองเพิ่มสนามสำรอง เปลี่ยนเวลา หรือยกเลิกก๊วนเพื่อคืนเงินผู้เล่น'}
+              : 'ระบบลองสนามที่อนุมัติไว้ครบทุกแห่งแล้ว ลองเพิ่มสนามสำรอง เปลี่ยนเวลา หรือยกเลิกนัดเพื่อคืนเงินผู้เล่น'}
           </Alert>
         </div>
       ) : null}
 
       {session.status === 'cancelled' && session.cancelled_reason ? (
         <div className="mb-4">
-          <Alert tone="danger" title="ก๊วนนี้ถูกยกเลิกแล้ว">
+          <Alert tone="danger" title="นัดนี้ถูกยกเลิกแล้ว">
             {session.cancelled_reason}
           </Alert>
         </div>
@@ -349,7 +349,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
           ) : null}
 
           {/*
-            ขึ้นเฉพาะก๊วนที่เกิดขึ้นจริงแล้ว ตรงกับ allowlist ของ RPC
+            ขึ้นเฉพาะนัดที่เกิดขึ้นจริงแล้ว ตรงกับ allowlist ของ RPC
             ไม่ใช่ขึ้นตลอดแล้ว disabled
           */}
           {session.status === 'booked' || session.status === 'completed' ? (
@@ -528,7 +528,7 @@ export default async function OrganizerSessionPage({ params, searchParams }: Par
               href={`/s/${session.public_code}`}
               className="font-semibold text-brand-700 hover:underline"
             >
-              ดูหน้าก๊วนแบบที่ผู้เล่นเห็น →
+              ดูหน้านัดแบบที่ผู้เล่นเห็น →
             </Link>
           </Card>
         </aside>

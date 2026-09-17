@@ -9,7 +9,7 @@ import { ButtonLink, Card } from '@/components/ui/primitives';
 
 const STEPS = [
   {
-    title: 'ตั้งก๊วน',
+    title: 'ตั้งนัด',
     body: 'เลือกกีฬา วันเวลา งบต่อคน แล้วจัดลำดับสนามที่ยอมให้ระบบจองได้',
   },
   {
@@ -67,7 +67,7 @@ export default async function LandingPage() {
             </p>
 
             <h1 className="mt-4 max-w-2xl text-[2.4rem] font-semibold leading-[1.15] tracking-tight text-ink-900 sm:text-6xl">
-              รวมก๊วน จ่ายเงิน
+              รวมคน จ่ายเงิน
               <br />
               {/* The one promise, marked like a line painted on the court. */}
               <span className="relative inline-block">
@@ -87,7 +87,7 @@ export default async function LandingPage() {
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <ButtonLink href={user ? '/organizer/new' : '/auth/sign-up'} size="lg">
-                สร้างก๊วนของคุณ
+                สร้างนัดของคุณ
               </ButtonLink>
               <ButtonLink href="/discover" size="lg" variant="secondary">
                 {t.nav.discover}
@@ -137,7 +137,7 @@ export default async function LandingPage() {
           <section className="border-t hairline">
             <div className="mx-auto max-w-5xl px-4 py-14">
               <div className="mb-6 flex items-baseline justify-between gap-4">
-                <h2 className="text-2xl font-semibold text-ink-900">ก๊วนที่กำลังเปิดรับ</h2>
+                <h2 className="text-2xl font-semibold text-ink-900">นัดที่กำลังเปิดรับ</h2>
                 <Link
                   href="/discover"
                   className="focus-ring shrink-0 rounded text-sm font-semibold text-brand-700 hover:underline"
@@ -169,7 +169,7 @@ export default async function LandingPage() {
                 คุณเป็นเจ้าของสนาม?
               </h2>
               <p className="mt-1.5 text-sm leading-relaxed text-ink-600">
-                ลงทะเบียนสนาม จัดการคอร์ตและเวลาทำการ แล้วรับคำขอจองจากก๊วนในระบบได้เลย
+                ลงทะเบียนสนาม จัดการคอร์ตและเวลาทำการ แล้วรับคำขอจองจากนัดในระบบได้เลย
               </p>
             </div>
             <ButtonLink href="/venue" variant="secondary">

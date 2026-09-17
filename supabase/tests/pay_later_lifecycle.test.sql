@@ -73,7 +73,7 @@ select is(
   1::bigint, 'a debt four days past the session is due a chase');
 
 select public.record_chase('eeeeeeee-0000-4000-8000-000000000004', -5,
-  'overdue_day_3', 'ยังค้างชำระค่าก๊วน', 'test');
+  'overdue_day_3', 'ยังค้างชำระค่านัด', 'test');
 
 select is(
   (select score from public.player_credit

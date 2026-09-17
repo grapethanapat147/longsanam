@@ -53,7 +53,7 @@ export default async function VenueListPage({
         <EmptyState
           icon="🏟️"
           title="คุณยังไม่ได้ดูแลสนามใด"
-          description="ลงทะเบียนสนามของคุณเพื่อเริ่มรับคำขอจองจากก๊วนในระบบ"
+          description="ลงทะเบียนสนามของคุณเพื่อเริ่มรับคำขอจองจากนัดในระบบ"
           action={<ButtonLink href="/venue/new">{t.venue.onboarding}</ButtonLink>}
         />
       ) : (

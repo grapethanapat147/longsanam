@@ -71,7 +71,7 @@ export function PayLaterControl({
   if (sessionClosed) {
     return (
       <Button variant="secondary" size="sm" disabled>
-        ก๊วนปิดแล้ว
+        นัดปิดแล้ว
       </Button>
     );
   }

@@ -54,7 +54,7 @@ export default async function AdminUsersPage() {
             <th className="px-4 py-3 font-medium">ผู้ใช้</th>
             <th className="px-4 py-3 font-medium">อีเมล</th>
             <th className="px-4 py-3 font-medium">สมัครเมื่อ</th>
-            <th className="px-4 py-3 text-right font-medium">ก๊วนที่เล่น</th>
+            <th className="px-4 py-3 text-right font-medium">นัดที่เล่น</th>
             <th className="px-4 py-3 text-right font-medium">สิทธิ์</th>
           </tr>
         </thead>

@@ -114,7 +114,7 @@ export default async function AdminAuditPage({
                       href={`/organizer/sessions/${row.session_id}`}
                       className="text-xs text-brand-700 hover:underline"
                     >
-                      ดูก๊วน →
+                      ดูนัด →
                     </Link>
                   ) : null}
                 </td>
