@@ -27,6 +27,7 @@
 | LSN-0023 | ใบสรุปก๊วน ที่ส่งกลับเข้า LINE ได้ | 9 |
 | LSN-0025 | ผู้จัดยืนยันคอร์ตเอง | 9 |
 | LSN-0024 | รายการเก็บเงินเพิ่มหลังจบก๊วน | 9 |
+| LSN-0027 | เปลี่ยนคำ: ก๊วน → นัด | 10 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,
