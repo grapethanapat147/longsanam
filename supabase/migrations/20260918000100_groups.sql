@@ -410,6 +410,14 @@ $$;
 -- ที่ LSN-0023 เจอ
 -- ---------------------------------------------------------------------------
 
+-- helper ทั้งสองตัวก็ต้อง revoke จาก public ให้ตรงกับ is_session_organizer และ
+-- is_platform_admin ที่ทำไว้แล้ว ตอนนี้ยังไม่ใช่ช่องโหว่เพราะมันคืนค่าของ
+-- auth.uid() เท่านั้น แต่ security definer ที่ PUBLIC เรียกได้คือของที่ไม่ควร
+-- ปล่อยไว้ให้ต่างจากเพื่อน วันที่มีคนแก้ให้รับ user id เป็นพารามิเตอร์
+-- มันจะกลายเป็นช่องโหว่ทันทีโดยไม่มีใครสังเกต
+revoke execute on function public.is_group_member(uuid) from public;
+revoke execute on function public.is_group_owner(uuid)  from public;
+
 revoke execute on function public.create_group(text, uuid, text) from public;
 revoke execute on function public.join_group(text)               from public;
 revoke execute on function public.leave_group(uuid)              from public;
