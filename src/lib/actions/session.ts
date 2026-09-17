@@ -35,6 +35,7 @@ const createSessionSchema = z
     fullRefundHoursBefore: z.coerce.number().int().min(0).max(720),
     partialRefundHoursBefore: z.coerce.number().int().min(0).max(720),
     partialRefundPercent: z.coerce.number().int().min(0).max(100),
+    groupId: z.string().uuid().optional(),
     organizerCancelAlwaysFullRefund: z.boolean(),
   })
   .refine((v) => v.minPlayers <= v.targetPlayers, {
@@ -78,6 +79,7 @@ export async function createSessionAction(
     paymentDeadlineDate: formData.get('paymentDeadlineDate'),
     paymentDeadlineTime: formData.get('paymentDeadlineTime'),
     courtIds: formData.getAll('courtIds').map(String).filter(Boolean),
+    groupId: formData.get('groupId') || undefined,
     fullRefundHoursBefore: formData.get('fullRefundHoursBefore'),
     partialRefundHoursBefore: formData.get('partialRefundHoursBefore'),
     partialRefundPercent: formData.get('partialRefundPercent'),
@@ -115,6 +117,20 @@ export async function createSessionAction(
 
   const supabase = await createClient();
 
+  // ก๊วนเป็นของไม่บังคับ ถ้าไม่ส่งมา บล็อกนี้ไม่ทำงานเลยและการตั้งนัด
+  // เดินเส้นทางเดิมทุกบรรทัด ซึ่งเป็นทางเข้าหลักของโปรดักต์ที่ห้ามพัง
+  if (v.groupId) {
+    const { data: membership } = await supabase
+      .from('group_members')
+      .select('user_id')
+      .eq('group_id', v.groupId)
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (!membership) {
+      return { ok: false, error: reasonLabel.not_a_member };
+    }
+  }
+
   const { data: session, error } = await supabase
     .from('sessions')
     .insert({
@@ -131,6 +147,7 @@ export async function createSessionAction(
       min_players: v.minPlayers,
       payment_deadline: paymentDeadline,
       status: 'draft',
+      group_id: v.groupId ?? null,
       cancellation_policy: {
         fullRefundHoursBefore: v.fullRefundHoursBefore,
         partialRefundHoursBefore: v.partialRefundHoursBefore,
@@ -221,6 +238,11 @@ export async function publishSessionAction(
     p_to: 'open',
     p_metadata: {},
   });
+
+  // แจ้งสมาชิกก๊วน **ตอนเผยแพร่** ไม่ใช่ตอนสร้างร่าง เพราะร่างยังไม่มีใคร
+  // เปิดดูได้ การแจ้งเตือนตอนนั้นจะพาคนไปหน้าที่เข้าไม่ได้
+  // RPC ตรวจเองว่านัดผูกก๊วนไหม ถ้าไม่ผูกก็คืน notified: 0 เงียบ ๆ
+  await admin.rpc('notify_group_new_session', { p_session_id: sessionId });
 
   revalidatePath('/organizer');
   revalidatePath('/discover');

@@ -78,6 +78,11 @@ export function sessionShareUrl(publicCode: string): string {
   return `${base}/s/${publicCode}`;
 }
 
+export function groupShareUrl(publicCode: string): string {
+  const base = (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3210').replace(/\/+$/, '');
+  return `${base}/g/${publicCode}`;
+}
+
 /**
  * ชื่อสนามของการจองหนึ่งแถว
  *

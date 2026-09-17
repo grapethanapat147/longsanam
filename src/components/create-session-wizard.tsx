@@ -68,7 +68,15 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
  * in state and emitted as ordered hidden inputs, because priority is the order
  * the orchestrator will actually try.
  */
-export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; courts: Court[] }) {
+export function CreateSessionWizard({
+  sports,
+  courts,
+  groupId,
+}: {
+  sports: Sport[];
+  courts: Court[];
+  groupId?: string;
+}) {
   const [state, formAction] = useActionState<CreateSessionState | null, FormData>(
     createSessionAction,
     null,
@@ -120,6 +128,7 @@ export function CreateSessionWizard({ sports, courts }: { sports: Sport[]; court
 
   return (
     <form action={formAction} className="space-y-5">
+      {groupId ? <input type="hidden" name="groupId" value={groupId} /> : null}
       <ol className="flex flex-wrap gap-2" aria-label="ขั้นตอน">
         {STEPS.map((label, index) => (
           <li key={label}>
