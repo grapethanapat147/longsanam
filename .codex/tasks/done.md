@@ -33,6 +33,7 @@
 | LSN-0030 | บันทึกผลแมตช์ + ยืนยันสองฝั่ง | 10 |
 | LSN-0033 | แสดงเฉพาะแบดมินตัน ปิดกีฬาอื่นไว้ก่อน | 10 |
 | LSN-0032 | หน้าสร้างทัวร์นาเมนต์ | 10 |
+| LSN-0035 | คืนเงินอัตโนมัติเมื่อทีมไม่ครบ | 10 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,
