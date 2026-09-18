@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AppShell } from '@/components/shell';
-import { Card, Chip, EmptyState, PageHeader } from '@/components/ui/primitives';
+import { ButtonLink, Card, Chip, EmptyState, PageHeader } from '@/components/ui/primitives';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
 import { formatDate, formatThb } from '@/lib/format';
@@ -23,10 +23,18 @@ export default async function TournamentsPage() {
 
   return (
     <AppShell>
-      <PageHeader title={t.tournaments.title} description={t.tournaments.tierNote} />
+      <PageHeader
+        title={t.tournaments.title}
+        description={t.tournaments.tierNote}
+        action={<ButtonLink href="/app/tournaments/new">{t.tournaments.create}</ButtonLink>}
+      />
 
       {tournaments.length === 0 ? (
-        <EmptyState title={t.tournaments.empty} />
+        /* ข้อความว่างเดิมบอกให้ "สร้างของก๊วนคุณเอง" แต่ไม่มีปุ่มให้กด (LSN-0032) */
+        <EmptyState
+          title={t.tournaments.empty}
+          action={<ButtonLink href="/app/tournaments/new">{t.tournaments.create}</ButtonLink>}
+        />
       ) : (
         <ul className="grid gap-3">
           {tournaments.map((x) => (

@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   confirmTournamentCourtAction,
+  createTournamentAction,
   joinTournamentAction,
   payTournamentTeamAction,
   publishTournamentAction,
@@ -139,5 +140,179 @@ export function JoinTournamentForm({
         {t.tournaments.joinCta}
       </Button>
     </>
+  );
+}
+
+/**
+ * สร้างทัวร์นาเมนต์ (LSN-0032)
+ *
+ * ตารางบังคับกติกาของวันเวลาและจำนวนทีมไว้แล้วด้วย check constraint แต่
+ * `create_tournament` ไม่ได้ตรวจอะไรเลยก่อน insert — constraint จึงดังเป็น error
+ * ดิบซึ่ง `call()` แปลงเป็น "เกิดข้อผิดพลาด" ที่ผู้ใช้ทำอะไรต่อไม่ถูก
+ *
+ * ฟอร์มจึงตรวจกติกาชุดเดียวกันก่อนยิง เพื่อให้ได้ข้อความที่บอกว่าต้องแก้ตรงไหน
+ * **ไม่ใช่การย้ายด่านมาไว้ที่หน้าจอ** — ด่านจริงยังอยู่ที่ตาราง ตรงนี้คือการแปล
+ */
+export function CreateTournamentForm({
+  ownedGroups,
+}: {
+  ownedGroups: { id: string; name: string }[];
+}) {
+  const router = useRouter();
+  const [hostGroupId, setHostGroupId] = useState(ownedGroups[0]?.id ?? '');
+  const [title, setTitle] = useState('');
+  const [tier, setTier] = useState('P');
+  const [startsAt, setStartsAt] = useState('');
+  const [endsAt, setEndsAt] = useState('');
+  const [deadline, setDeadline] = useState('');
+  const [minTeams, setMinTeams] = useState(4);
+  const [maxTeams, setMaxTeams] = useState('');
+  const [entryFee, setEntryFee] = useState(800);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  function submit() {
+    setError(null);
+
+    if (!startsAt || !endsAt || !deadline) return setError(t.tournaments.timeRequired);
+    const s = new Date(startsAt);
+    const e = new Date(endsAt);
+    const d = new Date(deadline);
+    if (e <= s) return setError(t.tournaments.endsBeforeStarts);
+    if (d > s) return setError(t.tournaments.deadlineAfterStarts);
+    if (minTeams < 2) return setError(t.tournaments.minTeamsTooLow);
+
+    const max = maxTeams.trim() === '' ? null : Number(maxTeams);
+    if (max !== null && max < minTeams) return setError(t.tournaments.maxLessThanMin);
+    if (entryFee < 1 || entryFee > 100000) return setError(t.tournaments.entryFeeRange);
+
+    startTransition(async () => {
+      const result = await createTournamentAction({
+        hostGroupId,
+        title,
+        startsAt: s.toISOString(),
+        endsAt: e.toISOString(),
+        deadline: d.toISOString(),
+        minTeams,
+        maxTeams: max,
+        entryFeeThb: entryFee,
+        tier,
+      });
+      if (!result.ok) return setError(result.error);
+      router.push(`/app/tournaments/${result.tournamentId}`);
+    });
+  }
+
+  return (
+    <Card className="px-5 py-4">
+      {/* Field ตัวเดียวไม่มีระยะห่างในตัว พอเรียงเก้าช่องจึงต้องมีตัวคุมระยะให้ */}
+      <div className="grid gap-3.5">
+      <Field
+        label={t.tournaments.hostGroupField}
+        htmlFor="tn-group"
+        hint={t.tournaments.hostGroupHint}
+      >
+        <Select id="tn-group" value={hostGroupId} onChange={(ev) => setHostGroupId(ev.target.value)}>
+          {ownedGroups.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}
+            </option>
+          ))}
+        </Select>
+      </Field>
+
+      <Field label={t.tournaments.titleField} htmlFor="tn-title">
+        <Input
+          id="tn-title"
+          value={title}
+          maxLength={120}
+          onChange={(ev) => setTitle(ev.target.value)}
+        />
+      </Field>
+
+      <Field label={t.tournaments.tierField} htmlFor="tn-tier" hint={t.tournaments.tierNote}>
+        <Select id="tn-tier" value={tier} onChange={(ev) => setTier(ev.target.value)}>
+          {['N', 'S', 'P', 'C', 'B', 'A'].map((x) => (
+            <option key={x} value={x}>
+              {x}
+            </option>
+          ))}
+        </Select>
+      </Field>
+
+      <Field label={t.tournaments.startsAtField} htmlFor="tn-starts">
+        <Input
+          id="tn-starts"
+          type="datetime-local"
+          value={startsAt}
+          onChange={(ev) => setStartsAt(ev.target.value)}
+        />
+      </Field>
+
+      <Field label={t.tournaments.endsAtField} htmlFor="tn-ends">
+        <Input
+          id="tn-ends"
+          type="datetime-local"
+          value={endsAt}
+          onChange={(ev) => setEndsAt(ev.target.value)}
+        />
+      </Field>
+
+      <Field label={t.tournaments.deadlineField} htmlFor="tn-deadline">
+        <Input
+          id="tn-deadline"
+          type="datetime-local"
+          value={deadline}
+          onChange={(ev) => setDeadline(ev.target.value)}
+        />
+      </Field>
+
+      <Field label={t.tournaments.minTeamsField} htmlFor="tn-min">
+        <Input
+          id="tn-min"
+          type="number"
+          min={2}
+          value={minTeams}
+          onChange={(ev) => setMinTeams(Number(ev.target.value))}
+        />
+      </Field>
+
+      <Field label={t.tournaments.maxTeamsField} htmlFor="tn-max">
+        <Input
+          id="tn-max"
+          type="number"
+          min={2}
+          value={maxTeams}
+          placeholder="ไม่จำกัด"
+          onChange={(ev) => setMaxTeams(ev.target.value)}
+        />
+      </Field>
+
+      <Field label={t.tournaments.entryFeeField} htmlFor="tn-fee">
+        <Input
+          id="tn-fee"
+          type="number"
+          min={1}
+          max={100000}
+          value={entryFee}
+          onChange={(ev) => setEntryFee(Number(ev.target.value))}
+        />
+      </Field>
+
+      </div>
+
+      {error ? <p className="mt-3 text-sm text-clay-700">{error}</p> : null}
+
+      <p className="mt-3 text-xs text-ink-500">{t.tournaments.draftNote}</p>
+
+      <Button
+        type="button"
+        onClick={submit}
+        disabled={pending || title.trim().length === 0 || !hostGroupId}
+        className="mt-2 w-full"
+      >
+        {t.tournaments.create}
+      </Button>
+    </Card>
   );
 }
