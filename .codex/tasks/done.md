@@ -37,6 +37,7 @@
 | LSN-0034 | หน้าแรกขายทัวร์นาเมนต์ | 10 |
 | LSN-0036 | หาทัวร์นาเมนต์ที่เปิดรับสมัครได้ | 10 |
 | LSN-0031 | คะแนนฝีมือจากผลแมตช์ | 10 |
+| LSN-0037 | ตัวอักษรบนปุ่มเขียวเป็นสีขาว | 10 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,

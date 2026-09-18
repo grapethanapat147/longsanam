@@ -15,7 +15,8 @@
  *      it is browsed at night.
  *   2. 500 paints, 600 writes, ink sits on 500. Brand-500 is bright enough to
  *      make the app feel alive, but white text on it measures 3.19:1 and fails
- *      AA — so anything written on brand-500 uses `on-brand` (5.37:1), and any
+ *      AA — so anything with text on it uses brand-600 instead (white: 5.37:1,
+ *      LSN-0037), and any
  *      green text on white uses 600 (5.37:1). The lime is line paint: fills
  *      and bars only, never text (1.38:1 on white).
  *   3. Numbers are the content. Money and headcount get tabular figures and
@@ -38,8 +39,11 @@
   --color-brand-800: #084d34;
   --color-brand-900: #06301f;
 
-  /* Text on a brand-500 fill. White fails there; ink does not. */
-  --color-on-brand: #0d1f18;
+  /* ตัวอักษรบนพื้นแบรนด์ (LSN-0037)
+     ขาวบน brand-500 ได้ 3.19:1 ซึ่งตกเกณฑ์ AA — ทางแก้คือขยับพื้นไปที่ 600
+     ไม่ใช่ยอมลดความคมชัด ขาวบน brand-600 ได้ 5.37:1 เท่ากับของเดิมเป๊ะ
+     ทุกที่ที่ใช้ text-on-brand จึงต้องคู่กับ bg-brand-600 ไม่ใช่ 500 */
+  --color-on-brand: #ffffff;
 
   /* Line paint. Surfaces and fills only — never text. */
   --color-accent-300: #e9fbaa;
