@@ -8,7 +8,12 @@ import { t } from '@/i18n';
 
 export const metadata: Metadata = { title: t.tournaments.createTitle };
 
-export default async function NewTournamentPage() {
+export default async function NewTournamentPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const { from } = await searchParams;
   const user = await requireUser('/app/tournaments/new');
   const supabase = await createClient();
 
@@ -28,6 +33,35 @@ export default async function NewTournamentPage() {
     .filter((g) => g !== null && g.archived_at === null)
     .map((g) => ({ id: g.id, name: g.name }));
 
+  /**
+   * ค่าตั้งต้นจากงานเดิม (LSN-0038)
+   *
+   * RLS คืนงานนี้เฉพาะคนที่เกี่ยวข้องอยู่แล้ว ถ้าอ่านไม่ได้ก็ตกกลับเป็นฟอร์มเปล่า
+   * แทนที่จะระเบิด — ลิงก์ที่ถูกส่งต่อไปให้คนอื่นจึงไม่ทำให้หน้าพัง
+   *
+   * **ไม่คัดลอกวันเวลา** วันของงานเก่าอยู่ในอดีต ถ้าเติมมาให้จะได้ฟอร์มที่ผิดกติกา
+   * ตั้งแต่ยังไม่ทันแตะ แล้วผู้ใช้ต้องมานั่งหาว่าผิดตรงไหน
+   */
+  const { data: source } = from
+    ? await supabase
+        .from('tournaments')
+        .select('host_group_id, title, tier, entry_fee_thb, min_teams, max_teams')
+        .eq('id', from)
+        .maybeSingle()
+    : { data: null };
+
+  const initial =
+    source && ownedGroups.some((g) => g.id === source.host_group_id)
+      ? {
+          hostGroupId: source.host_group_id,
+          title: source.title,
+          tier: source.tier as string,
+          entryFeeThb: source.entry_fee_thb,
+          minTeams: source.min_teams,
+          maxTeams: source.max_teams,
+        }
+      : null;
+
   return (
     <AppShell>
       <PageHeader title={t.tournaments.createTitle} description={t.tournaments.createHint} />
@@ -44,7 +78,7 @@ export default async function NewTournamentPage() {
           </ButtonLink>
         </Card>
       ) : (
-        <CreateTournamentForm ownedGroups={ownedGroups} />
+        <CreateTournamentForm ownedGroups={ownedGroups} initial={initial} />
       )}
     </AppShell>
   );

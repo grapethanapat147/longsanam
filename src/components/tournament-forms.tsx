@@ -155,19 +155,33 @@ export function JoinTournamentForm({
  */
 export function CreateTournamentForm({
   ownedGroups,
+  initial,
 }: {
   ownedGroups: { id: string; name: string }[];
+  /** ค่าจากงานเดิมเมื่อกด "จัดครั้งถัดไป" — ไม่มีวันเวลาโดยตั้งใจ (LSN-0038) */
+  initial?: {
+    hostGroupId: string;
+    title: string;
+    tier: string;
+    entryFeeThb: number;
+    minTeams: number;
+    maxTeams: number | null;
+  } | null;
 }) {
   const router = useRouter();
-  const [hostGroupId, setHostGroupId] = useState(ownedGroups[0]?.id ?? '');
-  const [title, setTitle] = useState('');
-  const [tier, setTier] = useState('P');
+  const [hostGroupId, setHostGroupId] = useState(
+    initial?.hostGroupId ?? ownedGroups[0]?.id ?? '',
+  );
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [tier, setTier] = useState(initial?.tier ?? 'P');
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [minTeams, setMinTeams] = useState(4);
-  const [maxTeams, setMaxTeams] = useState('');
-  const [entryFee, setEntryFee] = useState(800);
+  const [minTeams, setMinTeams] = useState(initial?.minTeams ?? 4);
+  const [maxTeams, setMaxTeams] = useState(
+    initial?.maxTeams != null ? String(initial.maxTeams) : '',
+  );
+  const [entryFee, setEntryFee] = useState(initial?.entryFeeThb ?? 800);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 

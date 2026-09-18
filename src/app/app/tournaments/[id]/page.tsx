@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/shell';
-import { Alert, Card, Chip, EmptyState, PageHeader } from '@/components/ui/primitives';
+import {
+  Alert,
+  ButtonLink,
+  Card,
+  Chip,
+  EmptyState,
+  PageHeader,
+} from '@/components/ui/primitives';
 import { ShareLink } from '@/components/share-link';
 import { TournamentControls } from '@/components/tournament-forms';
 import { MatchList, RecordMatchForm, type MatchRow } from '@/components/match-controls';
@@ -181,6 +188,21 @@ export default async function TournamentPage({ params }: Params) {
             hint={t.tournaments.gatesHint}
             inputLabel={t.tournaments.joinTitle}
           />
+        </div>
+      ) : null}
+
+      {/* งานประจำจัดซ้ำด้วยค่าเดิมเกือบทั้งหมด เหลือแค่วันที่ต้องเปลี่ยน (LSN-0038) */}
+      {isHost ? (
+        <div className="mt-4">
+          <Card className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+            <div className="min-w-0">
+              <p className="font-medium text-ink-800">{t.tournaments.repeat}</p>
+              <p className="mt-0.5 text-xs text-ink-500">{t.tournaments.repeatHint}</p>
+            </div>
+            <ButtonLink href={`/app/tournaments/new?from=${x.id}`} variant="secondary">
+              {t.tournaments.repeat}
+            </ButtonLink>
+          </Card>
         </div>
       ) : null}
 
