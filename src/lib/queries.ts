@@ -419,3 +419,34 @@ export async function loadSessionReceipt(code: string, viewerId: string | null) 
 
   return { session, totals, charges, names };
 }
+
+export type OpenTournament = {
+  publicCode: string;
+  title: string;
+  tier: string;
+  startsAt: string;
+  registrationDeadline: string;
+  entryFeeThb: number;
+  minTeams: number;
+  maxTeams: number | null;
+  hostGroupName: string;
+  teamCount: number;
+};
+
+/**
+ * ทัวร์นาเมนต์ที่เปิดรับสมัคร สำหรับหน้าค้นหาสาธารณะ (LSN-0036)
+ *
+ * ผ่าน RPC ไม่ใช่ select ตรง เพราะ `tournaments_read` ปิดสนิทสำหรับคนนอก และ
+ * การผ่อน policy จะเปิดทุกคอลัมน์ — RLS เป็น row-level ไม่ใช่ column-level
+ * ฟังก์ชันฝั่งฐานข้อมูลเลือกฟิลด์ที่เปิดไว้แล้ว ที่นี่จึงแค่รับมาแสดง
+ */
+export async function loadOpenTournaments(): Promise<OpenTournament[]> {
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)('public_open_tournaments');
+  if (error) {
+    console.error('[loadOpenTournaments] failed', error);
+    return [];
+  }
+  return (data ?? []) as OpenTournament[];
+}
