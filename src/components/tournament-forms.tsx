@@ -10,6 +10,7 @@ import {
   publishTournamentAction,
 } from '@/lib/actions/tournament';
 import { Button, Card, Field, Input, Select } from '@/components/ui/primitives';
+import { formatDate } from '@/lib/format';
 import { t } from '@/i18n';
 
 /**
@@ -144,6 +145,23 @@ export function JoinTournamentForm({
 }
 
 /**
+ * ช่วงเวลาครึ่งชั่วโมงที่สนามแบดเปิดจริง (LSN-0040)
+ * กดเลือกจากรายการเร็วกว่าและผิดยากกว่าการพิมพ์เวลาเองบนมือถือ
+ */
+const TIME_SLOTS = Array.from({ length: 36 }, (_, i) => {
+  const minutes = 6 * 60 + i * 30;
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+});
+
+/** วันก่อนวันแข่ง n วัน ในรูปแบบ yyyy-mm-dd — ใช้กับปุ่มลัด */
+function daysBefore(date: string, days: number): string {
+  if (!date) return '';
+  const d = new Date(`${date}T00:00`);
+  d.setDate(d.getDate() - days);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
  * สร้างทัวร์นาเมนต์ (LSN-0032)
  *
  * ตารางบังคับกติกาของวันเวลาและจำนวนทีมไว้แล้วด้วย check constraint แต่
@@ -174,9 +192,17 @@ export function CreateTournamentForm({
   );
   const [title, setTitle] = useState(initial?.title ?? '');
   const [tier, setTier] = useState(initial?.tier ?? 'P');
-  const [startsAt, setStartsAt] = useState('');
-  const [endsAt, setEndsAt] = useState('');
-  const [deadline, setDeadline] = useState('');
+  /**
+   * วันแข่งถามครั้งเดียว (LSN-0040)
+   *
+   * ตารางรองรับงานข้ามวันได้ แต่ฟอร์มไม่เปิดให้ เพราะงานแบดสมัครเล่นเกือบทั้งหมด
+   * จบในวันเดียว การถามวันสองครั้งจึงเป็นแค่ช่องให้เผลอตั้งคนละวัน
+   * ถ้าวันหนึ่งต้องรองรับจริง ให้เพิ่มสวิตช์ "งานข้ามวัน" ไม่ใช่ย้อนกลับไปถามสองครั้ง
+   */
+  const [matchDate, setMatchDate] = useState('');
+  const [startTime, setStartTime] = useState('18:00');
+  const [endTime, setEndTime] = useState('22:00');
+  const [deadlineDate, setDeadlineDate] = useState('');
   const [minTeams, setMinTeams] = useState(initial?.minTeams ?? 4);
   const [maxTeams, setMaxTeams] = useState(
     initial?.maxTeams != null ? String(initial.maxTeams) : '',
@@ -188,12 +214,15 @@ export function CreateTournamentForm({
   function submit() {
     setError(null);
 
-    if (!startsAt || !endsAt || !deadline) return setError(t.tournaments.timeRequired);
-    const s = new Date(startsAt);
-    const e = new Date(endsAt);
-    const d = new Date(deadline);
-    if (e <= s) return setError(t.tournaments.endsBeforeStarts);
-    if (d > s) return setError(t.tournaments.deadlineAfterStarts);
+    if (!matchDate || !deadlineDate) return setError(t.tournaments.dateRequired);
+    if (endTime <= startTime) return setError(t.tournaments.endBeforeStart);
+    // ปิดรับสมัคร 23:59 ของวันที่เลือก และบังคับให้เป็นวันก่อนวันแข่ง
+    // จึงไม่มีทางชน constraint registration_deadline <= starts_at ไม่ว่าแข่งกี่โมง
+    if (deadlineDate >= matchDate) return setError(t.tournaments.deadlineNotBeforeMatch);
+
+    const s = new Date(`${matchDate}T${startTime}`);
+    const e = new Date(`${matchDate}T${endTime}`);
+    const d = new Date(`${deadlineDate}T23:59`);
     if (minTeams < 2) return setError(t.tournaments.minTeamsTooLow);
 
     const max = maxTeams.trim() === '' ? null : Number(maxTeams);
@@ -254,31 +283,74 @@ export function CreateTournamentForm({
         </Select>
       </Field>
 
-      <Field label={t.tournaments.startsAtField} htmlFor="tn-starts">
+      <Field label={t.tournaments.matchDateField} htmlFor="tn-date">
         <Input
-          id="tn-starts"
-          type="datetime-local"
-          value={startsAt}
-          onChange={(ev) => setStartsAt(ev.target.value)}
+          id="tn-date"
+          type="date"
+          value={matchDate}
+          onChange={(ev) => setMatchDate(ev.target.value)}
         />
       </Field>
 
-      <Field label={t.tournaments.endsAtField} htmlFor="tn-ends">
-        <Input
-          id="tn-ends"
-          type="datetime-local"
-          value={endsAt}
-          onChange={(ev) => setEndsAt(ev.target.value)}
-        />
-      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t.tournaments.startTimeField} htmlFor="tn-start-time">
+          <Select
+            id="tn-start-time"
+            value={startTime}
+            onChange={(ev) => setStartTime(ev.target.value)}
+          >
+            {TIME_SLOTS.map((x) => (
+              <option key={x} value={x}>
+                {x} น.
+              </option>
+            ))}
+          </Select>
+        </Field>
 
-      <Field label={t.tournaments.deadlineField} htmlFor="tn-deadline">
+        <Field label={t.tournaments.endTimeField} htmlFor="tn-end-time">
+          <Select
+            id="tn-end-time"
+            value={endTime}
+            onChange={(ev) => setEndTime(ev.target.value)}
+          >
+            {TIME_SLOTS.map((x) => (
+              <option key={x} value={x}>
+                {x} น.
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+
+      <Field
+        label={t.tournaments.deadlineDateField}
+        htmlFor="tn-deadline"
+        hint={t.tournaments.deadlineDateHint}
+      >
         <Input
           id="tn-deadline"
-          type="datetime-local"
-          value={deadline}
-          onChange={(ev) => setDeadline(ev.target.value)}
+          type="date"
+          value={deadlineDate}
+          onChange={(ev) => setDeadlineDate(ev.target.value)}
         />
+        <div className="mt-2 flex flex-wrap gap-2">
+          {([7, 14] as const).map((days) => (
+            <button
+              key={days}
+              type="button"
+              onClick={() => setDeadlineDate(daysBefore(matchDate, days))}
+              disabled={!matchDate}
+              className="focus-ring rounded-full border border-ink-300 px-3 py-1 text-xs font-medium text-ink-700 transition hover:bg-ink-50 disabled:opacity-45"
+            >
+              {days === 7 ? t.tournaments.quickWeek : t.tournaments.quickTwoWeeks}
+            </button>
+          ))}
+          {!matchDate ? (
+            <span className="self-center text-xs text-ink-500">
+              {t.tournaments.pickMatchDateFirst}
+            </span>
+          ) : null}
+        </div>
       </Field>
 
       <Field label={t.tournaments.minTeamsField} htmlFor="tn-min">
@@ -315,18 +387,39 @@ export function CreateTournamentForm({
 
       </div>
 
-      {error ? <p className="mt-3 text-sm text-clay-700">{error}</p> : null}
+      {/* ทวนเป็นภาษาคนก่อนกด — ที่ผ่านมาต้องไล่อ่านทีละช่องเอง (LSN-0040) */}
+      {matchDate && deadlineDate ? (
+        <div className="mt-4 rounded-xl bg-brand-50 px-4 py-3">
+          <p className="text-xs font-semibold text-brand-800">{t.tournaments.summaryTitle}</p>
+          <p className="mt-1 text-sm leading-relaxed text-brand-900">
+            {t.tournaments.summary(
+              formatDate(`${matchDate}T${startTime}`),
+              startTime,
+              endTime,
+              formatDate(`${deadlineDate}T12:00`),
+            )}
+          </p>
+        </div>
+      ) : null}
 
-      <p className="mt-3 text-xs text-ink-500">{t.tournaments.draftNote}</p>
+      {/* ข้อความผิดพลาดต้องอยู่ติดปุ่มและแยกจากคำอธิบายอื่น เพราะเดิมมันไปแปะ
+          ชิดกับโน้ตเรื่องฉบับร่าง แล้วอ่านรวมกันเหมือนเป็นประโยคเดียว */}
+      {error ? (
+        <p className="mt-4 rounded-xl bg-clay-50 px-4 py-3 text-sm font-medium text-clay-900">
+          {error}
+        </p>
+      ) : null}
 
       <Button
         type="button"
         onClick={submit}
         disabled={pending || title.trim().length === 0 || !hostGroupId}
-        className="mt-2 w-full"
+        className="mt-4 w-full"
       >
         {t.tournaments.create}
       </Button>
+
+      <p className="mt-2 text-center text-xs text-ink-500">{t.tournaments.draftNote}</p>
     </Card>
   );
 }
