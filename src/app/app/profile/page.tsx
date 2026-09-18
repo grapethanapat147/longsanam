@@ -20,11 +20,19 @@ export default async function ProfilePage() {
   const user = await requireUser('/app/profile');
   const supabase = await createClient();
 
-  const { data: contact } = await supabase
-    .from('profile_contacts')
-    .select('phone, line_user_id, email')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const [{ data: contact }, { data: skill }] = await Promise.all([
+    supabase
+      .from('profile_contacts')
+      .select('phone, line_user_id, email')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+    // ไม่มีแถว = ยังไม่เคยมีแมตช์ที่ยืนยันแล้ว ไม่ใช่ error
+    supabase
+      .from('player_skill')
+      .select('rating, tier, provisional, matches_played')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+  ]);
 
   return (
     <AppShell>
@@ -43,6 +51,58 @@ export default async function ProfilePage() {
         </Card>
 
         <div className="space-y-4">
+          <Card className="px-5 py-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-semibold text-ink-900">{t.skill.title}</h2>
+              {skill ? (
+                <Chip tone={skill.provisional ? 'warning' : 'success'}>
+                  {skill.provisional ? t.skill.provisional : t.skill.settled}
+                </Chip>
+              ) : null}
+            </div>
+
+            {skill ? (
+              <>
+                <dl className="mt-3 grid grid-cols-3 gap-3 text-sm">
+                  <div>
+                    <dt className="text-ink-500">{t.skill.tierField}</dt>
+                    <dd className="font-display text-2xl font-semibold text-ink-900">
+                      {skill.tier}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-ink-500">{t.skill.ratingField}</dt>
+                    <dd className="font-display text-2xl font-semibold tabular-nums text-ink-900">
+                      {skill.rating}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-ink-500">{t.skill.matchesField}</dt>
+                    <dd className="font-display text-2xl font-semibold tabular-nums text-ink-900">
+                      {skill.matches_played}
+                    </dd>
+                  </div>
+                </dl>
+                {skill.provisional ? (
+                  <p className="mt-3 text-xs leading-relaxed text-ink-500">
+                    {t.skill.provisionalHint(skill.matches_played)}
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <p className="mt-2 text-sm text-ink-600">{t.skill.empty}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-ink-500">
+                  {t.skill.emptyHint}
+                </p>
+              </>
+            )}
+
+            <p className="mt-3 border-t hairline pt-3 text-xs leading-relaxed text-ink-500">
+              {t.skill.note}
+            </p>
+          </Card>
+
           <Card className="px-5 py-5">
             <h2 className="font-semibold text-ink-900">สิทธิ์การใช้งาน</h2>
             <p className="mt-2 flex items-center gap-2 text-sm text-ink-600">
