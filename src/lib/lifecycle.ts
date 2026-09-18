@@ -28,6 +28,8 @@ export type SweepResult = {
   chasedParticipants: number;
   creditCharged: number;
   noShows: number;
+  cancelledTournaments: number;
+  refundedTeamPayments: number;
 };
 
 const STRANDED_REASON =
@@ -63,6 +65,8 @@ export async function runLifecycleSweeps(): Promise<SweepResult> {
     chasedParticipants: 0,
     creditCharged: 0,
     noShows: 0,
+    cancelledTournaments: 0,
+    refundedTeamPayments: 0,
   };
 
   // A session whose start time passed without a confirmed court can never
@@ -126,6 +130,24 @@ export async function runLifecycleSweeps(): Promise<SweepResult> {
     console.error('[sweep] mark_no_shows failed', noShowError);
   } else {
     result.noShows = (noShowData as { noShows?: number } | null)?.noShows ?? 0;
+  }
+
+  // ทัวร์นาเมนต์ที่เลยกำหนดปิดรับสมัครโดยทีมไม่ครบต้องถูกปิดและคืนเงิน (LSN-0035)
+  //
+  // หน้าจอบอกผู้ใช้ไปแล้วว่า "ถ้าทีมไม่ครบภายใน … ทุกก๊วนได้เงินคืนเต็ม" แต่
+  // LSN-0029 เขียนฟังก์ชันไว้แล้วลืมต่อเข้ากับตัวจับเวลา คำสัญญาจึงไม่เคยเกิดขึ้นจริง
+  //
+  // จับ error แยกแทนที่จะใส่ใน Promise.all ข้างบน เพราะความล้มเหลวของการคืนเงิน
+  // ไม่ควรทำให้การปล่อยคอร์ตและที่นั่งที่ค้างอยู่ล้มตามไปด้วย
+  const { data: unfilledData, error: unfilledError } = await admin.rpc(
+    'close_unfilled_tournaments',
+  );
+  if (unfilledError) {
+    console.error('[sweep] close_unfilled_tournaments failed', unfilledError);
+  } else {
+    const u = unfilledData as { cancelled?: number; refundedPayments?: number } | null;
+    result.cancelledTournaments = u?.cancelled ?? 0;
+    result.refundedTeamPayments = u?.refundedPayments ?? 0;
   }
 
   const chase = await runPaymentChase();
