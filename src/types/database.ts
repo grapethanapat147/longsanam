@@ -851,6 +851,41 @@ export type Database = {
           },
         ]
       }
+      player_skill: {
+        Row: {
+          matches_played: number
+          provisional: boolean
+          rating: number
+          tier: Database["public"]["Enums"]["tournament_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          matches_played?: number
+          provisional?: boolean
+          rating?: number
+          tier?: Database["public"]["Enums"]["tournament_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          matches_played?: number
+          provisional?: boolean
+          rating?: number
+          tier?: Database["public"]["Enums"]["tournament_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_skill_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_contacts: {
         Row: {
           created_at: string
