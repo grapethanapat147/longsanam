@@ -160,6 +160,7 @@ export async function createSessionAction(
     .single();
 
   if (error || !session) {
+    console.error('[createSessionAction] insert failed', error);
     return { ok: false, error: t.common.unexpectedError };
   }
 

@@ -41,6 +41,7 @@ export function ThaiDateField({
   id,
   label,
   hint,
+  name,
   value,
   onChange,
   yearsAhead = 2,
@@ -48,6 +49,12 @@ export function ThaiDateField({
   id: string;
   label: string;
   hint?: string;
+  /**
+   * ใส่เมื่อฟอร์มนั้นส่งค่าด้วยกลไกฟอร์มของเบราว์เซอร์แทน state (LSN-0042)
+   * component นี้เป็น controlled จึงต้องมี hidden input พาค่าเข้าฟอร์มให้
+   * วิซาร์ดสร้างนัดจะได้ไม่ต้องรื้อวิธีส่งฟอร์มทั้งตัว
+   */
+  name?: string;
   /** `yyyy-mm-dd` แบบ ค.ศ. หรือสตริงว่างเมื่อยังไม่เลือก */
   value: string;
   onChange: (next: string) => void;
@@ -73,6 +80,7 @@ export function ThaiDateField({
 
   return (
     <Field label={label} htmlFor={`${id}-day`} hint={hint}>
+      {name ? <input type="hidden" name={name} value={value} /> : null}
       <div className="grid grid-cols-[4.5rem_1fr_5.5rem] gap-2">
         <Select
           id={`${id}-day`}

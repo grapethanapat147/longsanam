@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/cn';
 import { formatThb } from '@/lib/format';
 import { costPerPersonThb } from '@/lib/domain/booking-eligibility';
+import { ThaiDateField } from '@/components/thai-date-field';
 import { t } from '@/i18n';
 
 type Sport = {
@@ -88,6 +89,10 @@ export function CreateSessionWizard({
   const [targetPlayers, setTargetPlayers] = useState(sports[0]?.default_players ?? 8);
   const [minPlayers, setMinPlayers] = useState(Math.max(2, (sports[0]?.default_players ?? 8) - 2));
   const [budget, setBudget] = useState(100);
+  // สองช่องนี้ต้องคุมด้วย state เพราะ ThaiDateField เป็น controlled (LSN-0042)
+  // ส่วนค่ายังไหลเข้าฟอร์มทาง hidden input เหมือนเดิม ไม่ได้รื้อวิธีส่งฟอร์ม
+  const [playDate, setPlayDate] = useState(todayPlus(7));
+  const [payDate, setPayDate] = useState(todayPlus(6));
 
   /**
    * เหลือกีฬาเดียวก็ไม่ใช่ตัวเลือกอีกต่อไป (LSN-0033) — ปุ่มเดียวที่เลือกไว้ให้แล้ว
@@ -234,9 +239,13 @@ export function CreateSessionWizard({
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="วันที่เล่น" htmlFor="date" required error={fieldError('date')}>
-            <Input id="date" name="date" type="date" required defaultValue={todayPlus(7)} />
-          </Field>
+          <ThaiDateField
+            id="date"
+            name="date"
+            label="วันที่เล่น"
+            value={playDate}
+            onChange={setPlayDate}
+          />
           <Field label="เวลาเริ่ม" htmlFor="startTime" required>
             <Input id="startTime" name="startTime" type="time" required defaultValue="19:00" />
           </Field>
@@ -297,20 +306,13 @@ export function CreateSessionWizard({
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field
+          <ThaiDateField
+            id="paymentDeadlineDate"
+            name="paymentDeadlineDate"
             label="วันปิดรับชำระ"
-            htmlFor="paymentDeadlineDate"
-            required
-            error={fieldError('paymentDeadlineDate')}
-          >
-            <Input
-              id="paymentDeadlineDate"
-              name="paymentDeadlineDate"
-              type="date"
-              required
-              defaultValue={todayPlus(6)}
-            />
-          </Field>
+            value={payDate}
+            onChange={setPayDate}
+          />
           <Field label="เวลาปิดรับชำระ" htmlFor="paymentDeadlineTime" required>
             <Input
               id="paymentDeadlineTime"
