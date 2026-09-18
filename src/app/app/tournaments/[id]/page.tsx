@@ -11,6 +11,7 @@ import {
 import { ShareLink } from '@/components/share-link';
 import { TournamentControls } from '@/components/tournament-forms';
 import { MatchList, RecordMatchForm, type MatchRow } from '@/components/match-controls';
+import { RateEventForm, RatePlayersForm } from '@/components/impression-forms';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
 import { formatDate, formatThb, tournamentShareUrl } from '@/lib/format';
@@ -81,6 +82,19 @@ export default async function TournamentPage({ params }: Params) {
     .select('group_id, user_id, profiles (display_name)')
     .in('group_id', (teams ?? []).map((team) => team.group_id));
 
+  /**
+   * ให้คะแนนความประทับใจได้เมื่องานเดินถึงจุดที่เจอกันจริงแล้ว (LSN-0039)
+   *
+   * รายชื่อที่ให้คะแนนได้คือ **สมาชิกของก๊วนอื่นที่ผู้ใช้ไม่ได้อยู่ด้วย**
+   * ด่านจริงอยู่ที่ RPC ตรงนี้แค่ไม่แสดงปุ่มที่กดไปก็โดนปฏิเสธอยู่ดี
+   */
+  const canRate = ['ready', 'booked', 'completed'].includes(x.status);
+
+  const { data: myImpressions } = canRate
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.rpc as any)('my_player_impressions', { p_tournament_id: id })
+    : { data: {} };
+
   const membersByGroup = new Map<string, { id: string; name: string }[]>();
   for (const m of allMembers ?? []) {
     const list = membersByGroup.get(m.group_id) ?? [];
@@ -89,6 +103,20 @@ export default async function TournamentPage({ params }: Params) {
   }
   const groupName = new Map((teams ?? []).map((team) => [team.group_id, team.groups?.name ?? 'ก๊วน']));
   const inGroup = (gid: string) => (membersByGroup.get(gid) ?? []).some((p) => p.id === user.id);
+
+  // ก๊วนของผู้ใช้ในงานนี้ · คนหนึ่งอยู่ได้หลายก๊วน (LSN-0026) จึงเป็น Set ไม่ใช่ค่าเดียว
+  const myGroupIds = new Set((teams ?? []).map((tm) => tm.group_id).filter(inGroup));
+
+  // ให้คะแนนได้เฉพาะคนที่ไม่ได้อยู่ก๊วนเดียวกับเราเลยสักก๊วน
+  const rateablePlayers = (teams ?? [])
+    .filter((tm) => !myGroupIds.has(tm.group_id))
+    .flatMap((tm) => membersByGroup.get(tm.group_id) ?? [])
+    .filter((pl) => pl.id !== user.id)
+    .filter(
+      (pl) => ![...myGroupIds].some((gid) =>
+        (membersByGroup.get(gid) ?? []).some((mine) => mine.id === pl.id),
+      ),
+    );
 
   /*
     ตัดสินที่เซิร์ฟเวอร์ว่าใครยืนยันแมตช์ไหนได้ ด้วยกติกาเดียวกับ RPC
@@ -188,6 +216,20 @@ export default async function TournamentPage({ params }: Params) {
             hint={t.tournaments.gatesHint}
             inputLabel={t.tournaments.joinTitle}
           />
+        </div>
+      ) : null}
+
+      {canRate && myGroupIds.size > 0 ? (
+        <div className="mt-4 grid gap-4">
+          <RatePlayersForm
+            tournamentId={x.id}
+            players={rateablePlayers}
+            existing={(myImpressions ?? {}) as Record<
+              string,
+              { punctuality: number; manners: number; fun: number }
+            >}
+          />
+          {!isHost ? <RateEventForm tournamentId={x.id} /> : null}
         </div>
       ) : null}
 

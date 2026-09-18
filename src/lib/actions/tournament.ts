@@ -22,7 +22,9 @@ type Rpc =
   | 'publish_tournament'
   | 'join_tournament'
   | 'pay_tournament_team'
-  | 'confirm_tournament_court';
+  | 'confirm_tournament_court'
+  | 'rate_player'
+  | 'rate_tournament';
 
 async function call<T extends Record<string, unknown>>(
   fn: Rpc,
@@ -120,6 +122,42 @@ export async function confirmTournamentCourtAction(
   return call(
     'confirm_tournament_court',
     { p_tournament_id: tournamentId, p_venue_note: venueNote.trim() || null },
+    () => ({}) as never,
+  );
+}
+
+export async function ratePlayerAction(input: {
+  tournamentId: string;
+  rateeId: string;
+  punctuality: number;
+  manners: number;
+  fun: number;
+}): Promise<TournamentResult> {
+  return call(
+    'rate_player',
+    {
+      p_tournament_id: input.tournamentId,
+      p_ratee_id: input.rateeId,
+      p_punctuality: input.punctuality,
+      p_manners: input.manners,
+      p_fun: input.fun,
+    },
+    () => ({}) as never,
+  );
+}
+
+export async function rateTournamentAction(input: {
+  tournamentId: string;
+  courtCondition: number;
+  organisation: number;
+}): Promise<TournamentResult> {
+  return call(
+    'rate_tournament',
+    {
+      p_tournament_id: input.tournamentId,
+      p_court_condition: input.courtCondition,
+      p_organisation: input.organisation,
+    },
     () => ({}) as never,
   );
 }

@@ -4,6 +4,7 @@ import { AppShell } from '@/components/shell';
 import { SessionStatusChip } from '@/components/status';
 import { Alert, ButtonLink, Card, Chip, EmptyState, PageHeader } from '@/components/ui/primitives';
 import { GroupControls } from '@/components/group-forms';
+import { ImpressionSummaryCard } from '@/components/impression-forms';
 import { ShareLink } from '@/components/share-link';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
@@ -40,6 +41,11 @@ export default async function GroupPage({ params }: Params) {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: impression } = await (supabase.rpc as any)('group_impression_summary', {
+    p_group_id: id,
+  });
+
   const { data: members } = await supabase
     .from('group_members')
     .select('user_id, role, profiles (display_name)')
@@ -64,6 +70,11 @@ export default async function GroupPage({ params }: Params) {
       />
 
       {group.archived_at ? <Alert tone="warning">{t.groups.archived}</Alert> : null}
+
+      {/* ค่าเฉลี่ยคำนวณสดจากสมาชิกปัจจุบัน ไม่ได้เก็บเป็นคอลัมน์ (LSN-0039) */}
+      <div className="mb-4">
+        <ImpressionSummaryCard title={t.impressions.title} summary={impression ?? null} />
+      </div>
 
       <Card className="px-5 py-4">
         <p className="font-medium text-ink-800">

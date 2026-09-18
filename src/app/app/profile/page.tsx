@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { AppShell } from '@/components/shell';
 import { ProfileForm } from '@/components/profile-form';
 import { AvatarUpload } from '@/components/image-upload';
+import { ImpressionSummaryCard } from '@/components/impression-forms';
 import { Card, Chip, PageHeader } from '@/components/ui/primitives';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
@@ -20,7 +21,7 @@ export default async function ProfilePage() {
   const user = await requireUser('/app/profile');
   const supabase = await createClient();
 
-  const [{ data: contact }, { data: skill }] = await Promise.all([
+  const [{ data: contact }, { data: skill }, { data: impression }] = await Promise.all([
     supabase
       .from('profile_contacts')
       .select('phone, line_user_id, email')
@@ -32,6 +33,8 @@ export default async function ProfilePage() {
       .select('rating, tier, provisional, matches_played')
       .eq('user_id', user.id)
       .maybeSingle(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase.rpc as any)('player_impression_summary', { p_user_id: user.id }),
   ]);
 
   return (
@@ -102,6 +105,8 @@ export default async function ProfilePage() {
               {t.skill.note}
             </p>
           </Card>
+
+          <ImpressionSummaryCard title={t.impressions.title} summary={impression ?? null} />
 
           <Card className="px-5 py-5">
             <h2 className="font-semibold text-ink-900">สิทธิ์การใช้งาน</h2>
