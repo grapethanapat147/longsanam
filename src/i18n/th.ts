@@ -162,7 +162,7 @@ export const reasonLabel: Record<string, string> = {
 export const t = {
   brand: {
     name: 'ลงสนาม',
-    tagline: 'รวมคน จ่ายเงิน ได้สนาม จบในลิงก์เดียว',
+    tagline: 'ก๊วนแบดประจำ ออกไปเจอก๊วนอื่น จบในลิงก์เดียว',
   },
   charges: {
     title: 'รายการเก็บเงินเพิ่ม',
