@@ -11,6 +11,7 @@ import {
 } from '@/lib/actions/tournament';
 import { Button, Card, Field, Input, Select } from '@/components/ui/primitives';
 import { formatDate } from '@/lib/format';
+import { ThaiDateField } from '@/components/thai-date-field';
 import { t } from '@/i18n';
 
 /**
@@ -283,14 +284,12 @@ export function CreateTournamentForm({
         </Select>
       </Field>
 
-      <Field label={t.tournaments.matchDateField} htmlFor="tn-date">
-        <Input
-          id="tn-date"
-          type="date"
-          value={matchDate}
-          onChange={(ev) => setMatchDate(ev.target.value)}
-        />
-      </Field>
+      <ThaiDateField
+        id="tn-date"
+        label={t.tournaments.matchDateField}
+        value={matchDate}
+        onChange={setMatchDate}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <Field label={t.tournaments.startTimeField} htmlFor="tn-start-time">
@@ -322,17 +321,15 @@ export function CreateTournamentForm({
         </Field>
       </div>
 
-      <Field
+      <ThaiDateField
+        id="tn-deadline"
         label={t.tournaments.deadlineDateField}
-        htmlFor="tn-deadline"
         hint={t.tournaments.deadlineDateHint}
-      >
-        <Input
-          id="tn-deadline"
-          type="date"
-          value={deadlineDate}
-          onChange={(ev) => setDeadlineDate(ev.target.value)}
-        />
+        value={deadlineDate}
+        onChange={setDeadlineDate}
+      />
+
+      <div>
         <div className="mt-2 flex flex-wrap gap-2">
           {([7, 14] as const).map((days) => (
             <button
@@ -351,7 +348,7 @@ export function CreateTournamentForm({
             </span>
           ) : null}
         </div>
-      </Field>
+      </div>
 
       <Field label={t.tournaments.minTeamsField} htmlFor="tn-min">
         <Input

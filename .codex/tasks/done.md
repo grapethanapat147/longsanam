@@ -41,6 +41,7 @@
 | LSN-0038 | ปุ่มจัดทัวร์นาเมนต์ครั้งถัดไป | 10 |
 | LSN-0039 | ให้คะแนนความประทับใจหลังเจอกัน | 10 |
 | LSN-0040 | ช่องวันเวลาในฟอร์มสร้างทัวร์นาเมนต์ | 10 |
+| LSN-0041 | เลือกวันเป็น พ.ศ. | 10 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,
