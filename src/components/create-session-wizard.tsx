@@ -89,6 +89,12 @@ export function CreateSessionWizard({
   const [minPlayers, setMinPlayers] = useState(Math.max(2, (sports[0]?.default_players ?? 8) - 2));
   const [budget, setBudget] = useState(100);
 
+  /**
+   * เหลือกีฬาเดียวก็ไม่ใช่ตัวเลือกอีกต่อไป (LSN-0033) — ปุ่มเดียวที่เลือกไว้ให้แล้ว
+   * คือการถามคำถามที่มีคำตอบเดียว จึงแสดงเป็นข้อเท็จจริงแทน
+   */
+  const onlySport = sports.length === 1 ? sports[0] : null;
+
   const eligibleCourts = useMemo(
     () => courts.filter((court) => court.sportIds.includes(sportId)),
     [courts, sportId],
@@ -154,6 +160,16 @@ export function CreateSessionWizard({
       {/* Step 1 — sport */}
       <Card className={cn('px-5 py-5', step !== 0 && 'hidden')}>
         <h2 className="font-semibold text-ink-900">{t.organizer.stepSport}</h2>
+        {onlySport ? (
+          <>
+            {/* radio ข้างล่างเป็นตัวส่งค่าเข้าฟอร์ม พอไม่เรนเดอร์มันก็ต้องมี hidden แทน */}
+            <input type="hidden" name="sportId" value={onlySport.id} />
+            <p className="mt-3 flex items-center gap-2 rounded-xl border border-brand-500 bg-brand-50 px-3 py-2.5 text-sm font-semibold text-brand-800">
+              <span aria-hidden>{onlySport.emoji}</span>
+              {onlySport.name_th}
+            </p>
+          </>
+        ) : (
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {sports.map((sport) => (
             <label
@@ -183,6 +199,7 @@ export function CreateSessionWizard({
             </label>
           ))}
         </div>
+        )}
         {fieldError('sportId') ? (
           <p className="mt-2 text-xs text-red-600">{fieldError('sportId')}</p>
         ) : null}

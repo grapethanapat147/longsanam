@@ -5,6 +5,7 @@ import { Card, Chip, EmptyState, PageHeader } from '@/components/ui/primitives';
 import { CreateGroupForm } from '@/components/group-forms';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
+import { loadSports } from '@/lib/queries';
 import { t } from '@/i18n';
 
 export const metadata: Metadata = { title: t.groups.title };
@@ -13,12 +14,15 @@ export default async function MyGroupsPage() {
   const user = await requireUser('/app/groups');
   const supabase = await createClient();
 
-  const { data: rows } = await supabase
-    .from('group_members')
-    .select('role, groups (id, name, home_district, archived_at, sports (name_th, emoji))')
-    .eq('user_id', user.id);
-
-  const { data: sports } = await supabase.from('sports').select('id, name_th').order('name_th');
+  // กีฬาต้องอ่านผ่าน loadSports() เสมอ เพราะมันเป็นที่เดียวที่กรอง is_active
+  // หน้านี้เคยยิง query ตาราง sports เอง จึงยังโชว์กีฬาที่ปิดไปแล้วอยู่ (LSN-0033)
+  const [{ data: rows }, sports] = await Promise.all([
+    supabase
+      .from('group_members')
+      .select('role, groups (id, name, home_district, archived_at, sports (name_th, emoji))')
+      .eq('user_id', user.id),
+    loadSports(),
+  ]);
 
   const groups = (rows ?? []).filter((r) => r.groups !== null);
 
@@ -58,7 +62,7 @@ export default async function MyGroupsPage() {
       )}
 
       <div className="mt-6">
-        <CreateGroupForm sports={sports ?? []} />
+        <CreateGroupForm sports={sports} />
       </div>
     </AppShell>
   );

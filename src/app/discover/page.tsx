@@ -28,17 +28,21 @@ export default async function DiscoverPage({
         action={<ButtonLink href="/organizer/new">{t.nav.create}</ButtonLink>}
       />
 
-      <nav className="mb-5 flex flex-wrap gap-2" aria-label="กรองตามกีฬา">
-        <FilterChip href="/discover" active={!sport} label="ทั้งหมด" />
-        {sports.map((s) => (
-          <FilterChip
-            key={s.id}
-            href={`/discover?sport=${s.slug}`}
-            active={sport === s.slug}
-            label={`${s.emoji} ${s.name_th}`}
-          />
-        ))}
-      </nav>
+      {/* เหลือกีฬาเดียว ตัวกรองก็ไม่มีอะไรให้กรอง — "ทั้งหมด" กับ "แบดมินตัน"
+          หมายถึงชุดเดียวกันเป๊ะ ซ่อนไปทั้งแถบดีกว่าปล่อยให้เป็นปุ่มหลอก (LSN-0033) */}
+      {sports.length > 1 ? (
+        <nav className="mb-5 flex flex-wrap gap-2" aria-label="กรองตามกีฬา">
+          <FilterChip href="/discover" active={!sport} label="ทั้งหมด" />
+          {sports.map((s) => (
+            <FilterChip
+              key={s.id}
+              href={`/discover?sport=${s.slug}`}
+              active={sport === s.slug}
+              label={`${s.emoji} ${s.name_th}`}
+            />
+          ))}
+        </nav>
+      ) : null}
 
       {sessions.length === 0 ? (
         <EmptyState

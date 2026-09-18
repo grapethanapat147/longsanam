@@ -31,6 +31,7 @@
 | LSN-0026 | ก๊วนที่คงอยู่ข้ามครั้ง | 10 |
 | LSN-0029 | ทัวร์นาเมนต์ + สมัครเป็นทีม + คืนเงินเมื่อไม่ครบ | 10 |
 | LSN-0030 | บันทึกผลแมตช์ + ยืนยันสองฝั่ง | 10 |
+| LSN-0033 | แสดงเฉพาะแบดมินตัน ปิดกีฬาอื่นไว้ก่อน | 10 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,
