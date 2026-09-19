@@ -25,6 +25,23 @@ export const THAI_MONTHS_SHORT: readonly string[] = [
   'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
 ];
 
+/**
+ * เลื่อนวันถอยหลังโดยไม่ข้ามเขตเวลา (LSN-0044)
+ *
+ * ⚠️ `toISOString()` แปลงเป็น UTC ก่อนเสมอ เที่ยงคืนตามเวลาไทยคือ 17:00
+ * ของ *วันก่อนหน้า* ใน UTC ตัดสิบตัวแรกจึงได้วันที่เคลื่อนไปหนึ่งวัน
+ * ปุ่ม "1 สัปดาห์ก่อนแข่ง" เคยกรอกให้แปดวันก่อนแข่งด้วยเหตุนี้
+ */
+export function dateMinusDays(date: string, days: number): string {
+  if (!date) {
+    return '';
+  }
+  const d = new Date(`${date}T00:00`);
+  d.setDate(d.getDate() - days);
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 function toDate(value: Date | string): Date {
   return value instanceof Date ? value : new Date(value);
 }

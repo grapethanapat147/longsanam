@@ -14,11 +14,25 @@ export default async function TournamentsPage() {
   await requireUser('/app/tournaments');
   const supabase = await createClient();
 
-  // RLS คืนเฉพาะงานที่ผู้ใช้เกี่ยวข้อง คือเป็นเจ้าภาพหรืออยู่ในทีมที่สมัคร
-  const { data: rows } = await supabase
+  /**
+   * RLS คืนเฉพาะงานที่ผู้ใช้เกี่ยวข้อง คือเป็นเจ้าภาพหรืออยู่ในทีมที่สมัคร
+   *
+   * ⚠️ ต้องระบุชื่อ FK ให้ชัด — `tournaments` ต่อกับ `groups` ได้สองทาง คือ
+   * `host_group_id` ตรง ๆ และผ่าน `tournament_teams` แบบ many-to-many
+   * embed ว่า `groups (name)` เฉย ๆ จึงได้ PGRST201 ทุกครั้ง แล้วหน้านี้ก็ขึ้น
+   * "ยังไม่มีทัวร์นาเมนต์" ทั้งที่มีงานอยู่จริง
+   */
+  const { data: rows, error } = await supabase
     .from('tournaments')
-    .select('id, title, tier, status, starts_at, entry_fee_thb, min_teams, groups (name)')
+    .select(
+      'id, title, tier, status, starts_at, entry_fee_thb, min_teams, groups!tournaments_host_group_id_fkey (name)',
+    )
     .order('starts_at', { ascending: true });
+
+  // หน้าว่างกับหน้าที่ query พังหน้าตาเหมือนกันเป๊ะ ถ้าไม่ log ก็ไม่มีใครรู้
+  if (error) {
+    console.error('[app/tournaments] query failed', error);
+  }
 
   const tournaments = rows ?? [];
 

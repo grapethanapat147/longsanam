@@ -10,7 +10,7 @@ import {
   publishTournamentAction,
 } from '@/lib/actions/tournament';
 import { Button, Card, Field, Input, Select } from '@/components/ui/primitives';
-import { formatDate } from '@/lib/format';
+import { dateMinusDays, formatDate } from '@/lib/format';
 import { ThaiDateField } from '@/components/thai-date-field';
 import { TIERS, tierExample } from '@/lib/domain/tiers';
 import { t } from '@/i18n';
@@ -156,13 +156,6 @@ const TIME_SLOTS = Array.from({ length: 36 }, (_, i) => {
 });
 
 /** วันก่อนวันแข่ง n วัน ในรูปแบบ yyyy-mm-dd — ใช้กับปุ่มลัด */
-function daysBefore(date: string, days: number): string {
-  if (!date) return '';
-  const d = new Date(`${date}T00:00`);
-  d.setDate(d.getDate() - days);
-  return d.toISOString().slice(0, 10);
-}
-
 /**
  * สร้างทัวร์นาเมนต์ (LSN-0032)
  *
@@ -341,7 +334,7 @@ export function CreateTournamentForm({
             <button
               key={days}
               type="button"
-              onClick={() => setDeadlineDate(daysBefore(matchDate, days))}
+              onClick={() => setDeadlineDate(dateMinusDays(matchDate, days))}
               disabled={!matchDate}
               className="focus-ring rounded-full border border-ink-300 px-3 py-1 text-xs font-medium text-ink-700 transition hover:bg-ink-50 disabled:opacity-45"
             >
