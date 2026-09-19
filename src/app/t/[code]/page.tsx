@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth';
 import { formatDate, formatThb } from '@/lib/format';
 import { t } from '@/i18n';
+import { tierLabel } from '@/lib/domain/tiers';
 
 export const metadata: Metadata = { title: t.tournaments.joinTitle };
 
@@ -59,7 +60,7 @@ export default async function TournamentInvitePage({ params }: Params) {
     <AppShell>
       <PageHeader
         title={invite.title}
-        description={`${formatDate(invite.startsAt)} · ${t.tournaments.tierField} ${invite.tier} · ${formatThb(invite.entryFeeThb)} ต่อก๊วน`}
+        description={`${formatDate(invite.startsAt)} · ${t.tournaments.tierField} ${tierLabel(invite.tier)} · ${formatThb(invite.entryFeeThb)} ต่อก๊วน`}
       />
 
       <Card className="px-5 py-5">

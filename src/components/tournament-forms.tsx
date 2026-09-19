@@ -12,6 +12,7 @@ import {
 import { Button, Card, Field, Input, Select } from '@/components/ui/primitives';
 import { formatDate } from '@/lib/format';
 import { ThaiDateField } from '@/components/thai-date-field';
+import { TIERS, tierExample } from '@/lib/domain/tiers';
 import { t } from '@/i18n';
 
 /**
@@ -276,12 +277,17 @@ export function CreateTournamentForm({
 
       <Field label={t.tournaments.tierField} htmlFor="tn-tier" hint={t.tournaments.tierNote}>
         <Select id="tn-tier" value={tier} onChange={(ev) => setTier(ev.target.value)}>
-          {['N', 'S', 'P', 'C', 'B', 'A'].map((x) => (
-            <option key={x} value={x}>
-              {x}
+          {TIERS.map((x) => (
+            <option key={x.value} value={x.value}>
+              {x.value} · {x.name}
             </option>
           ))}
         </Select>
+        {/* ตัวอย่างของรุ่นที่เลือกอยู่ — อยู่นอกช่องเลือกเพื่อให้ข้อความในช่อง
+            สั้นพอที่จะอ่านครบบนมือถือ */}
+        {tierExample(tier) ? (
+          <p className="mt-1.5 text-xs font-medium text-brand-700">{tierExample(tier)}</p>
+        ) : null}
       </Field>
 
       <ThaiDateField

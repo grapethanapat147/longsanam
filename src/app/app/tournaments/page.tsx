@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
 import { formatDate, formatThb } from '@/lib/format';
 import { t } from '@/i18n';
+import { tierLabel } from '@/lib/domain/tiers';
 
 export const metadata: Metadata = { title: t.tournaments.title };
 
@@ -43,7 +44,7 @@ export default async function TournamentsPage() {
                 <Card className="px-5 py-4">
                   <div className="flex items-center justify-between gap-3">
                     <p className="min-w-0 flex-1 truncate font-medium text-ink-900">{x.title}</p>
-                    <Chip tone={x.status === 'ready' ? 'success' : 'neutral'}>{x.tier}</Chip>
+                    <Chip tone={x.status === 'ready' ? 'success' : 'neutral'}>{tierLabel(x.tier)}</Chip>
                   </div>
                   <p className="mt-1 text-sm text-ink-500">
                     {formatDate(x.starts_at)} · {formatThb(x.entry_fee_thb)} ต่อก๊วน ·{' '}

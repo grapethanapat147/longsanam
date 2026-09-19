@@ -13,6 +13,18 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat(LOCALE).format(value);
 }
 
+/**
+ * ชื่อเดือนแบบย่อสำหรับช่องเลือกวันที่ (LSN-0044)
+ *
+ * ช่องเลือกสามช่องในแถวเดียวบนจอ 320px เหลือที่ให้ข้อความราว 46px ต่อช่อง
+ * ชื่อเต็มอย่าง "พฤศจิกายน" กว้างเกินนั้นจนโดนตัด ชื่อย่อจึงไม่ใช่เรื่องสไตล์
+ * แต่เป็นงบความกว้างที่มีจริง
+ */
+export const THAI_MONTHS_SHORT: readonly string[] = [
+  'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+  'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
+];
+
 function toDate(value: Date | string): Date {
   return value instanceof Date ? value : new Date(value);
 }

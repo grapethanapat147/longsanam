@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { Field, Select } from '@/components/ui/primitives';
+import { THAI_MONTHS_SHORT } from '@/lib/format';
 
 /**
  * เลือกวันแบบ วัน / เดือน / ปี พ.ศ. (LSN-0041)
@@ -17,17 +18,21 @@ import { Field, Select } from '@/components/ui/primitives';
  * ถ้าปล่อยให้ พ.ศ. หลุดเข้าไปในระบบ จะมีวันที่ใครสักคนลืมลบ 543
  */
 
-const MONTHS = [
-  'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
-];
-
 const WEEKDAYS = [
   'วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ',
   'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์',
 ];
 
 const BE_OFFSET = 543;
+
+/**
+ * `Select` ปกติเติม `pr-8` เผื่อลูกศรไว้ **นอกเหนือจาก** ที่เบราว์เซอร์กันไว้ให้
+ * ลูกศรของตัวเองอยู่แล้ว รวมกันแล้วกินราว 44px จากช่องที่กว้าง 78px บนจอ 320px
+ * เหลือที่ให้ข้อความ 24px ทั้งที่คำว่า "เดือน" กว้าง 29px — คำจึงโดนตัด
+ *
+ * สามช่องนี้จึงคืนระยะขอบส่วนเกินนั้นกลับไปให้ข้อความ
+ */
+const COMPACT = 'px-2 pr-2';
 
 function daysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
@@ -81,9 +86,10 @@ export function ThaiDateField({
   return (
     <Field label={label} htmlFor={`${id}-day`} hint={hint}>
       {name ? <input type="hidden" name={name} value={value} /> : null}
-      <div className="grid grid-cols-[4.5rem_1fr_5.5rem] gap-2">
+      <div className="grid grid-cols-3 gap-1.5">
         <Select
           id={`${id}-day`}
+          className={COMPACT}
           aria-label="วันที่"
           value={d || ''}
           onChange={(e) => emit(y || years[0], m || 1, Number(e.target.value))}
@@ -100,12 +106,13 @@ export function ThaiDateField({
 
         <Select
           id={`${id}-month`}
+          className={COMPACT}
           aria-label="เดือน"
           value={m || ''}
           onChange={(e) => emit(y || years[0], Number(e.target.value), d || 1)}
         >
           <option value="">เดือน</option>
-          {MONTHS.map((name, i) => (
+          {THAI_MONTHS_SHORT.map((name, i) => (
             <option key={name} value={i + 1}>
               {name}
             </option>
@@ -114,6 +121,7 @@ export function ThaiDateField({
 
         <Select
           id={`${id}-year`}
+          className={COMPACT}
           aria-label="ปี พ.ศ."
           value={y || ''}
           onChange={(e) => emit(Number(e.target.value), m || 1, d || 1)}

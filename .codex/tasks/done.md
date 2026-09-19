@@ -44,6 +44,7 @@
 | LSN-0041 | เลือกวันเป็น พ.ศ. | 10 |
 | LSN-0042 | ฟอร์มสร้างนัดเลือกวันเป็น พ.ศ. | 10 |
 | LSN-0043 | ผู้ใช้ตั้งนัดไม่ได้เลย (bugfix) | 10 |
+| LSN-0044 | รุ่นมือกับช่องวันที่ที่คนทั่วไปอ่านออก | 10 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,

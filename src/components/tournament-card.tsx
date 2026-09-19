@@ -3,6 +3,7 @@ import { Card, Chip } from '@/components/ui/primitives';
 import { formatDate, formatThb } from '@/lib/format';
 import { reasonLabel, t } from '@/i18n';
 import type { OpenTournament } from '@/lib/queries';
+import { tierLabel } from '@/lib/domain/tiers';
 
 /**
  * การ์ดทัวร์นาเมนต์บนหน้าค้นหา
@@ -22,7 +23,7 @@ export function TournamentCardLink({ x, index }: { x: OpenTournament; index: num
         <div className="flex items-start justify-between gap-3">
           <p className="font-display font-semibold leading-snug text-ink-900">{x.title}</p>
           <Chip tone={full ? 'warning' : 'neutral'}>
-            {full ? reasonLabel.tournament_full : `รุ่น ${x.tier}`}
+            {full ? reasonLabel.tournament_full : `รุ่น ${tierLabel(x.tier)}`}
           </Chip>
         </div>
 

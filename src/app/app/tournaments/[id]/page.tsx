@@ -16,6 +16,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
 import { formatDate, formatThb, tournamentShareUrl } from '@/lib/format';
 import { t } from '@/i18n';
+import { tierLabel } from '@/lib/domain/tiers';
 
 export const metadata: Metadata = { title: t.tournaments.title };
 
@@ -159,7 +160,7 @@ export default async function TournamentPage({ params }: Params) {
     <AppShell>
       <PageHeader
         title={x.title}
-        description={`${formatDate(x.starts_at)} · ${t.tournaments.tierField} ${x.tier} · ${formatThb(x.entry_fee_thb)} ต่อก๊วน`}
+        description={`${formatDate(x.starts_at)} · ${t.tournaments.tierField} ${tierLabel(x.tier)} · ${formatThb(x.entry_fee_thb)} ต่อก๊วน`}
       />
 
       {x.status === 'cancelled' ? <Alert tone="warning">{t.tournaments.cancelledNote}</Alert> : null}

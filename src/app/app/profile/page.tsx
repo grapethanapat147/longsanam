@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
 import { isLineLoginConfigured, isLiffConfigured } from '@/lib/line';
 import { t } from '@/i18n';
+import { tierLabel } from '@/lib/domain/tiers';
 
 export const metadata: Metadata = { title: t.nav.profile };
 
@@ -70,7 +71,7 @@ export default async function ProfilePage() {
                   <div>
                     <dt className="text-ink-500">{t.skill.tierField}</dt>
                     <dd className="font-display text-2xl font-semibold text-ink-900">
-                      {skill.tier}
+                      {tierLabel(skill.tier)}
                     </dd>
                   </div>
                   <div>
