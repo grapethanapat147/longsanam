@@ -9,6 +9,7 @@ import {
   voidMatchAction,
 } from '@/lib/actions/match';
 import { Button, Card, Chip, Field, Input } from '@/components/ui/primitives';
+import { opponentChoice } from '@/lib/domain/opponent-choice';
 import { t } from '@/i18n';
 
 export type MatchRow = {
@@ -155,6 +156,14 @@ export function RecordMatchForm({
   const router = useRouter();
   const [a, setA] = useState(sideAPlayers[0]?.id ?? '');
   const [b, setB] = useState(sideBPlayers[0]?.id ?? '');
+
+  /**
+   * คิดตอนเรนเดอร์ ไม่ใช่ใน effect (LSN-0048)
+   *
+   * ถ้าไปแก้ `b` ใน effect หลังจาก `a` เปลี่ยน จะมีจังหวะหนึ่งเฟรมที่ช่องฝั่งตรงข้าม
+   * ยังค้างอยู่ที่คนเดียวกับฝั่งตัวเอง ซึ่งเป็นจังหวะที่กดส่งได้พอดี
+   */
+  const opponents = opponentChoice(sideBPlayers, a, b);
   const [scoreA, setScoreA] = useState('21');
   const [scoreB, setScoreB] = useState('15');
   const [court, setCourt] = useState('');
@@ -169,7 +178,7 @@ export function RecordMatchForm({
         sideAGroupId,
         sideBGroupId,
         sideAPlayers: [a],
-        sideBPlayers: [b],
+        sideBPlayers: [opponents.selected],
         scoreA: Number(scoreA),
         scoreB: Number(scoreB),
         courtLabel: court,
@@ -212,11 +221,11 @@ export function RecordMatchForm({
             className="w-16 text-center tabular-nums"
           />
           <select
-            value={b}
+            value={opponents.selected}
             onChange={(e) => setB(e.target.value)}
             className="min-w-0 flex-1 rounded-input border border-ink-400 px-2 py-2 text-sm"
           >
-            {sideBPlayers.map((p) => (
+            {opponents.options.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
@@ -227,12 +236,18 @@ export function RecordMatchForm({
         <Input id="court-label" value={court} onChange={(e) => setCourt(e.target.value)} />
       </Field>
 
+      {/* ก๊วนเล็กที่มีคนคนเดียว และคนนั้นอยู่ทั้งสองก๊วน จะไม่เหลือคู่แข่งให้เลือก
+          บอกเหตุผลดีกว่าปล่อยให้กดปุ่มที่กดไม่ได้แล้วงง */}
+      {opponents.options.length === 0 ? (
+        <p className="mt-2 text-sm text-ink-500">{t.matches.noOpponentLeft}</p>
+      ) : null}
+
       {error ? <p className="mt-2 text-sm text-clay-700">{error}</p> : null}
 
       <Button
         type="button"
         onClick={submit}
-        disabled={pending || !a || !b}
+        disabled={pending || !a || !opponents.selected}
         className="mt-3 w-full"
       >
         {t.matches.record}

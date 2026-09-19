@@ -1949,6 +1949,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      complete_finished_tournaments: {
+        Args: never
+        Returns: Json
+      }
       tournament_paid_groups: {
         Args: { p_tournament_id: string }
         Returns: {

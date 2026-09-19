@@ -30,6 +30,7 @@ export type SweepResult = {
   noShows: number;
   cancelledTournaments: number;
   refundedTeamPayments: number;
+  completedTournaments: number;
 };
 
 const STRANDED_REASON =
@@ -38,11 +39,12 @@ const STRANDED_REASON =
 export async function runLifecycleSweeps(): Promise<SweepResult> {
   const admin = createAdminClient();
 
-  const [holds, payments, promotions, completed] = await Promise.all([
+  const [holds, payments, promotions, completed, completedTournaments] = await Promise.all([
     admin.rpc('expire_stale_holds'),
     admin.rpc('expire_overdue_payments'),
     admin.rpc('expire_waitlist_promotions'),
     admin.rpc('complete_finished_sessions'),
+    admin.rpc('complete_finished_tournaments'),
   ]);
 
   const h = holds.data as {
@@ -52,6 +54,7 @@ export async function runLifecycleSweeps(): Promise<SweepResult> {
   const p = payments.data as { expiredPayments?: number } | null;
   const w = promotions.data as { expiredPromotions?: number } | null;
   const c = completed.data as { completedSessions?: number } | null;
+  const ct = completedTournaments.data as { completedTournaments?: number } | null;
 
   const result: SweepResult = {
     expiredHolds: h?.expiredHolds ?? 0,
@@ -67,6 +70,7 @@ export async function runLifecycleSweeps(): Promise<SweepResult> {
     noShows: 0,
     cancelledTournaments: 0,
     refundedTeamPayments: 0,
+    completedTournaments: ct?.completedTournaments ?? 0,
   };
 
   // A session whose start time passed without a confirmed court can never

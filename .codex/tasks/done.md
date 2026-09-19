@@ -46,6 +46,8 @@
 | LSN-0043 | ผู้ใช้ตั้งนัดไม่ได้เลย (bugfix) | 10 |
 | LSN-0044 | รุ่นมือกับช่องวันที่ที่คนทั่วไปอ่านออก | 10 |
 | LSN-0045 | ยืนยันผลแมตช์ใช้ไม่ได้ + ประตูจ่ายเงินตอบไม่ตรงกัน (bugfix) | 10 |
+| LSN-0046 | ทัวร์นาเมนต์มีตอนจบและมีแชมป์ | 11 |
+| LSN-0048 | ช่องเลือกผู้เล่นฝั่งตรงข้าม (bugfix) | 11 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,

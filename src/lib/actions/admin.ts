@@ -183,6 +183,9 @@ export async function runMaintenanceAction(): Promise<AdminActionState> {
       `หมดอายุ: การกันคอร์ต ${result.expiredHolds} · การจอง ${result.expiredBookings} · ` +
       `การชำระเงิน ${result.expiredPayments} · สิทธิ์คิวสำรอง ${result.expiredPromotions} — ` +
       `จบนัด ${result.completedSessions} รายการ` +
+      (result.completedTournaments > 0
+        ? ` · จบทัวร์นาเมนต์ ${result.completedTournaments} รายการ`
+        : '') +
       (result.strandedSessions > 0
         ? ` · ยกเลิกนัดที่จองสนามไม่ทัน ${result.strandedSessions} รายการ ` +
           `คืนเงินผู้เล่น ${result.refundedPlayers} คน รวม ${result.refundedThb} บาท`

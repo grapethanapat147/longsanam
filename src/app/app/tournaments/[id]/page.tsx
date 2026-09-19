@@ -1,13 +1,6 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/shell';
-import {
-  Alert,
-  ButtonLink,
-  Card,
-  Chip,
-  EmptyState,
-  PageHeader,
-} from '@/components/ui/primitives';
+import { Alert, ButtonLink, Card, Chip, EmptyState, PageHeader } from '@/components/ui/primitives';
 import { ShareLink } from '@/components/share-link';
 import { TournamentControls } from '@/components/tournament-forms';
 import { MatchList, RecordMatchForm, type MatchRow } from '@/components/match-controls';
@@ -17,6 +10,7 @@ import { requireUser } from '@/lib/auth';
 import { formatDate, formatThb, tournamentShareUrl } from '@/lib/format';
 import { t } from '@/i18n';
 import { tierLabel } from '@/lib/domain/tiers';
+import { championOf, computeStandings } from '@/lib/domain/standings';
 
 export const metadata: Metadata = { title: t.tournaments.title };
 
@@ -81,7 +75,9 @@ export default async function TournamentPage({ params }: Params) {
   // แมตช์ · RLS คืนเฉพาะงานที่ผู้ใช้เกี่ยวข้องอยู่แล้ว
   const { data: matchRows } = await supabase
     .from('matches')
-    .select('id, court_label, score_a, score_b, status, side_a_group_id, side_b_group_id, recorded_by')
+    .select(
+      'id, court_label, score_a, score_b, status, side_a_group_id, side_b_group_id, recorded_by',
+    )
     .eq('tournament_id', id)
     .order('played_at', { ascending: false });
 
@@ -89,7 +85,10 @@ export default async function TournamentPage({ params }: Params) {
   const { data: allMembers } = await supabase
     .from('group_members')
     .select('group_id, user_id, profiles (display_name)')
-    .in('group_id', (teams ?? []).map((team) => team.group_id));
+    .in(
+      'group_id',
+      (teams ?? []).map((team) => team.group_id),
+    );
 
   /**
    * ให้คะแนนความประทับใจได้เมื่องานเดินถึงจุดที่เจอกันจริงแล้ว (LSN-0039)
@@ -110,7 +109,9 @@ export default async function TournamentPage({ params }: Params) {
     list.push({ id: m.user_id, name: m.profiles?.display_name ?? 'ผู้เล่น' });
     membersByGroup.set(m.group_id, list);
   }
-  const groupName = new Map((teams ?? []).map((team) => [team.group_id, team.groups?.name ?? 'ก๊วน']));
+  const groupName = new Map(
+    (teams ?? []).map((team) => [team.group_id, team.groups?.name ?? 'ก๊วน']),
+  );
   const inGroup = (gid: string) => (membersByGroup.get(gid) ?? []).some((p) => p.id === user.id);
 
   // ก๊วนของผู้ใช้ในงานนี้ · คนหนึ่งอยู่ได้หลายก๊วน (LSN-0026) จึงเป็น Set ไม่ใช่ค่าเดียว
@@ -122,9 +123,10 @@ export default async function TournamentPage({ params }: Params) {
     .flatMap((tm) => membersByGroup.get(tm.group_id) ?? [])
     .filter((pl) => pl.id !== user.id)
     .filter(
-      (pl) => ![...myGroupIds].some((gid) =>
-        (membersByGroup.get(gid) ?? []).some((mine) => mine.id === pl.id),
-      ),
+      (pl) =>
+        ![...myGroupIds].some((gid) =>
+          (membersByGroup.get(gid) ?? []).some((mine) => mine.id === pl.id),
+        ),
     );
 
   /*
@@ -159,6 +161,28 @@ export default async function TournamentPage({ params }: Params) {
     };
   });
 
+  /**
+   * ตารางคะแนนกับแชมป์ (LSN-0046)
+   *
+   * คิดจากแมตช์ชุดเดียวกับที่หน้านี้โหลดมาอยู่แล้ว ไม่ต้องยิงอะไรเพิ่ม และ RLS
+   * กรองไว้ให้แล้วว่าใครเห็นงานไหน
+   */
+  const standings = computeStandings(
+    (teams ?? []).map((team) => ({
+      groupId: team.group_id,
+      name: team.groups?.name ?? 'ก๊วน',
+    })),
+    (matchRows ?? []).map((m) => ({
+      status: m.status,
+      sideAGroupId: m.side_a_group_id,
+      sideBGroupId: m.side_b_group_id,
+      scoreA: m.score_a,
+      scoreB: m.score_b,
+    })),
+  );
+  const champion = championOf(standings);
+  const hasResults = standings.some((row) => row.played > 0);
+
   const teamCount = (teams ?? []).length;
   const gateTeams = teamCount >= x.min_teams;
   const gateMoney = teamCount > 0 && (teams ?? []).every((team) => paidGroups.has(team.group_id));
@@ -171,34 +195,54 @@ export default async function TournamentPage({ params }: Params) {
         description={`${formatDate(x.starts_at)} · ${t.tournaments.tierField} ${tierLabel(x.tier)} · ${formatThb(x.entry_fee_thb)} ต่อก๊วน`}
       />
 
-      {x.status === 'cancelled' ? <Alert tone="warning">{t.tournaments.cancelledNote}</Alert> : null}
+      {x.status === 'cancelled' ? (
+        <Alert tone="warning">{t.tournaments.cancelledNote}</Alert>
+      ) : null}
+
+      {/* งานที่จบแล้วต้องมีตอนจบให้เห็น ไม่ใช่ค้างอยู่ที่ "ประตูสามบาน" ตลอดไป */}
+      {x.status === 'completed' ? (
+        <Alert tone="success">
+          {t.tournaments.completedNote} ·{' '}
+          {champion
+            ? t.tournaments.championIs(champion.name)
+            : hasResults
+              ? t.tournaments.championTied
+              : t.tournaments.championNone}
+        </Alert>
+      ) : null}
 
       {/* ประตูสามบาน — แสดงเป็นรายการอิสระ ไม่ใช่ขั้นตอนเรียงลำดับ
-          เพราะกติกาคือครบเมื่อไรก็พร้อม ไม่มีอันไหนต้องมาก่อนอันไหน */}
-      <Card className="px-5 py-4">
-        <p className="font-medium text-ink-800">{t.tournaments.gates}</p>
-        <p className="mt-1 text-sm text-ink-500">{t.tournaments.gatesHint}</p>
-        <ul className="mt-3 grid gap-2">
-          {[
-            [t.tournaments.gateTeams, gateTeams, t.tournaments.teamCount(teamCount, x.min_teams)],
-            [t.tournaments.gateMoney, gateMoney, `${paidGroups.size}/${teamCount}`],
-            [t.tournaments.gateCourt, gateCourt, x.venue_note ?? ''],
-          ].map(([label, done, detail]) => (
-            <li key={String(label)} className="flex items-center justify-between gap-2">
-              <span className="text-sm text-ink-900">{String(label)}</span>
-              <span className="flex items-center gap-2">
-                <span className="text-xs tabular-nums text-ink-500">{String(detail)}</span>
-                <Chip tone={done ? 'success' : 'warning'}>
-                  {done ? t.tournaments.gateDone : t.tournaments.gatePending}
-                </Chip>
-              </span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs text-ink-500">
-          {t.tournaments.deadlineHint(formatDate(x.registration_deadline))}
-        </p>
-      </Card>
+          เพราะกติกาคือครบเมื่อไรก็พร้อม ไม่มีอันไหนต้องมาก่อนอันไหน
+
+          ซ่อนเมื่องานจบหรือถูกยกเลิกแล้ว เพราะมันบอกว่างานจะได้แข่งไหม ซึ่งเป็น
+          คำถามที่ตอบไปแล้ว งานที่จบไปแล้วขึ้น "ทีมครบขั้นต่ำ · ยังไม่ครบ" คือ
+          คำเตือนที่ไม่มีใครทำอะไรกับมันได้ (LSN-0046) */}
+      {['completed', 'cancelled'].includes(x.status) ? null : (
+        <Card className="px-5 py-4">
+          <p className="font-medium text-ink-800">{t.tournaments.gates}</p>
+          <p className="mt-1 text-sm text-ink-500">{t.tournaments.gatesHint}</p>
+          <ul className="mt-3 grid gap-2">
+            {[
+              [t.tournaments.gateTeams, gateTeams, t.tournaments.teamCount(teamCount, x.min_teams)],
+              [t.tournaments.gateMoney, gateMoney, `${paidGroups.size}/${teamCount}`],
+              [t.tournaments.gateCourt, gateCourt, x.venue_note ?? ''],
+            ].map(([label, done, detail]) => (
+              <li key={String(label)} className="flex items-center justify-between gap-2">
+                <span className="text-sm text-ink-900">{String(label)}</span>
+                <span className="flex items-center gap-2">
+                  <span className="text-xs tabular-nums text-ink-500">{String(detail)}</span>
+                  <Chip tone={done ? 'success' : 'warning'}>
+                    {done ? t.tournaments.gateDone : t.tournaments.gatePending}
+                  </Chip>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-ink-500">
+            {t.tournaments.deadlineHint(formatDate(x.registration_deadline))}
+          </p>
+        </Card>
+      )}
 
       <Card className="mt-4 px-5 py-4">
         <p className="font-medium text-ink-800">{t.tournaments.teams}</p>
@@ -233,10 +277,12 @@ export default async function TournamentPage({ params }: Params) {
           <RatePlayersForm
             tournamentId={x.id}
             players={rateablePlayers}
-            existing={(myImpressions ?? {}) as Record<
-              string,
-              { punctuality: number; manners: number; fun: number }
-            >}
+            existing={
+              (myImpressions ?? {}) as Record<
+                string,
+                { punctuality: number; manners: number; fun: number }
+              >
+            }
           />
           {!isHost ? <RateEventForm tournamentId={x.id} /> : null}
         </div>
@@ -257,11 +303,34 @@ export default async function TournamentPage({ params }: Params) {
         </div>
       ) : null}
 
+      {hasResults ? (
+        <Card className="mt-4 px-5 py-4">
+          <p className="font-medium text-ink-800">{t.tournaments.standings}</p>
+          <p className="mt-1 text-sm text-ink-500">{t.tournaments.standingsHint}</p>
+          <ul className="mt-3 divide-y divide-ink-200">
+            {standings.map((row, index) => (
+              <li key={row.groupId} className="flex items-center gap-3 py-2 text-sm">
+                <span className="w-5 shrink-0 tabular-nums text-ink-500">{index + 1}</span>
+                <span className="min-w-0 flex-1 truncate text-ink-900">{row.name}</span>
+                <span className="shrink-0 tabular-nums text-ink-600">
+                  {t.tournaments.standingsWins} {row.wins}/{row.played}
+                </span>
+                <span className="w-14 shrink-0 text-right tabular-nums text-ink-600">
+                  {row.diff > 0 ? `+${row.diff}` : row.diff}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
       <div className="mt-4">
         <MatchList matches={matches} />
       </div>
 
-      {myTeam && x.status === 'ready' ? (
+      {/* `record_match` ยอมรับ ready · booked · completed คนกรอกสกอร์หลังเลิกแข่ง
+          เป็นเรื่องปกติ ถ้าฟอร์มหายตอนงานจบ ผลที่ยังไม่ได้กรอกก็กรอกไม่ได้อีกเลย */}
+      {myTeam && ['ready', 'booked', 'completed'].includes(x.status) ? (
         <RecordMatchForm
           tournamentId={x.id}
           sideAGroupId={myTeam.group_id}
