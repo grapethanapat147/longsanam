@@ -22,7 +22,10 @@
     "deploy:preview": "vercel deploy",
     "demo:seed": "node scripts/seed-remote-demo.mjs",
     "demo:clear": "node scripts/clear-remote-demo.mjs",
-    "test:db": "supabase test db"
+    "test:db": "supabase db reset && supabase test db",
+    "e2e": "supabase db reset && playwright test",
+    "e2e:only": "playwright test",
+    "test:db:only": "supabase test db"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
@@ -37,6 +40,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

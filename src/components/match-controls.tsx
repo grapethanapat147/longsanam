@@ -196,6 +196,8 @@ export function RecordMatchForm({
       <Field label={t.matches.scoreField} htmlFor="score-a">
         <div className="flex items-center gap-2">
           <select
+            id="match-side-a"
+            aria-label={t.matches.sideAPlayer}
             value={a}
             onChange={(e) => setA(e.target.value)}
             className="min-w-0 flex-1 rounded-input border border-ink-400 px-2 py-2 text-sm"
@@ -206,6 +208,7 @@ export function RecordMatchForm({
           </select>
           <Input
             id="score-a"
+            aria-label={t.matches.scoreAField}
             type="number"
             min={0}
             value={scoreA}
@@ -214,6 +217,8 @@ export function RecordMatchForm({
           />
           <span className="text-ink-500">–</span>
           <Input
+            id="score-b"
+            aria-label={t.matches.scoreBField}
             type="number"
             min={0}
             value={scoreB}
@@ -221,6 +226,8 @@ export function RecordMatchForm({
             className="w-16 text-center tabular-nums"
           />
           <select
+            id="match-side-b"
+            aria-label={t.matches.sideBPlayer}
             value={opponents.selected}
             onChange={(e) => setB(e.target.value)}
             className="min-w-0 flex-1 rounded-input border border-ink-400 px-2 py-2 text-sm"
