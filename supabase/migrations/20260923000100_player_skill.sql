@@ -78,7 +78,11 @@ declare
   v_uid     uuid;
 begin
   -- เริ่มจากศูนย์ทุกครั้ง แถวเก่าที่ไม่มีแมตช์แล้วต้องหายไปด้วย
-  delete from public.player_skill;
+  --
+  -- `where user_id is not null` ไม่ได้กรองอะไรออก (`user_id` เป็น primary key)
+  -- แต่ **ห้ามลบทิ้ง** — บทบาท `authenticator` ที่ PostgREST ใช้ preload ส่วนขยาย
+  -- `safeupdate` ไว้ คำสั่งที่ไม่มี WHERE จึงถูกปฏิเสธ (LSN-0045)
+  delete from public.player_skill where user_id is not null;
 
   for v_m in
     select * from public.matches
@@ -132,7 +136,9 @@ begin
     where user_id = any(v_m.side_a_players || v_m.side_b_players);
   end loop;
 
-  update public.player_skill set tier = public.skill_tier_of(rating);
+  -- WHERE ด้วยเหตุผลเดียวกับ DELETE ข้างบน (LSN-0045)
+  update public.player_skill set tier = public.skill_tier_of(rating)
+  where user_id is not null;
 end;
 $$;
 

@@ -51,14 +51,22 @@ export default async function TournamentPage({ params }: Params) {
     .eq('tournament_id', id)
     .order('is_host', { ascending: false });
 
-  const { data: payments } = await supabase
-    .from('tournament_team_payments')
-    .select('group_id, status')
-    .eq('tournament_id', id);
+  /**
+   * ผ่าน RPC ไม่ใช่อ่านตารางตรง (LSN-0045)
+   *
+   * policy ของ `tournament_team_payments` เปิดให้อ่านเฉพาะแถวของก๊วนตัวเอง
+   * (หรือทุกแถวถ้าเป็นเจ้าภาพ) การนับจากชุดนั้นทำให้ประตู "ทุกทีมจ่ายแล้ว"
+   * ตอบไม่เหมือนกันตามคนดู เจ้าภาพเห็น 2/2 ส่วนอีกก๊วนเห็น 1/2
+   */
+  const { data: paid, error: paidError } = await supabase.rpc('tournament_paid_groups', {
+    p_tournament_id: id,
+  });
 
-  const paidGroups = new Set(
-    (payments ?? []).filter((p) => p.status === 'paid').map((p) => p.group_id),
-  );
+  if (paidError) {
+    console.error('[app/tournaments/:id] tournament_paid_groups failed', paidError);
+  }
+
+  const paidGroups = new Set((paid ?? []).map((p) => p.group_id));
 
   const { data: myOwned } = await supabase
     .from('group_members')

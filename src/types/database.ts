@@ -1949,6 +1949,12 @@ export type Database = {
           user_id: string
         }[]
       }
+      tournament_paid_groups: {
+        Args: { p_tournament_id: string }
+        Returns: {
+          group_id: string
+        }[]
+      }
       list_stranded_sessions: {
         Args: never
         Returns: {
