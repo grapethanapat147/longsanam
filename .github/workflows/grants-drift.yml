@@ -1,0 +1,78 @@
+# ตรวจว่าสิทธิ์ของฟังก์ชันบน production ยังตรงกับในเครื่อง
+#
+# เหตุผลที่แยกออกมาจาก ci.yml: งานนี้ต้องคุยกับ **production** จึงต้องใช้ความลับ
+# และไม่ควรรันทุก PR — PR จากคนนอกจะได้ไม่แตะฐานข้อมูลจริง
+#
+# ปัญหาที่มันเฝ้า (LSN-0049): `20260901000300_rls.sql` ปิดประตูให้ฟังก์ชันที่มีอยู่
+# ณ วันนั้น ฟังก์ชันที่สร้างทีหลังไม่เคยผ่านประตูบานนั้น และบน Supabase cloud
+# ฟังก์ชันใหม่เรียกได้โดย PUBLIC ตามค่าเริ่มต้น บวกกับ default privileges ที่แจก
+# EXECUTE ให้ anon/authenticated อีกชั้น — สองฝั่งจึงเบี่ยงจากกันเงียบ ๆ
+# ตอนเจอครั้งแรกมีแปดฟังก์ชันรั่ว ตัวหนึ่งคืนข้อมูลส่วนบุคคลให้ใครก็ได้ที่มี anon key
+#
+# ความลับที่ต้องตั้งใน repo:
+#   SUPABASE_ACCESS_TOKEN   จาก https://supabase.com/dashboard/account/tokens
+#   SUPABASE_DB_PASSWORD    รหัสฐานข้อมูลของโปรเจกต์
+#   SUPABASE_PROJECT_REF    xqhptxkmllahptzhjaup
+#
+# ถ้ายังไม่ได้ตั้ง งานนี้จะข้ามไปเฉย ๆ ไม่แดง — จะได้ไม่มีเสียงเตือนหลอกทุกสัปดาห์
+
+name: Grants drift
+
+on:
+  workflow_dispatch:
+  schedule:
+    # ทุกวันจันทร์ 02:00 UTC (09:00 เวลาไทย)
+    - cron: '0 2 * * 1'
+
+jobs:
+  check:
+    name: เทียบสิทธิ์สองฝั่ง
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ข้ามถ้ายังไม่ได้ตั้งความลับ
+        id: guard
+        run: |
+          if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] \
+            || [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ] \
+            || [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
+            echo "ยังไม่ได้ตั้งความลับครบ ข้ามการตรวจ"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+        if: steps.guard.outputs.ready == 'true'
+
+      - uses: supabase/setup-cli@v1
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          version: latest
+
+      # ฝั่งในเครื่องคือ "ของที่ถูก" สคริปต์จะถาม has_function_privilege จากตัวนี้
+      - name: เปิด Supabase ในเครื่องรัน
+        if: steps.guard.outputs.ready == 'true'
+        run: supabase start
+
+      - name: ผูกกับโปรเจกต์จริง
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+
+      - name: เทียบสิทธิ์
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: npm run check:grants

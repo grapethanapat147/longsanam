@@ -29,8 +29,21 @@ function run(cmd, args) {
   return execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
 }
 
+/**
+ * ในเครื่องติดตั้ง CLI ผ่าน Homebrew ส่วนใน CI ใช้ `supabase/setup-cli` ซึ่งวางไว้
+ * ใน PATH เหมือนกัน แต่ถ้าไม่มีจริง ๆ ก็ยังตกกลับไปใช้ `npx` ได้
+ */
+function supabase(args, opts = {}) {
+  try {
+    execFileSync('supabase', ['--version'], { stdio: 'ignore' });
+    return execFileSync('supabase', args, opts);
+  } catch {
+    return execFileSync('npx', ['supabase', ...args], opts);
+  }
+}
+
 function localDbUrl() {
-  const status = run('npx', ['supabase', 'status', '-o', 'json']);
+  const status = supabase(['status', '-o', 'json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
   const json = JSON.parse(status.slice(status.indexOf('{')));
   return json.DB_URL;
 }
@@ -60,9 +73,7 @@ function localEffective() {
 /** สิทธิ์ที่มีผลจริงบน production อ่านจากดัมป์สคีมา */
 function remoteEffective() {
   const file = join(dir, 'remote.sql');
-  execFileSync('npx', ['supabase', 'db', 'dump', '--linked', '-f', file], {
-    stdio: ['ignore', 'ignore', 'inherit'],
-  });
+  supabase(['db', 'dump', '--linked', '-f', file], { stdio: ['ignore', 'ignore', 'inherit'] });
   const sql = readFileSync(file, 'utf8');
 
   return (name) => {
