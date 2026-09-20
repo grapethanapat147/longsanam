@@ -1,29 +1,24 @@
--- RPC ของเครื่องต้องปิดจาก anon และ authenticated (LSN-0049)
+-- ฟังก์ชันที่ต้องปิดจาก anon และ authenticated (LSN-0049 · LSN-0050)
 --
--- ⚠️ เทสนี้ต่างจากเทสอื่นในโปรเจกต์ตรงที่มันตรวจ **สถานะของฐานข้อมูลที่ชี้ไป**
--- ไม่ใช่ตรรกะของโค้ด ในเครื่องมันเขียวอยู่แล้วตั้งแต่ก่อนมีตั๋วนี้ ของที่เพี้ยนคือ
--- production เพราะฟังก์ชันใหม่ที่ไม่มีใคร revoke จะเรียกได้โดย PUBLIC ตามค่าเริ่มต้น
--- และ Supabase cloud ยังแจก EXECUTE ให้ `anon`/`authenticated` ซ้ำอีกชั้น
+-- ⚠️ เทสนี้ตรวจ **สถานะของฐานข้อมูลที่ชี้ไป** ไม่ใช่ตรรกะของโค้ด ในเครื่องมันเขียว
+-- อยู่แล้ว ของที่เคยเพี้ยนคือ production เพราะฟังก์ชันใหม่ที่ไม่มีใคร revoke
+-- จะเรียกได้โดย PUBLIC ตามค่าเริ่มต้น และ Supabase cloud ยังแจก EXECUTE ให้
+-- `anon`/`authenticated` ซ้ำอีกชั้น
 --
--- **ต้องรันกับ production ด้วย ไม่ใช่แค่ในเครื่อง:**
---
---     npx supabase test db --linked
---
--- ถ้ารันแต่ในเครื่อง เทสนี้จะเขียวตลอดกาลโดยไม่ได้เฝ้าอะไรเลย — รูปแบบเดิมที่
--- โปรเจกต์นี้เจอซ้ำใน LSN-0022 · LSN-0035 · LSN-0043 · LSN-0045 · LSN-0047
+-- pgTAP รันกับ production ไม่ได้ (ไม่ได้ติดตั้งส่วนขยาย `pgtap` บนนั้น)
+-- ตัวจับการเบี่ยงข้ามสภาพแวดล้อมจึงเป็น **`npm run check:grants`** ไม่ใช่ไฟล์นี้
+-- ไฟล์นี้มีหน้าที่กันไม่ให้ migration ในอนาคต grant คืนให้โดยไม่ตั้งใจ
 
 begin;
-select plan(29);
+select plan(32);
 
--- ด่านคู่ข้อหนึ่ง: กันรายชื่อถูกลบจนเหลือศูนย์แล้วเทสเขียวฟรี
-select cmp_ok(27, '>=', 27, 'รายชื่อ RPC ของเครื่องยังครบ');
+select cmp_ok(30, '>=', 30, 'รายชื่อยังครบ ไม่ได้ถูกลบจนว่าง');
 
--- ด่านคู่ข้อสอง: กันการปิดเหมารวมจนแอปใช้ไม่ได้
 select ok(
   has_function_privilege('authenticated',
     'public.create_tournament(uuid,text,timestamptz,timestamptz,timestamptz,integer,integer,integer,public.tournament_tier)',
     'execute'),
-  'ฟังก์ชันที่ผู้ใช้ต้องเรียกได้ยังเปิดอยู่');
+  'ฟังก์ชันที่ผู้ใช้ต้องเรียกได้ยังเปิดอยู่ — ไม่ได้ปิดเหมารวม');
 
 select ok(
   not has_function_privilege('anon', 'public.app_log(uuid,text,uuid,uuid,text,text,text,jsonb)', 'execute')
@@ -76,9 +71,19 @@ select ok(
   'fail_session_booking ปิดจาก anon และ authenticated');
 
 select ok(
+  not has_function_privilege('anon', 'public.generate_group_code()', 'execute')
+  and not has_function_privilege('authenticated', 'public.generate_group_code()', 'execute'),
+  'generate_group_code ปิดจาก anon และ authenticated');
+
+select ok(
   not has_function_privilege('anon', 'public.generate_session_code()', 'execute')
   and not has_function_privilege('authenticated', 'public.generate_session_code()', 'execute'),
   'generate_session_code ปิดจาก anon และ authenticated');
+
+select ok(
+  not has_function_privilege('anon', 'public.generate_tournament_code()', 'execute')
+  and not has_function_privilege('authenticated', 'public.generate_tournament_code()', 'execute'),
+  'generate_tournament_code ปิดจาก anon และ authenticated');
 
 select ok(
   not has_function_privilege('anon', 'public.list_chaseable_participants()', 'execute')
@@ -134,6 +139,11 @@ select ok(
   not has_function_privilege('anon', 'public.session_denominator(uuid)', 'execute')
   and not has_function_privilege('authenticated', 'public.session_denominator(uuid)', 'execute'),
   'session_denominator ปิดจาก anon และ authenticated');
+
+select ok(
+  not has_function_privilege('anon', 'public.session_progress(uuid)', 'execute')
+  and not has_function_privilege('authenticated', 'public.session_progress(uuid)', 'execute'),
+  'session_progress ปิดจาก anon และ authenticated');
 
 select ok(
   not has_function_privilege('anon', 'public.settle_payment(uuid,boolean,text,text,uuid)', 'execute')

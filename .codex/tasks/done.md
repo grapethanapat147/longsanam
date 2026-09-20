@@ -50,6 +50,7 @@
 | LSN-0047 | E2E smoke test เดินเส้นทางคลิกจริง | 11 |
 | LSN-0048 | ช่องเลือกผู้เล่นฝั่งตรงข้าม (bugfix) | 11 |
 | LSN-0049 | สิทธิ์ฟังก์ชันบน production ไม่ตรงกับในเครื่อง (bugfix) | 11 |
+| LSN-0050 | ไล่ดู 66 ฟังก์ชันที่เปิดทั้งสองฝั่ง (security audit) | 11 |
 
 All tickets carry review notes in `.codex/tasks/tickets/`. Defects found during
 verification are recorded on LSN-0003, LSN-0007, LSN-0011, LSN-0012, LSN-0013,
