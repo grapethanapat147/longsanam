@@ -25,7 +25,8 @@
     "test:db": "supabase db reset && supabase test db",
     "e2e": "supabase db reset && playwright test",
     "e2e:only": "playwright test",
-    "test:db:only": "supabase test db"
+    "test:db:only": "supabase test db",
+    "check:grants": "node scripts/check-grants.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
