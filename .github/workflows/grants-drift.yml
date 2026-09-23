@@ -9,14 +9,21 @@
 # EXECUTE ให้ anon/authenticated อีกชั้น — สองฝั่งจึงเบี่ยงจากกันเงียบ ๆ
 # ตอนเจอครั้งแรกมีแปดฟังก์ชันรั่ว ตัวหนึ่งคืนข้อมูลส่วนบุคคลให้ใครก็ได้ที่มี anon key
 #
-# ความลับที่ต้องตั้งใน repo:
+# ความลับที่ต้องตั้งใน repo (สองตัว):
 #   SUPABASE_ACCESS_TOKEN   จาก https://supabase.com/dashboard/account/tokens
 #   SUPABASE_DB_PASSWORD    รหัสฐานข้อมูลของโปรเจกต์
-#   SUPABASE_PROJECT_REF    xqhptxkmllahptzhjaup
+#
+# project ref ไม่ใช่ความลับจึงเขียนไว้ตรง ๆ ข้างล่าง — มันอยู่ใน
+# `NEXT_PUBLIC_SUPABASE_URL` ที่ส่งไปถึงเบราว์เซอร์ของทุกคนอยู่แล้ว
+# การทำให้เป็น secret จึงเพิ่มแค่ขั้นตอนที่ต้องตั้ง ไม่ได้ปิดอะไรเลย
 #
 # ถ้ายังไม่ได้ตั้ง งานนี้จะข้ามไปเฉย ๆ ไม่แดง — จะได้ไม่มีเสียงเตือนหลอกทุกสัปดาห์
 
 name: Grants drift
+
+# project ref ไม่ใช่ความลับ (อยู่ใน URL ที่เบราว์เซอร์ทุกเครื่องเห็นอยู่แล้ว)
+env:
+  SUPABASE_PROJECT_REF: xqhptxkmllahptzhjaup
 
 on:
   workflow_dispatch:
@@ -36,9 +43,8 @@ jobs:
         id: guard
         run: |
           if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] \
-            || [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ] \
-            || [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
-            echo "ยังไม่ได้ตั้งความลับครบ ข้ามการตรวจ"
+            || [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ]; then
+            echo "ยังไม่ได้ตั้ง SUPABASE_ACCESS_TOKEN หรือ SUPABASE_DB_PASSWORD — ข้ามการตรวจ"
             echo "ready=false" >> "$GITHUB_OUTPUT"
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
@@ -68,7 +74,7 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: เทียบสิทธิ์
         if: steps.guard.outputs.ready == 'true'
