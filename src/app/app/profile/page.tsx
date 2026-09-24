@@ -8,7 +8,8 @@ import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth';
 import { isLineLoginConfigured, isLiffConfigured } from '@/lib/line';
 import { t } from '@/i18n';
-import { tierLabel } from '@/lib/domain/tiers';
+import { tierName } from '@/lib/domain/tiers';
+import { BadgeGrid } from '@/components/badge-grid';
 
 export const metadata: Metadata = { title: t.nav.profile };
 
@@ -22,7 +23,8 @@ export default async function ProfilePage() {
   const user = await requireUser('/app/profile');
   const supabase = await createClient();
 
-  const [{ data: contact }, { data: skill }, { data: impression }] = await Promise.all([
+  const [{ data: contact }, { data: skill }, { data: impression }, { data: badges }] =
+    await Promise.all([
     supabase
       .from('profile_contacts')
       .select('phone, line_user_id, email')
@@ -36,6 +38,11 @@ export default async function ProfilePage() {
       .maybeSingle(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase.rpc as any)('player_impression_summary', { p_user_id: user.id }),
+    supabase
+      .from('player_badges')
+      .select('badge_id, awarded_at')
+      .eq('user_id', user.id)
+      .order('awarded_at', { ascending: false }),
   ]);
 
   return (
@@ -70,9 +77,13 @@ export default async function ProfilePage() {
                 <dl className="mt-3 grid grid-cols-3 gap-3 text-sm">
                   <div>
                     <dt className="text-ink-500">{t.skill.tierField}</dt>
-                    <dd className="font-display text-2xl font-semibold text-ink-900">
-                      {tierLabel(skill.tier)}
+                    {/* ตัวอักษรตัวใหญ่ ชื่อรุ่นตัวเล็กใต้มัน — `tierLabel()` เต็ม ๆ
+                        ที่ text-2xl ในคอลัมน์หนึ่งในสามตัดบรรทัดเป็น "P · ตี / ประจำ"
+                        (หลุดมาตั้งแต่ LSN-0044 เจอตอนตรวจหน้านี้ใน LSN-0028) */}
+                    <dd className="font-display text-2xl font-semibold leading-tight text-ink-900">
+                      {skill.tier}
                     </dd>
+                    <p className="text-xs text-ink-500">{tierName(skill.tier)}</p>
                   </div>
                   <div>
                     <dt className="text-ink-500">{t.skill.ratingField}</dt>
@@ -106,6 +117,8 @@ export default async function ProfilePage() {
               {t.skill.note}
             </p>
           </Card>
+
+          <BadgeGrid earned={badges ?? []} />
 
           <ImpressionSummaryCard title={t.impressions.title} summary={impression ?? null} />
 

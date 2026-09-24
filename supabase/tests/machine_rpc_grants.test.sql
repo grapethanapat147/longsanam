@@ -10,9 +10,9 @@
 -- ไฟล์นี้มีหน้าที่กันไม่ให้ migration ในอนาคต grant คืนให้โดยไม่ตั้งใจ
 
 begin;
-select plan(32);
+select plan(35);
 
-select cmp_ok(30, '>=', 30, 'รายชื่อยังครบ ไม่ได้ถูกลบจนว่าง');
+select cmp_ok(33, '>=', 30, 'รายชื่อยังครบ ไม่ได้ถูกลบจนว่าง');
 
 select ok(
   has_function_privilege('authenticated',
@@ -116,6 +116,11 @@ select ok(
   'promote_waitlist ปิดจาก anon และ authenticated');
 
 select ok(
+  not has_function_privilege('anon', 'public.recompute_player_badges()', 'execute')
+  and not has_function_privilege('authenticated', 'public.recompute_player_badges()', 'execute'),
+  'recompute_player_badges ปิดจาก anon และ authenticated');
+
+select ok(
   not has_function_privilege('anon', 'public.recompute_player_skill()', 'execute')
   and not has_function_privilege('authenticated', 'public.recompute_player_skill()', 'execute'),
   'recompute_player_skill ปิดจาก anon และ authenticated');
@@ -161,9 +166,19 @@ select ok(
   'start_payment ปิดจาก anon และ authenticated');
 
 select ok(
+  not has_function_privilege('anon', 'public.tournament_champion(uuid)', 'execute')
+  and not has_function_privilege('authenticated', 'public.tournament_champion(uuid)', 'execute'),
+  'tournament_champion ปิดจาก anon และ authenticated');
+
+select ok(
   not has_function_privilege('anon', 'public.tournament_groups_of(uuid,uuid)', 'execute')
   and not has_function_privilege('authenticated', 'public.tournament_groups_of(uuid,uuid)', 'execute'),
   'tournament_groups_of ปิดจาก anon และ authenticated');
+
+select ok(
+  not has_function_privilege('anon', 'public.tournament_standings_raw(uuid)', 'execute')
+  and not has_function_privilege('authenticated', 'public.tournament_standings_raw(uuid)', 'execute'),
+  'tournament_standings_raw ปิดจาก anon และ authenticated');
 
 select ok(
   not has_function_privilege('anon', 'public.try_hold_court(uuid,uuid,timestamp with time zone,timestamp with time zone,integer,text,uuid)', 'execute')

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { TIERS, tierExample, tierLabel } from '@/lib/domain/tiers';
+import { TIERS, tierExample, tierLabel, tierName } from '@/lib/domain/tiers';
 
 /**
  * ฟอร์มสร้างทัวร์นาเมนต์เคยโชว์แค่ N S P C B A เปล่า ๆ ซึ่งคนที่เพิ่งเข้ามา
@@ -40,6 +40,9 @@ describe('ลำดับมือ', () => {
 
   it('ป้ายที่แสดงมีทั้งตัวอักษรเดิมและคำอธิบาย', () => {
     expect(tierLabel('P')).toBe('P · ตีประจำ');
+    // ชื่อล้วนสำหรับที่แคบ เช่นการ์ดคะแนนฝีมือบนโปรไฟล์
+    expect(tierName('P')).toBe('ตีประจำ');
+    expect(tierName('Z')).toBe('Z');
     expect(tierExample('N')).toBe('เพิ่งเริ่มเล่น ยังไม่เคยลงแข่ง');
   });
 
