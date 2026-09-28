@@ -10,7 +10,7 @@ import { requireUser } from '@/lib/auth';
 import { formatDate, formatThb, tournamentShareUrl } from '@/lib/format';
 import { t } from '@/i18n';
 import { tierLabel } from '@/lib/domain/tiers';
-import { championOf, computeStandings } from '@/lib/domain/standings';
+import { BadgesEarnedHere } from '@/components/badge-grid';
 
 export const metadata: Metadata = { title: t.tournaments.title };
 
@@ -162,26 +162,44 @@ export default async function TournamentPage({ params }: Params) {
   });
 
   /**
-   * ตารางคะแนนกับแชมป์ (LSN-0046)
+   * ตารางคะแนนกับแชมป์ — คิดที่ฐานข้อมูล (LSN-0028)
    *
-   * คิดจากแมตช์ชุดเดียวกับที่หน้านี้โหลดมาอยู่แล้ว ไม่ต้องยิงอะไรเพิ่ม และ RLS
-   * กรองไว้ให้แล้วว่าใครเห็นงานไหน
+   * LSN-0046 คิดใน TypeScript เพราะตอนนั้นมีผู้ใช้รายเดียวคือหน้านี้ พอ badge
+   * ต้องใช้กติกาเดียวกันฝั่งฐานข้อมูล การเก็บไว้สองที่แปลว่าวันหนึ่งหน้าจอกับ
+   * badge จะบอกคนละคน จึงย้ายมาเป็นแหล่งความจริงเดียวแล้วให้หน้านี้เรียก
    */
-  const standings = computeStandings(
-    (teams ?? []).map((team) => ({
-      groupId: team.group_id,
-      name: team.groups?.name ?? 'ก๊วน',
-    })),
-    (matchRows ?? []).map((m) => ({
-      status: m.status,
-      sideAGroupId: m.side_a_group_id,
-      sideBGroupId: m.side_b_group_id,
-      scoreA: m.score_a,
-      scoreB: m.score_b,
-    })),
+  const { data: standingsRows, error: standingsError } = await supabase.rpc(
+    'tournament_standings',
+    { p_tournament_id: id },
   );
-  const champion = championOf(standings);
+
+  if (standingsError) {
+    console.error('[app/tournaments/:id] tournament_standings failed', standingsError);
+  }
+
+  const standings = standingsRows ?? [];
   const hasResults = standings.some((row) => row.played > 0);
+
+  /*
+    แชมป์อ่านจากลำดับที่ฐานข้อมูลเรียงมาแล้ว — เสมอกันที่หัวตารางคือยังไม่มีแชมป์
+    กติกานี้ต้องตรงกับ `tournament_champion()` ที่ badge ใช้ ถ้าวันหนึ่งไม่ตรง
+    แปลว่ามีคนแก้ที่เดียว
+  */
+  const [top, runnerUp] = standings;
+  const tiedAtTop =
+    top !== undefined &&
+    runnerUp !== undefined &&
+    runnerUp.wins === top.wins &&
+    runnerUp.diff === top.diff &&
+    runnerUp.points_for === top.points_for;
+  const champion = top && top.played > 0 && !tiedAtTop ? top : null;
+
+  // badge ที่ผู้ใช้ได้จากงานนี้ (LSN-0028)
+  const { data: badgesHere } = await supabase
+    .from('player_badges')
+    .select('badge_id, awarded_at')
+    .eq('user_id', user.id)
+    .eq('tournament_id', id);
 
   const teamCount = (teams ?? []).length;
   const gateTeams = teamCount >= x.min_teams;
@@ -303,13 +321,19 @@ export default async function TournamentPage({ params }: Params) {
         </div>
       ) : null}
 
+      {(badgesHere ?? []).length > 0 ? (
+        <div className="mt-4">
+          <BadgesEarnedHere earned={badgesHere ?? []} />
+        </div>
+      ) : null}
+
       {hasResults ? (
         <Card className="mt-4 px-5 py-4">
           <p className="font-medium text-ink-800">{t.tournaments.standings}</p>
           <p className="mt-1 text-sm text-ink-500">{t.tournaments.standingsHint}</p>
           <ul className="mt-3 divide-y divide-ink-200">
             {standings.map((row, index) => (
-              <li key={row.groupId} className="flex items-center gap-3 py-2 text-sm">
+              <li key={row.group_id} className="flex items-center gap-3 py-2 text-sm">
                 <span className="w-5 shrink-0 tabular-nums text-ink-500">{index + 1}</span>
                 <span className="min-w-0 flex-1 truncate text-ink-900">{row.name}</span>
                 <span className="shrink-0 tabular-nums text-ink-600">

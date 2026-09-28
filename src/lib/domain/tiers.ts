@@ -33,6 +33,11 @@ export function tierLabel(value: string): string {
   return tier ? `${tier.value} · ${tier.name}` : value;
 }
 
+/** `'P'` → `'ตีประจำ'` — ชื่อรุ่นล้วน ไม่มีตัวอักษรนำ สำหรับที่แคบ */
+export function tierName(value: string): string {
+  return TIERS.find((x) => x.value === value)?.name ?? value;
+}
+
 export function tierExample(value: string): string | null {
   return TIERS.find((x) => x.value === value)?.example ?? null;
 }

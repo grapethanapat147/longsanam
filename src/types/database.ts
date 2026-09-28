@@ -1404,6 +1404,27 @@ export type Database = {
         }
         Relationships: []
       }
+      player_badges: {
+        Row: {
+          awarded_at: string
+          badge_id: string
+          tournament_id: string | null
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          badge_id: string
+          tournament_id?: string | null
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          badge_id?: string
+          tournament_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       tournament_team_payments: {
         Row: {
           amount_thb: number
@@ -1952,6 +1973,20 @@ export type Database = {
       complete_finished_tournaments: {
         Args: never
         Returns: Json
+      }
+      tournament_standings: {
+        Args: { p_tournament_id: string }
+        Returns: {
+          group_id: string
+          name: string
+          played: number
+          wins: number
+          losses: number
+          draws: number
+          points_for: number
+          points_against: number
+          diff: number
+        }[]
       }
       tournament_paid_groups: {
         Args: { p_tournament_id: string }
